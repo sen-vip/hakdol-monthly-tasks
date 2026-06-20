@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>학돌 월별필수업무</title>
-  <meta name="description" content="행정실 1년 업무를 월별로 조망하고 체크·메모로 관리하는 업무지도" />
+  <meta name="description" content="초보 행정실 담당자를 위한 학교 월별 필수업무 생존 가이드" />
   <link rel="preconnect" href="https://cdn.jsdelivr.net" />
   <link rel="stylesheet" href="./styles.css" />
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -17,7 +17,7 @@
       <span class="brand-icon">📅</span>
       <div>
         <strong>학돌 월별필수업무</strong>
-        <small>행정실 1년 업무지도</small>
+        <small>학교 업무 생존 가이드</small>
       </div>
     </div>
     <nav class="topnav" aria-label="주요 메뉴">
@@ -25,9 +25,10 @@
       <button class="ghost" data-action="go-year">연간보기</button>
       <button class="ghost" data-action="show-all">전체업무</button>
       <button class="ghost" data-action="print">프린트</button>
+      <a class="ghost nav-link" href="https://github.com/sen-vip/hakdol-monthly-tasks" target="_blank" rel="noopener noreferrer">GitHub</a>
     </nav>
     <div class="auth-box" id="authBox">
-      <span id="authHint">로그인하면 체크·메모를 저장할 수 있어요</span>
+      <span id="authHint">로그인 없이도 볼 수 있어요 · 로그인하면 저장됩니다</span>
       <button class="primary" id="loginOpenBtn">로그인</button>
     </div>
   </header>
@@ -35,9 +36,9 @@
   <main class="app-shell">
     <section class="hero" id="hero">
       <div>
-        <p class="eyebrow">Monthly Office Map</p>
-        <h1>행정실 1년 업무를 월별로 조망합니다.</h1>
-        <p class="hero-desc">닥치면 허겁지겁하게 되는 필수업무를 월별로 미리 보고, 로그인하면 완료·중요·해당없음·메모를 계정별로 저장할 수 있습니다.</p>
+        <p class="eyebrow">Monthly Task Board</p>
+        <h1 id="heroTitle">이번 달 업무판</h1>
+        <p class="hero-desc">이번 달에 챙길 필수업무를 월초·중순·월말 순서로 확인하세요. 완료, 중요, 해당없음, 메모로 우리 학교 상황에 맞게 관리할 수 있습니다.</p>
       </div>
       <div class="hero-card">
         <span class="hero-label">현재 보기</span>
@@ -46,9 +47,10 @@
       </div>
     </section>
 
+    <section class="stats-grid" id="statsGrid" aria-label="요약 통계"></section>
+
     <section class="notice no-print" id="configNotice" hidden>
-      <strong>Supabase 연결 전입니다.</strong>
-      <span>공개 열람은 가능하지만 로그인 저장을 쓰려면 <code>supabase-config.js</code>에 URL과 anon key를 입력하세요.</span>
+      <span>로그인 저장 설정 전입니다. 업무 목록은 그대로 볼 수 있고, 로그인 저장을 쓰려면 <code>supabase-config.js</code>를 설정하세요.</span>
     </section>
 
     <section class="toolbar no-print" aria-label="검색과 필터">
@@ -56,41 +58,50 @@
         <span>검색</span>
         <input id="searchInput" type="search" placeholder="업무명, 분류, 근거, 안내부서 검색" />
       </label>
-      <label>
-        <span>월</span>
-        <select id="monthFilter"></select>
-      </label>
-      <label>
-        <span>분류</span>
-        <select id="categoryFilter"></select>
-      </label>
-      <label>
-        <span>일정</span>
-        <select id="periodFilter">
-          <option value="">전체</option>
-          <option>월초</option>
-          <option>중순</option>
-          <option>월말</option>
-          <option>날짜지정</option>
-          <option>수시/학교별</option>
-          <option>기타</option>
-        </select>
-      </label>
-      <label>
-        <span>상태</span>
-        <select id="stateFilter">
-          <option value="">전체</option>
-          <option value="undone">미완료</option>
-          <option value="done">완료</option>
-          <option value="important">중요</option>
-          <option value="skipped">해당없음</option>
-        </select>
-      </label>
-      <button class="ghost" id="resetFiltersBtn">초기화</button>
-      <button class="primary" id="addTaskBtn">+ 내 업무</button>
+      <div class="quick-filters" aria-label="빠른 필터">
+        <button class="quick-chip active" type="button" data-quick="all">전체</button>
+        <button class="quick-chip" type="button" data-quick="월초">월초</button>
+        <button class="quick-chip" type="button" data-quick="중순">중순</button>
+        <button class="quick-chip" type="button" data-quick="월말">월말</button>
+        <button class="quick-chip" type="button" data-quick="undone">미완료</button>
+        <button class="quick-chip" type="button" data-quick="important">중요</button>
+      </div>
+      <button class="ghost" id="detailFilterToggle" type="button" aria-expanded="false">상세 필터</button>
+      <button class="primary" id="addTaskBtn">+ 우리 학교 업무 추가</button>
+      <div class="detail-filters" id="detailFilters" hidden>
+        <label>
+          <span>월</span>
+          <select id="monthFilter"></select>
+        </label>
+        <label>
+          <span>분류</span>
+          <select id="categoryFilter"></select>
+        </label>
+        <label>
+          <span>일정</span>
+          <select id="periodFilter">
+            <option value="">전체</option>
+            <option>월초</option>
+            <option>중순</option>
+            <option>월말</option>
+            <option>날짜지정</option>
+            <option>수시/학교별</option>
+            <option>기타</option>
+          </select>
+        </label>
+        <label>
+          <span>상태</span>
+          <select id="stateFilter">
+            <option value="">전체</option>
+            <option value="undone">미완료</option>
+            <option value="done">완료</option>
+            <option value="important">중요</option>
+            <option value="skipped">해당없음</option>
+          </select>
+        </label>
+        <button class="ghost" id="resetFiltersBtn" type="button">초기화</button>
+      </div>
     </section>
-
-    <section class="stats-grid" id="statsGrid" aria-label="요약 통계"></section>
 
     <section class="year-board" id="yearBoard" aria-label="연간보기"></section>
 
@@ -132,14 +143,14 @@
   <div class="modal-backdrop no-print" id="customTaskModal" hidden>
     <article class="modal" role="dialog" aria-modal="true" aria-labelledby="customTaskTitle">
       <button class="modal-close" data-close="customTaskModal" aria-label="닫기">×</button>
-      <h2 id="customTaskTitle">내 업무 추가</h2>
+      <h2 id="customTaskTitle">우리 학교 업무 추가</h2>
       <form id="customTaskForm" class="stack-form grid-form">
-        <label>월<select id="customMonth" required></select></label>
-        <label>대략적 일정<input id="customPeriod" placeholder="예: 월초, 중순, 월말, 25일까지" /></label>
-        <label>업무분류<input id="customCategory" required placeholder="예: 예산, 시설, 자체업무" /></label>
-        <label class="wide">주요 업무명<input id="customTitle" required placeholder="우리학교만의 업무명" /></label>
-        <label class="wide">간략내용<textarea id="customDesc" rows="4" placeholder="필요한 준비사항이나 설명"></textarea></label>
-        <label class="wide">메모<textarea id="customMemo" rows="3" placeholder="민감정보는 입력하지 마세요"></textarea></label>
+        <label>몇 월 업무인가요?<select id="customMonth" required></select></label>
+        <label>언제쯤 하나요?<input id="customPeriod" placeholder="예: 월초, 중순, 월말, 25일까지" /></label>
+        <label>업무 분류<input id="customCategory" required placeholder="예: 예산, 시설, 자체업무" /></label>
+        <label class="wide">업무 이름<input id="customTitle" required placeholder="우리 학교만의 업무명" /></label>
+        <label class="wide">업무 설명<textarea id="customDesc" rows="4" placeholder="필요한 준비사항이나 설명"></textarea></label>
+        <label class="wide">우리 학교 메모<textarea id="customMemo" rows="3" placeholder="민감정보는 입력하지 마세요"></textarea></label>
         <div class="button-row wide"><button class="primary" type="submit">저장</button></div>
       </form>
     </article>

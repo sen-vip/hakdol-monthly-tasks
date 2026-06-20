@@ -44,6 +44,16 @@ function categoryClass(category = "") {
   return categoryColorMap[normalized] || "etc";
 }
 
+function periodClass(period = "") {
+  const normalized = String(period || "").replace(/\s+/g, "");
+  if (normalized.includes("월초")) return "early";
+  if (normalized.includes("중순")) return "middle";
+  if (normalized.includes("월말")) return "late";
+  if (normalized.includes("수시") || normalized.includes("학교")) return "anytime";
+  if (normalized.includes("날짜")) return "date";
+  return "etc";
+}
+
 
 const state = {
   user: null,
@@ -55,13 +65,16 @@ const state = {
   taskStates: {},
   customTasks: [],
   allMode: false,
+  detailFiltersOpen: false,
+  showYearBoard: false,
 };
 
 const $ = (id) => document.getElementById(id);
 const els = {
   authBox: $("authBox"), authHint: $("authHint"), loginOpenBtn: $("loginOpenBtn"), configNotice: $("configNotice"),
-  heroMonthTitle: $("heroMonthTitle"), heroSummary: $("heroSummary"), statsGrid: $("statsGrid"), yearBoard: $("yearBoard"),
+  heroTitle: $("heroTitle"), heroMonthTitle: $("heroMonthTitle"), heroSummary: $("heroSummary"), statsGrid: $("statsGrid"), yearBoard: $("yearBoard"),
   monthFilter: $("monthFilter"), categoryFilter: $("categoryFilter"), periodFilter: $("periodFilter"), stateFilter: $("stateFilter"), searchInput: $("searchInput"),
+  detailFilterToggle: $("detailFilterToggle"), detailFilters: $("detailFilters"),
   resetFiltersBtn: $("resetFiltersBtn"), taskList: $("taskList"), taskListTitle: $("taskListTitle"), taskListMeta: $("taskListMeta"),
   detailModal: $("detailModal"), detailBody: $("detailBody"), loginModal: $("loginModal"), loginForm: $("loginForm"), signupBtn: $("signupBtn"),
   emailInput: $("emailInput"), passwordInput: $("passwordInput"), addTaskBtn: $("addTaskBtn"), customTaskModal: $("customTaskModal"),
@@ -140,7 +153,7 @@ function renderAuth() {
     els.authBox.innerHTML = `<span>내 체크 저장 중 · ${escapeHtml(email)}</span><button class="ghost" id="logoutBtn">로그아웃</button>`;
     $("logoutBtn").addEventListener("click", logout);
   } else {
-    els.authBox.innerHTML = `<span>로그인하면 체크·메모를 저장할 수 있어요</span><button class="primary" id="loginOpenBtn">로그인</button>`;
+    els.authBox.innerHTML = `<span>로그인 없이도 볼 수 있어요 · 로그인하면 저장됩니다</span><button class="primary" id="loginOpenBtn">로그인</button>`;
     $("loginOpenBtn").addEventListener("click", () => openModal("loginModal"));
   }
 }
@@ -160,30 +173,35 @@ function renderFilterOptions() {
 function renderHeroAndStats() {
   const monthLabel = state.allMode ? "전체업무" : `${state.selectedMonth}월`;
   const tasks = getFilteredTasks();
-  const monthStats = state.allMode ? null : completionFor(state.selectedMonth);
-  els.heroMonthTitle.textContent = state.allMode ? "전체업무 보기" : `${new Date().getFullYear()}년 ${state.selectedMonth}월`;
-  if (state.user && monthStats && !state.allMode) {
-    els.heroSummary.textContent = `업무 ${monthStats.total}건 · 완료 ${monthStats.done}건 · 남은 업무 ${monthStats.left}건 · 완료율 ${monthStats.rate}%`;
-  } else if (!state.user) {
-    els.heroSummary.textContent = `${monthLabel} 기준 ${tasks.length}건 표시 중 · 로그인하면 완료 체크와 메모를 저장할 수 있습니다.`;
-  } else {
-    els.heroSummary.textContent = `조건에 맞는 업무 ${tasks.length}건 표시 중`;
-  }
+  const base = state.allMode ? getAllTasks() : getMonthTasks(state.selectedMonth);
+  const actionable = base.filter(t => !getTaskState(t.id).skipped);
+  const undone = actionable.filter(t => !getTaskState(t.id).done).length;
+  const early = base.filter(t => t.periodGroup === "월초").length;
+  const important = base.filter(t => getTaskState(t.id).important).length;
+  const done = actionable.filter(t => getTaskState(t.id).done).length;
+  const rate = actionable.length ? Math.round(done / actionable.length * 100) : 0;
 
-  const total = getAllTasks().length;
-  const selected = tasks.length;
-  const doneTotal = getAllTasks().filter(t => getTaskState(t.id).done).length;
-  const importantTotal = getAllTasks().filter(t => getTaskState(t.id).important).length;
-  const skippedTotal = getAllTasks().filter(t => getTaskState(t.id).skipped).length;
+  els.heroTitle.textContent = state.allMode ? "전체 업무판" : `${state.selectedMonth}월 업무판`;
+  els.heroMonthTitle.textContent = state.allMode ? "전체업무 보기" : `${state.selectedMonth}월 필수업무`;
+  els.heroSummary.textContent = state.allMode
+    ? `조건에 맞는 업무 ${tasks.length}건 표시 중 · 월별 업무 흐름을 전체로 확인합니다.`
+    : `업무 ${base.length}건 · 미완료 ${undone}건 · 완료율 ${rate}%`;
+
   els.statsGrid.innerHTML = [
-    ["기본업무", `${baseTasks.length}건`, "엑셀 원자료 기반"],
-    ["현재 표시", `${selected}건`, state.allMode ? "전체 조건" : `${state.selectedMonth}월 조건`],
-    [state.user ? "완료" : "로그인 저장", state.user ? `${doneTotal}건` : "가능", state.user ? `해당없음 ${skippedTotal}건` : "체크·메모 동기화"],
-    ["중요 표시", state.user ? `${importantTotal}건` : "로그인 후", `내 추가업무 ${state.customTasks.length}건`]
+    ["전체 업무", `${base.length}건`, state.allMode ? "등록된 전체 기준" : `${state.selectedMonth}월 기준`],
+    ["미완료", `${undone}건`, "완료·해당없음 제외"],
+    ["월초 업무", `${early}건`, "먼저 챙길 일"],
+    ["중요 표시", `${important}건`, state.user ? "내가 표시한 업무" : "로그인 후 저장"]
   ].map(([label, value, desc]) => `<article class="stat-card"><small>${label}</small><strong>${value}</strong><small>${desc}</small></article>`).join("");
 }
 
 function renderYearBoard() {
+  if (!state.showYearBoard) {
+    els.yearBoard.hidden = true;
+    els.yearBoard.innerHTML = "";
+    return;
+  }
+  els.yearBoard.hidden = false;
   const counts = Array.from({ length: 12 }, (_, i) => ({ month: i+1, stats: completionFor(i+1) }));
   const max = Math.max(...counts.map(x => x.stats.total));
   els.yearBoard.innerHTML = counts.map(({ month, stats }) => {
@@ -201,6 +219,7 @@ function renderYearBoard() {
     state.selectedMonth = Number(btn.dataset.month);
     state.allMode = false;
     els.monthFilter.value = String(state.selectedMonth);
+    state.showYearBoard = false;
     render();
     document.getElementById("taskSectionHead").scrollIntoView({ block: "start" });
   }));
@@ -231,11 +250,11 @@ function renderTaskList() {
 function taskCard(task) {
   const st = getTaskState(task.id);
   const cls = ["task-card", st.done ? "done" : "", st.skipped ? "skipped" : ""].join(" ");
-  const sourceChip = task.isCustom ? `<span class="chip important">내 업무</span>` : "";
+  const sourceChip = task.isCustom ? `<span class="chip important">우리 학교 업무</span>` : "";
   return `<div class="${cls}" data-task-id="${task.id}">
     <input class="task-check" type="checkbox" data-toggle="done" ${st.done ? "checked" : ""} aria-label="완료 체크" />
     <div class="task-main">
-      <div class="chips"><span class="chip category cat-${categoryClass(task.category)}">${escapeHtml(task.category)}</span><span class="chip period">${escapeHtml(task.period || task.periodGroup)}</span>${sourceChip}${st.important ? `<span class="chip important">중요</span>` : ""}${st.skipped ? `<span class="chip skipped">해당없음</span>` : ""}</div>
+      <div class="chips"><span class="chip period period-${periodClass(task.periodGroup)}">${escapeHtml(task.period || task.periodGroup)}</span><span class="chip category cat-${categoryClass(task.category)}">${escapeHtml(task.category)}</span>${sourceChip}${st.done ? `<span class="chip done">완료</span>` : `<span class="chip status">미완료</span>`}${st.important ? `<span class="chip important">중요</span>` : ""}${st.skipped ? `<span class="chip skipped">해당없음</span>` : ""}</div>
       <p class="task-title">${escapeHtml(task.title)}</p>
       <p class="task-desc">${escapeHtml(task.description || task.department || task.law || "상세보기에서 관련 정보를 확인하세요.")}</p>
     </div>
@@ -268,7 +287,7 @@ function openDetail(taskId) {
   const st = getTaskState(task.id);
   els.detailBody.innerHTML = `<p class="eyebrow">${escapeHtml(task.source || "기본업무")}</p>
     <h2 id="detailTitle">${escapeHtml(task.title)}</h2>
-    <div class="chips"><span class="chip category cat-${categoryClass(task.category)}">${escapeHtml(task.category)}</span><span class="chip period">${escapeHtml(task.month)}월 · ${escapeHtml(task.period || task.periodGroup)}</span>${st.done ? `<span class="chip done">완료</span>` : ""}${st.important ? `<span class="chip important">중요</span>` : ""}${st.skipped ? `<span class="chip skipped">해당없음</span>` : ""}</div>
+    <div class="chips"><span class="chip category cat-${categoryClass(task.category)}">${escapeHtml(task.category)}</span><span class="chip period period-${periodClass(task.periodGroup)}">${escapeHtml(task.month)}월 · ${escapeHtml(task.period || task.periodGroup)}</span>${st.done ? `<span class="chip done">완료</span>` : ""}${st.important ? `<span class="chip important">중요</span>` : ""}${st.skipped ? `<span class="chip skipped">해당없음</span>` : ""}</div>
     <dl class="detail-grid">
       <dt>월</dt><dd>${escapeHtml(task.monthLabel || `${task.month}월`)}</dd>
       <dt>대략적 일정</dt><dd>${escapeHtml(task.period || "-")}</dd>
@@ -281,7 +300,7 @@ function openDetail(taskId) {
     <hr />
     <label class="stack-form">내 메모<textarea id="detailMemo" rows="5" placeholder="민감정보는 입력하지 마세요." ${state.user ? "" : "disabled"}>${escapeHtml(st.memo || "")}</textarea></label>
     <p class="safety-note">이 앱은 월별 업무 체크 및 개인 메모 저장용입니다. 학생·교직원 개인정보, 급여 세부자료, 계좌번호, 민원 내용 등 민감정보는 입력하지 마세요.</p>
-    <div class="button-row"><button class="primary" id="saveMemoBtn">메모 저장</button>${task.isCustom ? `<button class="ghost" id="deleteCustomBtn">내 업무 삭제</button>` : ""}</div>`;
+    <div class="button-row"><button class="primary" id="saveMemoBtn">메모 저장</button>${task.isCustom ? `<button class="ghost" id="deleteCustomBtn">우리 학교 업무 삭제</button>` : ""}</div>`;
   openModal("detailModal");
   $("saveMemoBtn").addEventListener("click", () => {
     if (!requireLogin()) return;
@@ -293,13 +312,42 @@ function openDetail(taskId) {
 function openModal(id) { $(id).hidden = false; }
 function closeModal(id) { $(id).hidden = true; }
 
+function updateQuickFilters() {
+  const buttons = document.querySelectorAll("[data-quick]");
+  buttons.forEach(btn => {
+    const key = btn.dataset.quick;
+    const active = key === "all"
+      ? !state.period && !state.stateFilter
+      : key === state.period || key === state.stateFilter;
+    btn.classList.toggle("active", active);
+  });
+  els.detailFilters.hidden = !state.detailFiltersOpen;
+  els.detailFilterToggle.setAttribute("aria-expanded", String(state.detailFiltersOpen));
+  els.detailFilterToggle.textContent = state.detailFiltersOpen ? "상세 필터 닫기" : "상세 필터";
+}
+
+function applyQuickFilter(key) {
+  if (key === "all") {
+    state.period = "";
+    state.stateFilter = "";
+  } else if (["월초", "중순", "월말"].includes(key)) {
+    state.period = state.period === key ? "" : key;
+    state.stateFilter = "";
+  } else {
+    state.stateFilter = state.stateFilter === key ? "" : key;
+    state.period = "";
+  }
+  if (["undone", "important"].includes(key) && !state.user) openModal("loginModal");
+  render();
+}
+
 document.addEventListener("click", (ev) => {
   const close = ev.target?.dataset?.close;
   if (close) closeModal(close);
   const action = ev.target?.dataset?.action;
-  if (action === "go-today") { state.selectedMonth = currentMonth; state.allMode = false; resetSoftFilters(); render(); }
-  if (action === "go-year") { document.getElementById("yearBoard").scrollIntoView({ block: "start" }); }
-  if (action === "show-all") { state.allMode = true; els.monthFilter.value = ""; render(); }
+  if (action === "go-today") { state.selectedMonth = currentMonth; state.allMode = false; state.showYearBoard = false; resetSoftFilters(); render(); }
+  if (action === "go-year") { state.showYearBoard = true; render(); document.getElementById("yearBoard").scrollIntoView({ block: "start" }); }
+  if (action === "show-all") { state.allMode = true; state.showYearBoard = false; els.monthFilter.value = ""; render(); }
   if (action === "print") window.print();
 });
 
@@ -313,7 +361,9 @@ els.monthFilter.addEventListener("change", e => { state.allMode = !e.target.valu
 els.categoryFilter.addEventListener("change", e => { state.category = e.target.value; render(); });
 els.periodFilter.addEventListener("change", e => { state.period = e.target.value; render(); });
 els.stateFilter.addEventListener("change", e => { state.stateFilter = e.target.value; if (!state.user && e.target.value) openModal("loginModal"); render(); });
-els.resetFiltersBtn.addEventListener("click", () => { state.allMode = false; state.selectedMonth = currentMonth; resetSoftFilters(); render(); });
+els.resetFiltersBtn.addEventListener("click", () => { state.allMode = false; state.showYearBoard = false; state.selectedMonth = currentMonth; resetSoftFilters(); render(); });
+els.detailFilterToggle.addEventListener("click", () => { state.detailFiltersOpen = !state.detailFiltersOpen; render(); });
+document.querySelectorAll("[data-quick]").forEach(btn => btn.addEventListener("click", () => applyQuickFilter(btn.dataset.quick)));
 els.addTaskBtn.addEventListener("click", () => { if (requireLogin()) openModal("customTaskModal"); });
 
 async function toggleState(taskId, key, checkedValue) {
@@ -359,20 +409,20 @@ async function loadUserData() {
   (states || []).forEach(row => { state.taskStates[row.task_id] = { done: row.done, important: row.important, skipped: row.skipped, memo: row.memo || "" }; });
 
   const { data: customs, error: customError } = await supabaseClient.from("custom_tasks").select("*").eq("user_id", state.user.id).order("month", { ascending: true });
-  if (customError) toast(`내 업무 불러오기 오류: ${customError.message}`);
+  if (customError) toast(`우리 학교 업무 불러오기 오류: ${customError.message}`);
   state.customTasks = (customs || []).map(row => ({
     id: row.custom_task_id,
     month: row.month,
     monthLabel: `${row.month}월`,
     period: row.period || "",
     periodGroup: groupPeriod(row.period),
-    category: row.category || "내 업무",
+    category: row.category || "우리 학교 업무",
     title: row.title,
     department: "",
     law: "",
     description: row.description || "",
     note: row.memo || "",
-    source: "내 추가업무",
+    source: "우리 학교 추가업무",
     isCustom: true
   }));
 }
@@ -438,12 +488,12 @@ els.customTaskForm.addEventListener("submit", async (e) => {
     const { error } = await supabaseClient.from("custom_tasks").insert(task);
     if (error) { toast(`저장 오류: ${error.message}`); return; }
   }
-  els.customTaskForm.reset(); closeModal("customTaskModal"); await loadUserData(); render(); toast("내 업무를 추가했어요.");
+  els.customTaskForm.reset(); closeModal("customTaskModal"); await loadUserData(); render(); toast("우리 학교 업무를 추가했어요.");
 });
 
 async function deleteCustomTask(taskId) {
   if (!state.user) return;
-  if (!confirm("이 내 업무를 삭제할까요?")) return;
+  if (!confirm("이 우리 학교 업무를 삭제할까요?")) return;
   if (HAS_SUPABASE) {
     const { error } = await supabaseClient.from("custom_tasks").delete().eq("user_id", state.user.id).eq("custom_task_id", taskId);
     if (error) { toast(`삭제 오류: ${error.message}`); return; }
@@ -457,6 +507,7 @@ function render() {
   renderHeroAndStats();
   renderYearBoard();
   renderTaskList();
+  updateQuickFilters();
 }
 
 async function init() {
