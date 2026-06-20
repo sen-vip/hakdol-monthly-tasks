@@ -33,6 +33,12 @@
     </div>
   </header>
 
+  <div class="scroll-status no-print" id="scrollStatus">
+    <div class="scroll-status-inner">
+      <strong id="scrollMonthLabel">이번 달</strong>
+    </div>
+  </div>
+
   <main class="app-shell">
     <section class="hero" id="hero">
       <div>
@@ -58,34 +64,31 @@
         <span>검색</span>
         <input id="searchInput" type="search" placeholder="업무명, 분류, 근거, 안내부서 검색" />
       </label>
-      <div class="quick-filters" aria-label="빠른 필터">
-        <button class="quick-chip active" type="button" data-quick="all">전체</button>
-        <button class="quick-chip" type="button" data-quick="월초">월초</button>
-        <button class="quick-chip" type="button" data-quick="중순">중순</button>
-        <button class="quick-chip" type="button" data-quick="월말">월말</button>
-        <button class="quick-chip" type="button" data-quick="undone">미완료</button>
-        <button class="quick-chip" type="button" data-quick="important">중요</button>
+      <div class="submission-filter-wrap" aria-label="제출업무 필터">
+        <button type="button" class="submit-filter-chip active" data-submission-filter="">전체</button>
+        <button type="button" class="submit-filter-chip" data-submission-filter="only">제출만 보기</button>
+        <button type="button" class="submit-filter-chip" data-submission-filter="exclude">제출 제외 보기</button>
       </div>
-      <button class="ghost" id="detailFilterToggle" type="button" aria-expanded="false">상세 필터</button>
+      <button class="ghost" id="detailFilterToggle" type="button" aria-expanded="false" hidden>상세 필터</button>
       <button class="primary" id="addTaskBtn">+ 우리 학교 업무 추가</button>
       <div class="detail-filters" id="detailFilters" hidden>
         <label>
-          <span>월</span>
+          <span>언제 해야 하나요?</span>
           <select id="monthFilter"></select>
         </label>
         <label>
-          <span>분류</span>
+          <span>무슨 업무분류인가요?</span>
           <select id="categoryFilter"></select>
         </label>
         <label>
-          <span>일정</span>
+          <span>업무 시기</span>
           <select id="periodFilter">
             <option value="">전체</option>
             <option>월초</option>
             <option>중순</option>
             <option>월말</option>
             <option>날짜지정</option>
-            <option>수시/학교별</option>
+            <option>월중</option>
             <option>기타</option>
           </select>
         </label>
@@ -102,6 +105,8 @@
         <button class="ghost" id="resetFiltersBtn" type="button">초기화</button>
       </div>
     </section>
+
+    <section class="selector-board no-print" id="selectorBoard" aria-label="업무 선택 상자"></section>
 
     <section class="year-board" id="yearBoard" aria-label="연간보기"></section>
 
@@ -156,6 +161,7 @@
     </article>
   </div>
 
+  <button type="button" class="to-top-btn no-print" id="toTopBtn" data-action="go-top" aria-label="맨 위로 올리기">↑</button>
   <div class="toast no-print" id="toast" role="status" aria-live="polite"></div>
   <script src="./app.js"></script>
 </body>
