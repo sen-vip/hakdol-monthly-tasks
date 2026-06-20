@@ -71,5 +71,5 @@ window.HAKDOL_SUPABASE_CONFIG = {
 
 ## 제작자
 
-- 제작: 손승희 / 학돌 도구 시리즈
+- 제작: senvip / 학돌 도구 시리즈
 - 용도: 학교 행정실 업무 조망 및 체크 보조
