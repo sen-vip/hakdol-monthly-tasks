@@ -152,3 +152,175 @@ textarea.card-memo{resize:none}
 .to-top-btn:hover{background:#263241!important;transform:translateY(-1px)}
 @media(max-width:900px){.scroll-status{top:54px}.scroll-status-inner{width:calc(100% - 28px)}}
 @media(max-width:560px){.scroll-status{top:50px}.scroll-status-inner{min-height:44px}.scroll-status-inner strong{font-size:22px!important}.to-top-btn{right:18px;bottom:18px;width:46px!important;height:46px!important}}
+
+
+/* 2026-06-21: 업무 묶음 헤더가 고정바에 가려지지 않도록 보정 */
+.period-group{scroll-margin-top:128px}
+#taskList,#taskSectionHead{scroll-margin-top:128px}
+.period-title h3{font-size:16px;font-weight:850;letter-spacing:-.03em}
+@media(max-width:900px){.period-group,#taskList,#taskSectionHead{scroll-margin-top:116px}}
+@media(max-width:560px){.period-group,#taskList,#taskSectionHead{scroll-margin-top:108px}}
+
+
+/* 2026-06 프린트 보정: 월초/월중/중순/월말 글자 줄바꿈 방지 */
+@media print{
+  .task-card{
+    display:grid!important;
+    grid-template-columns:76px 86px minmax(0,1fr)!important;
+    gap:12px!important;
+    align-items:start!important;
+    padding:10px 12px!important;
+  }
+  .task-when{
+    display:flex!important;
+    grid-template-columns:none!important;
+    gap:0!important;
+    min-width:76px!important;
+    padding-top:1px!important;
+  }
+  .task-when strong{
+    display:block!important;
+    white-space:nowrap!important;
+    word-break:keep-all!important;
+    overflow-wrap:normal!important;
+    line-height:1.25!important;
+    font-size:12.5px!important;
+    margin:0!important;
+  }
+  .task-check{display:none!important}
+  .task-category-col{min-width:86px!important;padding-top:0!important}
+  .task-main{min-width:0!important;padding-top:0!important}
+  .task-title{margin-top:0!important}
+}
+
+
+/* 업무분장 선택 딱지 확대 + 부서명 라벨 제거 후 정보줄 정리 */
+.selector-panel.wide .selector-options{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(104px,1fr));
+  gap:10px;
+  align-items:stretch;
+}
+.selector-panel.wide .select-pill.category-pill{
+  width:100%;
+  min-height:54px;
+  padding:9px 10px;
+  border-radius:16px;
+  flex-direction:column;
+  gap:3px;
+  font-size:14px;
+  line-height:1.05;
+  text-align:center;
+}
+.selector-panel.wide .select-pill.category-pill span{
+  max-width:100%;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+.selector-panel.wide .select-pill.category-pill b{
+  font-size:12px;
+  line-height:1;
+}
+.task-facts span:first-child{
+  padding-left:8px;
+}
+@media(max-width:560px){
+  .selector-panel.wide .selector-options{grid-template-columns:repeat(2,minmax(0,1fr));}
+  .selector-panel.wide .select-pill.category-pill{min-height:50px;border-radius:14px;}
+}
+
+
+/* 2026-06 월 단위 묶음: 월초/월중 박스 분리 제거 */
+.period-group.month-group{overflow:hidden}
+.period-title.month-title{position:sticky;top:calc(var(--sticky-top-offset, 0px));z-index:5;background:#fff;min-height:52px;padding:14px 18px;border-bottom:1px solid #dbe3ef}
+.period-title.month-title h3{font-size:17px;font-weight:900;letter-spacing:-.04em;color:#0f172a}
+.period-title.month-title .chip{min-width:34px;justify-content:center;background:#fff;border-color:#dbe3ef;color:#475569}
+@media print{.period-title.month-title{position:static;top:auto;min-height:auto;padding:10px 12px}.period-title.month-title h3{font-size:14px}}
+
+/* 2026-06 월 흐름 컬러 정리: 한 계열 블루로 점점 진하게 */
+.task-card.period-early::before{background:#dbeafe!important}
+.task-card.period-month::before{background:#bfdbfe!important}
+.task-card.period-middle::before{background:#93c5fd!important}
+.task-card.period-late::before{background:#60a5fa!important}
+.task-card.period-anytime::before,.task-card.period-etc::before{background:#cbd5e1!important}
+
+.task-card.period-early .task-when strong,
+.task-card.period-month .task-when strong,
+.task-card.period-middle .task-when strong,
+.task-card.period-late .task-when strong{display:inline-flex;align-items:center;justify-content:center;min-height:28px;padding:4px 10px;border-radius:999px;border:1px solid transparent;line-height:1.1;white-space:nowrap;font-weight:850}
+.task-card.period-early .task-when strong{background:#eff6ff;border-color:#dbeafe;color:#1e40af}
+.task-card.period-month .task-when strong{background:#dbeafe;border-color:#bfdbfe;color:#1d4ed8}
+.task-card.period-middle .task-when strong{background:#bfdbfe;border-color:#93c5fd;color:#1e3a8a}
+.task-card.period-late .task-when strong{background:#93c5fd;border-color:#60a5fa;color:#172554}
+
+.chip.period-early{background:#eff6ff!important;color:#1e40af!important;border-color:#dbeafe!important}
+.chip.period-month{background:#dbeafe!important;color:#1d4ed8!important;border-color:#bfdbfe!important}
+.chip.period-middle{background:#bfdbfe!important;color:#1e3a8a!important;border-color:#93c5fd!important}
+.chip.period-late{background:#93c5fd!important;color:#172554!important;border-color:#60a5fa!important}
+.chip.period-anytime,.chip.period-etc{background:#f8fafc!important;color:#475569!important;border-color:#cbd5e1!important}
+
+
+/* 2026-06 시기 딱지 제거: 왼쪽 바 컬러만 유지 */
+.task-card.period-early .task-when strong,
+.task-card.period-month .task-when strong,
+.task-card.period-middle .task-when strong,
+.task-card.period-late .task-when strong,
+.task-card.period-anytime .task-when strong,
+.task-card.period-etc .task-when strong{
+  display:block!important;
+  min-height:auto!important;
+  padding:0!important;
+  border:0!important;
+  border-radius:0!important;
+  background:transparent!important;
+  color:#0f172a!important;
+  box-shadow:none!important;
+  line-height:1.35!important;
+  font-size:15.5px!important;
+  font-weight:850!important;
+  letter-spacing:-.03em!important;
+  white-space:nowrap!important;
+}
+.task-category-col .chip.category{
+  font-size:13px!important;
+  line-height:1.15!important;
+  min-height:30px!important;
+  padding:6px 11px!important;
+  font-weight:850!important;
+}
+.task-title{
+  font-size:16.8px!important;
+  line-height:1.38!important;
+}
+.task-desc{
+  font-size:13.5px!important;
+}
+.task-facts{
+  font-size:12.5px!important;
+}
+@media print{
+  .task-card.period-early .task-when strong,
+  .task-card.period-month .task-when strong,
+  .task-card.period-middle .task-when strong,
+  .task-card.period-late .task-when strong,
+  .task-card.period-anytime .task-when strong,
+  .task-card.period-etc .task-when strong{
+    font-size:12px!important;
+    padding:0!important;
+    border:0!important;
+    background:transparent!important;
+  }
+  .task-category-col .chip.category{font-size:10.5px!important;min-height:22px!important;padding:3px 7px!important}
+}
+
+
+/* 2026-06 월 고정 방식 정리: 상단 월표식 제거, 월 박스 헤더 자체 고정 */
+.scroll-status{display:none!important}
+.period-group.month-group{overflow:visible}
+.period-title.month-title{position:sticky;top:61px;z-index:42;background:#fff;min-height:52px;padding:14px 18px;border-bottom:1px solid #dbe3ef;box-shadow:0 1px 0 rgba(219,227,239,.9)}
+.period-group{scroll-margin-top:84px!important}
+#taskList,#taskSectionHead{scroll-margin-top:84px!important}
+@media(max-width:900px){.period-title.month-title{top:54px}.period-group,#taskList,#taskSectionHead{scroll-margin-top:78px!important}}
+@media(max-width:560px){.period-title.month-title{top:50px}.period-group,#taskList,#taskSectionHead{scroll-margin-top:74px!important}}
+@media print{.period-title.month-title{position:static;top:auto;box-shadow:none}}

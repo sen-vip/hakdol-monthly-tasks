@@ -62,7 +62,7 @@ window.HAKDOL_TASKS = [
     "period": "월초",
     "periodGroup": "월초",
     "category": "예산",
-    "title": "제3섹터(시설관리원) 용역비 소요예산(2025년 1~2월분) 신청",
+    "title": "제3섹터(시설관리원) 용역비 소요예산(1~2월분) 신청",
     "department": "시설관리본부 재정지원과",
     "law": "",
     "description": "",
@@ -118,10 +118,10 @@ window.HAKDOL_TASKS = [
     "period": "중순",
     "periodGroup": "중순",
     "category": "시설",
-    "title": "상반기 학교시설통합유지관리 사업(수목, 고천장등) 수요조사 신청",
-    "department": "시설관리본부",
+    "title": "상반기 학교시설통합유지관리 사업 수요조사",
+    "department": "시설관리본부 지원2과",
     "law": "",
-    "description": "",
+    "description": "학교수목, 고천장등 유지관리",
     "note": "",
     "source": "기본업무"
   },
@@ -148,7 +148,7 @@ window.HAKDOL_TASKS = [
     "category": "기록물",
     "title": "기록물관리 책임자 및 담당자 명단 제출",
     "department": "지원청 행정지원과",
-    "law": "공공기록물 관리에 관한 법률 시행규칙 제15조(기록물관리책임자),제출요청공문",
+    "law": "공공기록물 관리에 관한 법률 시행규칙 제15조(기록물관리책임자)",
     "description": "",
     "note": "",
     "source": "기본업무"
@@ -261,7 +261,7 @@ window.HAKDOL_TASKS = [
     "title": "예산조정위원회 실시",
     "department": "",
     "law": "학교회계 예산편성 기본지침",
-    "description": "●12월 부장회의에서 합의한 날짜에 실시 ●부별 또는 전체 교직원 조정회의를 통한 예산 조정 실시(주로 업무추진비 조정이 주된 내용임)",
+    "description": "12월 부장회의에서 합의한 날짜에 실시 / 부별 또는 전체 교직원 조정회의를 통한 예산 조정 실시(주로 업무추진비 조정이 주된 내용임)",
     "note": "",
     "source": "기본업무"
   },
@@ -286,10 +286,10 @@ window.HAKDOL_TASKS = [
     "period": "",
     "periodGroup": "월중",
     "category": "지출",
-    "title": "소방안전원회비 납부(관리자: 실장님)",
+    "title": "한국소방안전원 회비 납부 (소방안전관리자: 실장님)",
     "department": "",
     "law": "",
-    "description": "시기는 학교마다 다를 수 있음",
+    "description": "납부시기는 학교마다 다를 수 있음",
     "note": "",
     "source": "기본업무"
   },
@@ -331,7 +331,7 @@ window.HAKDOL_TASKS = [
     "title": "다음학년도 본예산 심의 및 확정",
     "department": "",
     "law": "학교회계 예산편성 기본지침",
-    "description": "예산(안)확정 - (학운위 심의 후)예산확정 ●학교의 교육시책방향 및 재정여건, 예산편성방향 및 내용 에 대한 학교장 제안 설명 ●예산과 관련된 교직원, 학생대표 등 의견 청취 ●학교장 동의 없이 세출예산 증액 또는 세부사업 설치 금지 ●학교장이 학교회계 세입세출예산 확정, 예산공개(학교 홈페이지에 열린 서울교육 홈페이지(open.sen.go.kr)를 연계하여 자동 공개하는 경우에는 정상 공개 여부를 수시 모니터링하여야 함)",
+    "description": "예산(안)확정 - (학운위 심의 후)예산확정 학교의 교육시책방향 및 재정여건, 예산편성방향 및 내용에 대한 학교장 제안 설명 / 예산과 관련된 교직원, 학생대표 등 의견 청취 / 학교장 동의 없이 세출예산 증액 또는 세부사업 설치 금지 / 학교장이 학교회계 세입세출예산 확정, 예산공개(학교 홈페이지에 열린 서울교육 홈페이지(open.sen.go.kr)를 연계하여 자동 공개하는 경우에는 정상 공개 여부를 수시 모니터링하여야 함)",
     "note": "",
     "source": "기본업무"
   },
@@ -412,10 +412,10 @@ window.HAKDOL_TASKS = [
     "period": "월초",
     "periodGroup": "월초",
     "category": "시설",
-    "title": "2025년 제2·3종시설물 시설물 유지관리 계획 FMS 제출",
+    "title": "제2·3종시설물 시설물 유지관리 계획 FMS 제출",
     "department": "지원청 학교시설지원과",
-    "law": "",
-    "description": "",
+    "law": "「시설물의 안전 및 유지관리에 관한 특별법」제6조, 제9조",
+    "description": "제출방법 : http://www.fms.or.kr 사이트 상단 [안전 및 유지관리] > [유지관리계획보고] > [유지관리계획(총괄)] 입력 후 [저장 및 승인요청] > [시설물별 점검진단/보수보강계획] 입력 > 승인요청",
     "note": "",
     "source": "기본업무"
   },
@@ -454,10 +454,10 @@ window.HAKDOL_TASKS = [
     "period": "중순",
     "periodGroup": "중순",
     "category": "물품",
-    "title": "2026년도 녹색제품 구매계획 제출",
+    "title": "녹색제품 구매계획 제출",
     "department": "지원청 재정지원과",
-    "law": "",
-    "description": "",
+    "law": "녹색제품 구매촉진에 관한 법률 제6조~제8조",
+    "description": "제출방법: 에코스퀘어 시스템(https://ecosq.or.kr) 각 기관(학교)에서 직접입력",
     "note": "",
     "source": "기본업무"
   },
@@ -479,13 +479,13 @@ window.HAKDOL_TASKS = [
     "id": "task-02-008",
     "month": 2,
     "monthLabel": "2월",
-    "period": "중순",
-    "periodGroup": "중순",
-    "category": "공유재산",
+    "period": "월중",
+    "periodGroup": "기타",
+    "category": "물품재산",
     "title": "공유재산심의회 안건 제출",
     "department": "지원청 재정지원과",
     "law": "",
-    "description": "",
+    "description": "해당사항 있는 경우만 제출 / 공유재산(토지,건물,공작물,입목·죽, 무체재산)의 용도폐지·변경은 공유재산 심의 대상/ ① 공유재산의 취득·처분(5억원 초과) ② 행정재산(일반재산) 용도폐지 ③ 행정재산(일반재산) 용도변경 ④ 복합시설 설치 ⑤ 공유재산의 무상사용(대부) ⑥ 행정재산의 관리위탁 ⑦ 일반재산의 신탁(위탁) ⑧ 수탁기관 선정",
     "note": "",
     "source": "기본업무"
   },
@@ -524,7 +524,7 @@ window.HAKDOL_TASKS = [
     "period": "월초",
     "periodGroup": "월초",
     "category": "시설",
-    "title": "2026년 신학기 대비 학교안전 점검 실시 및 결과 제출",
+    "title": "신학기 대비 학교안전 점검 실시 및 결과 제출",
     "department": "지원청 학교통합지원과",
     "law": "",
     "description": "",
@@ -551,11 +551,11 @@ window.HAKDOL_TASKS = [
     "monthLabel": "2월",
     "period": "월초",
     "periodGroup": "월초",
-    "category": "기타",
-    "title": "신학년도 신원보증보험 가입(신원보증보험 가입(회계관계직원 재정보증 가입)",
+    "category": "보험",
+    "title": "신학년도 신원보증보험 가입 / 갱신 (회계관계직원 재정보증 가입)",
     "department": "",
     "law": "지방회계법 시행령 제56조(재정보증의 한도액 등) 서울특별시 교육비특별회계 재무회계 규칙 제165조(재정보증)",
-    "description": "최소 1천만 원 이상, 임명된 날로부터 30일 이내에 보증보험을 통해 설정해야 하며, 교육감을 피보험인으로 하고 매년(1년 단위) 이를 갱신",
+    "description": "최소 1천만 원 이상, 임명된 날로부터 30일 이내에 보증보험을 통해 설정해야 하며, 교육감을 피보험인으로 하고 매년(1년 단위) 이를 갱신 / 가입시기는 학교마다 다를 수 있음",
     "note": "",
     "source": "기본업무"
   },
@@ -661,14 +661,14 @@ window.HAKDOL_TASKS = [
     "id": "task-02-021",
     "month": 2,
     "monthLabel": "2월",
-    "period": "월말",
-    "periodGroup": "월말",
+    "period": "",
+    "periodGroup": "월중",
     "category": "계약",
     "title": "계약심의위원회 안건 제출",
     "department": "지원청 재정지원과",
-    "law": "",
-    "description": "학교 거의 제출할 사항 없음",
-    "note": "공문참조",
+    "law": "「지방자치단체를 당사자로 하는 계약에 관한 법률」제32조 및 같은 법 시행령 제108조, 「서울특별시교육청 계약심의위원회 운영세칙(2022. 9. 29. 개정)」제3조 제1항",
+    "description": "해당있는 경우만 제출 / ☑️「지방계약법 시행령」으로 정하는 규모 이상(추정가격 70억원 이상 공사 및 20억원 이상 물품·용역)의 계약과 관련된 - 입찰참가자의 자격제한에 관한 사항 - 계약체결 방법에 관한 사항 - 낙찰자 결정방법에 관한 사항 - 관련 업체가 지방계약법 제9조의2에 따른 구매규격 사전공개와 관련하여 이의제기한 사항 ☑️ 부정당업자의 입찰 참가자격 제한에 관한 사항",
+    "note": "",
     "source": "기본업무"
   },
   {
@@ -681,7 +681,7 @@ window.HAKDOL_TASKS = [
     "title": "간주처리예산(간주추경) 확정 후 결재받기",
     "department": "",
     "law": "학교회계 예산편성 기본지침",
-    "description": "예산안확정-예산확정(심의없이 진행) ●간주처리 예산은 회계연도 말에 최종 추경이 확정된 후(통상적 2월 중) 목적지정 경비가 교부되어 학교운영위원회의 심의를 거칠 시간적 여유가 없을 때 제한적으로 운용 ●목적이 지정된 전입금, 보조금, 지원금이어야 함. -자체재원(수익자부담수입 포함) 과목 조정 및 증감 불가 -목적사업비 반납에 따른 해당 목적사업 예산액 감액 불가 ●학교운영위원회에 사유 및 내용 등을 반드시 차기 회의 시까지 보고하여야 함.",
+    "description": "예산안확정-예산확정(심의없이 진행) ☑️간주처리 예산은 회계연도 말에 최종 추경이 확정된 후(통상적 2월 중) 목적지정 경비가 교부되어 학교운영위원회의 심의를 거칠 시간적 여유가 없을 때 제한적으로 운용 ☑️목적이 지정된 전입금, 보조금, 지원금이어야 함. -자체재원(수익자부담수입 포함) 과목 조정 및 증감 불가 -목적사업비 반납에 따른 해당 목적사업 예산액 감액 불가 ☑️학교운영위원회에 사유 및 내용 등을 반드시 차기 회의 시까지 보고하여야 함.",
     "note": "",
     "source": "기본업무"
   },
@@ -692,7 +692,7 @@ window.HAKDOL_TASKS = [
     "period": "월말",
     "periodGroup": "월말",
     "category": "예산",
-    "title": "2026년 학교시설관리 제3섹터 용역 기초자료 제출",
+    "title": "학교시설관리 제3섹터 용역 기초자료 제출",
     "department": "시설관리본부 재정지원과",
     "law": "",
     "description": "",
@@ -756,35 +756,21 @@ window.HAKDOL_TASKS = [
     "source": "기본업무"
   },
   {
-    "id": "task-02-028",
-    "month": 2,
-    "monthLabel": "2월",
-    "period": "",
-    "periodGroup": "월중",
-    "category": "보험",
-    "title": "신원보증보험 가입(갱신)",
-    "department": "",
-    "law": "",
-    "description": "학교마다 다를 수 있음",
-    "note": "",
-    "source": "기본업무"
-  },
-  {
-    "id": "task-02-029",
-    "month": 2,
-    "monthLabel": "2월",
-    "period": "",
-    "periodGroup": "월중",
-    "category": "문서",
+    "id": "task-03-001",
+    "month": 3,
+    "monthLabel": "3월",
+    "period": "월초",
+    "periodGroup": "월초",
+    "category": "문서관리",
     "title": "에듀파인 신학기 부서, 조직도 정리",
     "department": "",
     "law": "",
-    "description": "에듀파인 서비스공통",
+    "description": "학교 업무분장에 따름 / 에듀파인 서비스공통에서 작업",
     "note": "",
     "source": "기본업무"
   },
   {
-    "id": "task-02-030",
+    "id": "task-02-028",
     "month": 2,
     "monthLabel": "2월",
     "period": "",
@@ -798,7 +784,7 @@ window.HAKDOL_TASKS = [
     "source": "기본업무"
   },
   {
-    "id": "task-02-031",
+    "id": "task-02-029",
     "month": 2,
     "monthLabel": "2월",
     "period": "",
@@ -812,7 +798,7 @@ window.HAKDOL_TASKS = [
     "source": "기본업무"
   },
   {
-    "id": "task-02-032",
+    "id": "task-02-030",
     "month": 2,
     "monthLabel": "2월",
     "period": "",
@@ -826,7 +812,7 @@ window.HAKDOL_TASKS = [
     "source": "기본업무"
   },
   {
-    "id": "task-02-033",
+    "id": "task-02-031",
     "month": 2,
     "monthLabel": "2월",
     "period": "",
@@ -840,7 +826,7 @@ window.HAKDOL_TASKS = [
     "source": "기본업무"
   },
   {
-    "id": "task-03-001",
+    "id": "task-03-002",
     "month": 3,
     "monthLabel": "3월",
     "period": "월초",
@@ -854,7 +840,7 @@ window.HAKDOL_TASKS = [
     "source": "기본업무"
   },
   {
-    "id": "task-03-002",
+    "id": "task-03-003",
     "month": 3,
     "monthLabel": "3월",
     "period": "월초",
@@ -868,7 +854,7 @@ window.HAKDOL_TASKS = [
     "source": "기본업무"
   },
   {
-    "id": "task-03-003",
+    "id": "task-03-004",
     "month": 3,
     "monthLabel": "3월",
     "period": "월초",
@@ -882,30 +868,16 @@ window.HAKDOL_TASKS = [
     "source": "기본업무"
   },
   {
-    "id": "task-03-004",
-    "month": 3,
-    "monthLabel": "3월",
-    "period": "월초",
-    "periodGroup": "월초",
-    "category": "문서관리",
-    "title": "신학년 에듀파인 조직도 정리",
-    "department": "",
-    "law": "",
-    "description": "학교 업무분장에 따름",
-    "note": "",
-    "source": "기본업무"
-  },
-  {
     "id": "task-03-005",
     "month": 3,
     "monthLabel": "3월",
     "period": "월초",
     "periodGroup": "월초",
     "category": "예산",
-    "title": "신학년 에듀파인 예산 부서, 권한 부여",
+    "title": "에듀파인 예산 담당 부서, 조직도 정리",
     "department": "",
-    "law": "학교회계 예산편성 기본지침",
-    "description": "학교 업무분장에 따름",
+    "law": "",
+    "description": "☑️부서입력: 학교회계 > 사업관리 > 기준정보 > 사용자별부서관리 ☑️품의권한부여: 학교회계 > 사업관리 > 기준정보 > 세부항목코드관리 > 일괄적용담당자선택 - 추가",
     "note": "",
     "source": "기본업무"
   },
@@ -915,8 +887,22 @@ window.HAKDOL_TASKS = [
     "monthLabel": "3월",
     "period": "월초",
     "periodGroup": "월초",
+    "category": "예산",
+    "title": "(권한) 에듀파인 신학년 예산 부서, 권한 부여",
+    "department": "",
+    "law": "학교회계 예산편성 기본지침",
+    "description": "학교 업무분장에 따름",
+    "note": "",
+    "source": "기본업무"
+  },
+  {
+    "id": "task-03-007",
+    "month": 3,
+    "monthLabel": "3월",
+    "period": "월초",
+    "periodGroup": "월초",
     "category": "문서관리",
-    "title": "신학년 과제카드 및 에듀파인 문서 권한 부여",
+    "title": "(권한) 에듀파인 신학년 과제카드 및 문서 권한 부여",
     "department": "",
     "law": "",
     "description": "학교 업무분장에 따름",
@@ -924,7 +910,7 @@ window.HAKDOL_TASKS = [
     "source": "기본업무"
   },
   {
-    "id": "task-03-007",
+    "id": "task-03-008",
     "month": 3,
     "monthLabel": "3월",
     "period": "월초",
@@ -938,7 +924,7 @@ window.HAKDOL_TASKS = [
     "source": "기본업무"
   },
   {
-    "id": "task-03-008",
+    "id": "task-03-009",
     "month": 3,
     "monthLabel": "3월",
     "period": "월초",
@@ -952,7 +938,7 @@ window.HAKDOL_TASKS = [
     "source": "기본업무"
   },
   {
-    "id": "task-03-009",
+    "id": "task-03-010",
     "month": 3,
     "monthLabel": "3월",
     "period": "월초",
@@ -966,7 +952,7 @@ window.HAKDOL_TASKS = [
     "source": "기본업무"
   },
   {
-    "id": "task-03-010",
+    "id": "task-03-011",
     "month": 3,
     "monthLabel": "3월",
     "period": "월초",
@@ -975,12 +961,12 @@ window.HAKDOL_TASKS = [
     "title": "교직원에게 필수 안내사항 안내",
     "department": "",
     "law": "",
-    "description": "●문서권한, 예산권한 부여예정안내 ●지출방법, 온라인카드결제방법, 쇼핑몰 ID PW 공유 ●강사채용 시 행정실 공유, 공문공람 요청 ●보안교육, 업무추진비, 초과근무 교육과 묶어서 안내해도 좋음",
+    "description": "☑️(권한)문서권한, 예산권한 부여예정안내 ☑️(지출)지출방법, 온라인카드결제방법, 쇼핑몰 ID PW 공유 ☑️(급여)강사채용 시 행정실 공유, 공문공람 요청 ☑️(교직원교육)보안교육, 업무추진비, 초과근무 교육과 묶어서 안내해도 좋음",
     "note": "",
     "source": "기본업무"
   },
   {
-    "id": "task-03-011",
+    "id": "task-03-012",
     "month": 3,
     "monthLabel": "3월",
     "period": "",
@@ -989,12 +975,12 @@ window.HAKDOL_TASKS = [
     "title": "신입생 수납자정보 등록",
     "department": "",
     "law": "",
-    "description": "●확정된 반, 번호로 출금이체신청서 수합하여 에듀파인 등록 ●첫 수익자부담금 징수 전까지 등록 완료(대략 3월 말 전까지)",
+    "description": "☑️확정된 반, 번호로 출금이체신청서 수합하여 에듀파인 등록 ☑️첫 수익자부담금 징수 전까지 등록 완료(대략 3월 말 전까지)",
     "note": "",
     "source": "기본업무"
   },
   {
-    "id": "task-03-012",
+    "id": "task-03-013",
     "month": 3,
     "monthLabel": "3월",
     "period": "중순",
@@ -1008,7 +994,7 @@ window.HAKDOL_TASKS = [
     "source": "기본업무"
   },
   {
-    "id": "task-03-013",
+    "id": "task-03-014",
     "month": 3,
     "monthLabel": "3월",
     "period": "중순",
@@ -1022,7 +1008,7 @@ window.HAKDOL_TASKS = [
     "source": "기본업무"
   },
   {
-    "id": "task-03-014",
+    "id": "task-03-015",
     "month": 3,
     "monthLabel": "3월",
     "period": "중순",
@@ -1036,7 +1022,7 @@ window.HAKDOL_TASKS = [
     "source": "기본업무"
   },
   {
-    "id": "task-03-015",
+    "id": "task-03-016",
     "month": 3,
     "monthLabel": "3월",
     "period": "중순",
@@ -1050,7 +1036,7 @@ window.HAKDOL_TASKS = [
     "source": "기본업무"
   },
   {
-    "id": "task-03-016",
+    "id": "task-03-017",
     "month": 3,
     "monthLabel": "3월",
     "period": "중순",
@@ -1064,30 +1050,16 @@ window.HAKDOL_TASKS = [
     "source": "기본업무"
   },
   {
-    "id": "task-03-017",
-    "month": 3,
-    "monthLabel": "3월",
-    "period": "",
-    "periodGroup": "월중",
-    "category": "교직원교육",
-    "title": "보안교육 교직원 교육",
-    "department": "",
-    "law": "",
-    "description": "상반기1회,하반기1회 실시",
-    "note": "",
-    "source": "기본업무"
-  },
-  {
     "id": "task-03-018",
     "month": 3,
     "monthLabel": "3월",
     "period": "",
     "periodGroup": "월중",
     "category": "교직원교육",
-    "title": "업무추진비 교직원 교육",
+    "title": "상반기 보안교육 실시",
     "department": "",
-    "law": "",
-    "description": "연1회 실시",
+    "law": "교육부 보안업무규정 시행세칙 제75조(보안교육)",
+    "description": "반기별 1회 이상 실시(상반기 1회, 하반기 1회)",
     "note": "",
     "source": "기본업무"
   },
@@ -1098,15 +1070,29 @@ window.HAKDOL_TASKS = [
     "period": "",
     "periodGroup": "월중",
     "category": "교직원교육",
-    "title": "초과근무교육",
+    "title": "업무추진비 교직원 교육 실시",
     "department": "",
-    "law": "",
-    "description": "분기별 1회이상 실시",
+    "law": "서울특별시교육청 업무추진비 집행기준 및 공개에 관한 조례 제9조(교육·점검)",
+    "description": "연 1회 이상 실시",
     "note": "",
     "source": "기본업무"
   },
   {
     "id": "task-03-020",
+    "month": 3,
+    "monthLabel": "3월",
+    "period": "",
+    "periodGroup": "월중",
+    "category": "교직원교육",
+    "title": "초과근무교육 실시",
+    "department": "",
+    "law": "「지방공무원보수업무 등 처리지침」 (행정안전부예규) 9. 초과근무수당 관리강화 대책",
+    "description": "분기별 1회 이상 실시 / 분기별 1회 이상 교육 시 유연근무 교육은 필수 추진사항은 아니나, 학교별 복무관리 차원에서 자율적으로 실시",
+    "note": "",
+    "source": "기본업무"
+  },
+  {
+    "id": "task-03-021",
     "month": 3,
     "monthLabel": "3월",
     "period": "말까지",
@@ -1120,7 +1106,7 @@ window.HAKDOL_TASKS = [
     "source": "기본업무"
   },
   {
-    "id": "task-03-021",
+    "id": "task-03-022",
     "month": 3,
     "monthLabel": "3월",
     "period": "월말",
@@ -1134,21 +1120,21 @@ window.HAKDOL_TASKS = [
     "source": "기본업무"
   },
   {
-    "id": "task-03-022",
+    "id": "task-03-023",
     "month": 3,
     "monthLabel": "3월",
-    "period": "월말",
-    "periodGroup": "월말",
+    "period": "",
+    "periodGroup": "월중",
     "category": "계약",
     "title": "계약심의위원회 안건 제출",
     "department": "지원청 재정지원과",
-    "law": "",
-    "description": "학교거의 해당되는 내용 없음",
+    "law": "「지방자치단체를 당사자로 하는 계약에 관한 법률」제32조 및 같은 법 시행령 제108조, 「서울특별시교육청 계약심의위원회 운영세칙(2022. 9. 29. 개정)」제3조 제1항",
+    "description": "해당있는 경우만 제출 / ☑️「지방계약법 시행령」으로 정하는 규모 이상(추정가격 70억원 이상 공사 및 20억원 이상 물품·용역)의 계약과 관련된 - 입찰참가자의 자격제한에 관한 사항 - 계약체결 방법에 관한 사항 - 낙찰자 결정방법에 관한 사항 - 관련 업체가 지방계약법 제9조의2에 따른 구매규격 사전공개와 관련하여 이의제기한 사항 ☑️ 부정당업자의 입찰 참가자격 제한에 관한 사항",
     "note": "",
     "source": "기본업무"
   },
   {
-    "id": "task-03-023",
+    "id": "task-03-024",
     "month": 3,
     "monthLabel": "3월",
     "period": "월말",
@@ -1162,16 +1148,16 @@ window.HAKDOL_TASKS = [
     "source": "기본업무"
   },
   {
-    "id": "task-03-024",
-    "month": 3,
-    "monthLabel": "3월",
-    "period": "월말",
-    "periodGroup": "월말",
-    "category": "공유재산",
+    "id": "task-04-001",
+    "month": 4,
+    "monthLabel": "4월",
+    "period": "월중",
+    "periodGroup": "기타",
+    "category": "물품재산",
     "title": "공유재산심의회 안건 제출",
     "department": "지원청 재정지원과",
     "law": "",
-    "description": "",
+    "description": "해당사항 있는 경우만 제출 / 공유재산(토지,건물,공작물,입목·죽, 무체재산)의 용도폐지·변경은 공유재산 심의 대상/ ① 공유재산의 취득·처분(5억원 초과) ② 행정재산(일반재산) 용도폐지 ③ 행정재산(일반재산) 용도변경 ④ 복합시설 설치 ⑤ 공유재산의 무상사용(대부) ⑥ 행정재산의 관리위탁 ⑦ 일반재산의 신탁(위탁) ⑧ 수탁기관 선정",
     "note": "",
     "source": "기본업무"
   },
@@ -1358,7 +1344,7 @@ window.HAKDOL_TASKS = [
     "source": "기본업무"
   },
   {
-    "id": "task-04-001",
+    "id": "task-04-002",
     "month": 4,
     "monthLabel": "4월",
     "period": "중순",
@@ -1372,7 +1358,7 @@ window.HAKDOL_TASKS = [
     "source": "기본업무"
   },
   {
-    "id": "task-04-002",
+    "id": "task-04-003",
     "month": 4,
     "monthLabel": "4월",
     "period": "중순",
@@ -1386,7 +1372,7 @@ window.HAKDOL_TASKS = [
     "source": "기본업무"
   },
   {
-    "id": "task-04-003",
+    "id": "task-04-004",
     "month": 4,
     "monthLabel": "4월",
     "period": "중순",
@@ -1400,7 +1386,7 @@ window.HAKDOL_TASKS = [
     "source": "기본업무"
   },
   {
-    "id": "task-04-004",
+    "id": "task-04-005",
     "month": 4,
     "monthLabel": "4월",
     "period": "중순",
@@ -1414,7 +1400,7 @@ window.HAKDOL_TASKS = [
     "source": "기본업무"
   },
   {
-    "id": "task-04-005",
+    "id": "task-04-006",
     "month": 4,
     "monthLabel": "4월",
     "period": "말까지",
@@ -1423,12 +1409,12 @@ window.HAKDOL_TASKS = [
     "title": "학교운영위원회에 결산서 제출 마감",
     "department": "",
     "law": "학교회계 예산편성 기본지침",
-    "description": "(회계연도 종료 후 2개월 이내) ●학교운영위원들에게 회의개시 7일 전까지 결산서 개별 통지",
+    "description": "(회계연도 종료 후 2개월 이내) 학교운영위원들에게 회의개시 7일 전까지 결산서 개별 통지",
     "note": "",
     "source": "기본업무"
   },
   {
-    "id": "task-04-006",
+    "id": "task-04-007",
     "month": 4,
     "monthLabel": "4월",
     "period": "말까지",
@@ -1442,7 +1428,7 @@ window.HAKDOL_TASKS = [
     "source": "기본업무"
   },
   {
-    "id": "task-04-007",
+    "id": "task-04-008",
     "month": 4,
     "monthLabel": "4월",
     "period": "월말",
@@ -1456,7 +1442,7 @@ window.HAKDOL_TASKS = [
     "source": "기본업무"
   },
   {
-    "id": "task-04-008",
+    "id": "task-04-009",
     "month": 4,
     "monthLabel": "4월",
     "period": "월말",
@@ -1470,7 +1456,7 @@ window.HAKDOL_TASKS = [
     "source": "기본업무"
   },
   {
-    "id": "task-04-009",
+    "id": "task-04-010",
     "month": 4,
     "monthLabel": "4월",
     "period": "20일까지",
@@ -1484,10 +1470,10 @@ window.HAKDOL_TASKS = [
     "source": "기본업무"
   },
   {
-    "id": "task-04-010",
+    "id": "task-04-011",
     "month": 4,
     "monthLabel": "4월",
-    "period": "15일이내",
+    "period": "15일 이내",
     "periodGroup": "날짜지정",
     "category": "학운위",
     "title": "위원장 및 부위원장 선출",
@@ -1498,7 +1484,7 @@ window.HAKDOL_TASKS = [
     "source": "기본업무"
   },
   {
-    "id": "task-04-011",
+    "id": "task-04-012",
     "month": 4,
     "monthLabel": "4월",
     "period": "",
@@ -1512,7 +1498,7 @@ window.HAKDOL_TASKS = [
     "source": "기본업무"
   },
   {
-    "id": "task-04-012",
+    "id": "task-04-013",
     "month": 4,
     "monthLabel": "4월",
     "period": "",
@@ -1526,7 +1512,7 @@ window.HAKDOL_TASKS = [
     "source": "기본업무"
   },
   {
-    "id": "task-04-013",
+    "id": "task-04-014",
     "month": 4,
     "monthLabel": "4월",
     "period": "",
@@ -1540,7 +1526,7 @@ window.HAKDOL_TASKS = [
     "source": "기본업무"
   },
   {
-    "id": "task-04-014",
+    "id": "task-04-015",
     "month": 4,
     "monthLabel": "4월",
     "period": "",
@@ -1554,7 +1540,7 @@ window.HAKDOL_TASKS = [
     "source": "기본업무"
   },
   {
-    "id": "task-04-015",
+    "id": "task-04-016",
     "month": 4,
     "monthLabel": "4월",
     "period": "",
@@ -1568,7 +1554,7 @@ window.HAKDOL_TASKS = [
     "source": "기본업무"
   },
   {
-    "id": "task-04-016",
+    "id": "task-04-017",
     "month": 4,
     "monthLabel": "4월",
     "period": "",
@@ -1582,7 +1568,7 @@ window.HAKDOL_TASKS = [
     "source": "기본업무"
   },
   {
-    "id": "task-04-017",
+    "id": "task-04-018",
     "month": 4,
     "monthLabel": "4월",
     "period": "",
@@ -1591,26 +1577,12 @@ window.HAKDOL_TASKS = [
     "title": "학운위 결산(안) 심의",
     "department": "",
     "law": "학교회계 예산편성 기본지침",
-    "description": "●회계연도 종료 후 3개월 이내(5월 말일까지) ●학교운영위원회 결산심의 결과를 학교장에게 통보",
+    "description": "회계연도 종료 후 3개월 이내(5월 말일까지) / 학교운영위원회 결산심의 결과를 학교장에게 통보",
     "note": "",
     "source": "기본업무"
   },
   {
     "id": "task-05-001",
-    "month": 5,
-    "monthLabel": "5월",
-    "period": "월초",
-    "periodGroup": "월초",
-    "category": "안전",
-    "title": "안전관리자 지정 현황 제출",
-    "department": "본청 교육시설안전과",
-    "law": "",
-    "description": "",
-    "note": "",
-    "source": "기본업무"
-  },
-  {
-    "id": "task-05-002",
     "month": 5,
     "monthLabel": "5월",
     "period": "월초",
@@ -1624,7 +1596,7 @@ window.HAKDOL_TASKS = [
     "source": "기본업무"
   },
   {
-    "id": "task-05-003",
+    "id": "task-05-002",
     "month": 5,
     "monthLabel": "5월",
     "period": "중순경까지",
@@ -1638,11 +1610,11 @@ window.HAKDOL_TASKS = [
     "source": "기본업무"
   },
   {
-    "id": "task-05-004",
+    "id": "task-05-003",
     "month": 5,
     "monthLabel": "5월",
-    "period": "중순",
-    "periodGroup": "중순",
+    "period": "말까지",
+    "periodGroup": "월말",
     "category": "발전기금",
     "title": "(5월말까지)지난회계연도 학교발전기금 결산보고 자료 제출",
     "department": "지원청 재정지원과",
@@ -1652,21 +1624,21 @@ window.HAKDOL_TASKS = [
     "source": "기본업무"
   },
   {
-    "id": "task-05-005",
+    "id": "task-05-004",
     "month": 5,
     "monthLabel": "5월",
     "period": "중순",
     "periodGroup": "중순",
     "category": "인사",
     "title": "전보 공문 처리",
-    "department": "총무과",
+    "department": "본청 총무과, 지원청 행정지원과",
     "law": "하반기 6급 이하 일반직공무원 전보임용 계획 알림",
     "description": "",
     "note": "",
     "source": "기본업무"
   },
   {
-    "id": "task-05-006",
+    "id": "task-05-005",
     "month": 5,
     "monthLabel": "5월",
     "period": "말까지",
@@ -1675,12 +1647,12 @@ window.HAKDOL_TASKS = [
     "title": "(학운위)결산 심의결과 통보",
     "department": "",
     "law": "학교회계 예산편성 기본지침",
-    "description": "●학교운영위원회 결산심의 결과를 학교장에게 통보 ●심의 결과 통보일로부터 10일이내 결산 공개",
+    "description": "학교운영위원회 결산심의 결과를 학교장에게 통보 / 심의 결과 통보일로부터 10일이내 결산 공개",
     "note": "",
     "source": "기본업무"
   },
   {
-    "id": "task-05-007",
+    "id": "task-05-006",
     "month": 5,
     "monthLabel": "5월",
     "period": "말까지",
@@ -1694,13 +1666,13 @@ window.HAKDOL_TASKS = [
     "source": "기본업무"
   },
   {
-    "id": "task-05-008",
+    "id": "task-05-007",
     "month": 5,
     "monthLabel": "5월",
-    "period": "29까지",
+    "period": "29일까지",
     "periodGroup": "날짜지정",
     "category": "발전기금",
-    "title": "학교발전기금결산처리(5.29.까지)",
+    "title": "(5.29.까지)학교발전기금결산처리",
     "department": "",
     "law": "초·중등교육법 시행령 제64조(학교발전기금) 및 시행규칙 제50조(결산보고)",
     "description": "",
@@ -1708,7 +1680,7 @@ window.HAKDOL_TASKS = [
     "source": "기본업무"
   },
   {
-    "id": "task-05-009",
+    "id": "task-05-008",
     "month": 5,
     "monthLabel": "5월",
     "period": "10일경",
@@ -1742,8 +1714,8 @@ window.HAKDOL_TASKS = [
     "period": "월초",
     "periodGroup": "월초",
     "category": "안전보건",
-    "title": "하반기 안전보건 관계 법령상 의무이행 점검 및 관리감독자 평가 결과 제출",
-    "department": "안전총괄담당관",
+    "title": "상반기 안전보건 관계 법령상 의무이행 점검 및 관리감독자 평가 결과 제출",
+    "department": "본청 안전총괄담당관",
     "law": "",
     "description": "",
     "note": "",
@@ -1767,13 +1739,13 @@ window.HAKDOL_TASKS = [
     "id": "task-06-004",
     "month": 6,
     "monthLabel": "6월",
-    "period": "월초",
-    "periodGroup": "월초",
-    "category": "공유재산",
+    "period": "월중",
+    "periodGroup": "기타",
+    "category": "물품재산",
     "title": "공유재산심의회 안건 제출",
     "department": "지원청 재정지원과",
     "law": "",
-    "description": "",
+    "description": "해당사항 있는 경우만 제출 / 공유재산(토지,건물,공작물,입목·죽, 무체재산)의 용도폐지·변경은 공유재산 심의 대상/ ① 공유재산의 취득·처분(5억원 초과) ② 행정재산(일반재산) 용도폐지 ③ 행정재산(일반재산) 용도변경 ④ 복합시설 설치 ⑤ 공유재산의 무상사용(대부) ⑥ 행정재산의 관리위탁 ⑦ 일반재산의 신탁(위탁) ⑧ 수탁기관 선정",
     "note": "",
     "source": "기본업무"
   },
@@ -1801,7 +1773,7 @@ window.HAKDOL_TASKS = [
     "title": "다음년도 학교기본운영비 확정을 위한 기초자료 제출",
     "department": "지원청 재정지원과",
     "law": "",
-    "description": "●교육통계 조사 자료 기준(2026. 4. 1.) 학급수, 학생수, 건물연면적 ●2025학년도 사용료 세입 결산액(학교회계>수입관리>수입현황>징수및수납현황>징수부)",
+    "description": "☑️교육통계 조사 자료 기준(당해연도 4월 1일 기준) 학급수, 학생수, 건물연면적 ☑️지난 학년도 사용료 세입 결산액(학교회계>수입관리>수입현황>징수및수납현황>징수부)",
     "note": "",
     "source": "기본업무"
   },
@@ -1809,13 +1781,13 @@ window.HAKDOL_TASKS = [
     "id": "task-06-007",
     "month": 6,
     "monthLabel": "6월",
-    "period": "중순",
-    "periodGroup": "중순",
+    "period": "",
+    "periodGroup": "월중",
     "category": "계약",
     "title": "계약심의위원회 안건 제출",
     "department": "지원청 재정지원과",
-    "law": "",
-    "description": "학교 거의 해당되는 내용 없음",
+    "law": "「지방자치단체를 당사자로 하는 계약에 관한 법률」제32조 및 같은 법 시행령 제108조, 「서울특별시교육청 계약심의위원회 운영세칙(2022. 9. 29. 개정)」제3조 제1항",
+    "description": "해당있는 경우만 제출 / ☑️「지방계약법 시행령」으로 정하는 규모 이상(추정가격 70억원 이상 공사 및 20억원 이상 물품·용역)의 계약과 관련된 - 입찰참가자의 자격제한에 관한 사항 - 계약체결 방법에 관한 사항 - 낙찰자 결정방법에 관한 사항 - 관련 업체가 지방계약법 제9조의2에 따른 구매규격 사전공개와 관련하여 이의제기한 사항 ☑️ 부정당업자의 입찰 참가자격 제한에 관한 사항",
     "note": "",
     "source": "기본업무"
   },
@@ -1913,7 +1885,7 @@ window.HAKDOL_TASKS = [
     "title": "기록물 폐기집행",
     "department": "지원청 행정지원과",
     "law": "",
-    "description": "폐기 집행월은 매년 약간씩 달라질 수 있음 ●일자별 이송장소에서 기록물 검수 후 업체 입고파쇄 ●폐기대상 기록물 목록, 인계인수서(직인 날인, 2부) 지참 ●폐기대상 기록물 실물이 없거나 수량 등이 불일치(증감)하는 경우‘사유서’제출",
+    "description": "☑️폐기 집행월은 매년 약간씩 달라질 수 있음 ☑️일자별 이송장소에서 기록물 검수 후 업체 입고파쇄 ☑️폐기대상 기록물 목록, 인계인수서(직인 날인, 2부) 지참 ☑️폐기대상 기록물 실물이 없거나 수량 등이 불일치(증감)하는 경우‘사유서’제출",
     "note": "",
     "source": "기본업무"
   },
@@ -2106,7 +2078,7 @@ window.HAKDOL_TASKS = [
     "period": "중순",
     "periodGroup": "중순",
     "category": "시설",
-    "title": "장애인편의시설 현황조사 및 2026년 본예산 수립을 위한 기초자료 제출",
+    "title": "장애인편의시설 현황조사 및 다음 연도 본예산 수립을 위한 기초자료 제출",
     "department": "지원청 학교시설지원과",
     "law": "",
     "description": "",
@@ -2117,13 +2089,13 @@ window.HAKDOL_TASKS = [
     "id": "task-08-004",
     "month": 8,
     "monthLabel": "8월",
-    "period": "중순",
-    "periodGroup": "중순",
-    "category": "공유재산",
+    "period": "월중",
+    "periodGroup": "기타",
+    "category": "물품재산",
     "title": "공유재산심의회 안건 제출",
     "department": "지원청 재정지원과",
     "law": "",
-    "description": "",
+    "description": "해당사항 있는 경우만 제출 / 공유재산(토지,건물,공작물,입목·죽, 무체재산)의 용도폐지·변경은 공유재산 심의 대상/ ① 공유재산의 취득·처분(5억원 초과) ② 행정재산(일반재산) 용도폐지 ③ 행정재산(일반재산) 용도변경 ④ 복합시설 설치 ⑤ 공유재산의 무상사용(대부) ⑥ 행정재산의 관리위탁 ⑦ 일반재산의 신탁(위탁) ⑧ 수탁기관 선정",
     "note": "",
     "source": "기본업무"
   },
@@ -2131,13 +2103,13 @@ window.HAKDOL_TASKS = [
     "id": "task-08-005",
     "month": 8,
     "monthLabel": "8월",
-    "period": "중순",
-    "periodGroup": "중순",
+    "period": "",
+    "periodGroup": "월중",
     "category": "계약",
     "title": "계약심의위원회 안건 제출",
     "department": "지원청 재정지원과",
-    "law": "",
-    "description": "학교 거의 해당되는 내용 없음",
+    "law": "「지방자치단체를 당사자로 하는 계약에 관한 법률」제32조 및 같은 법 시행령 제108조, 「서울특별시교육청 계약심의위원회 운영세칙(2022. 9. 29. 개정)」제3조 제1항",
+    "description": "해당있는 경우만 제출 / ☑️「지방계약법 시행령」으로 정하는 규모 이상(추정가격 70억원 이상 공사 및 20억원 이상 물품·용역)의 계약과 관련된 - 입찰참가자의 자격제한에 관한 사항 - 계약체결 방법에 관한 사항 - 낙찰자 결정방법에 관한 사항 - 관련 업체가 지방계약법 제9조의2에 따른 구매규격 사전공개와 관련하여 이의제기한 사항 ☑️ 부정당업자의 입찰 참가자격 제한에 관한 사항",
     "note": "",
     "source": "기본업무"
   },
@@ -2176,7 +2148,7 @@ window.HAKDOL_TASKS = [
     "period": "월초",
     "periodGroup": "월초",
     "category": "급여",
-    "title": "2025년 9~10월 장애인근로자 인건비 신청",
+    "title": "9~10월 장애인근로자 인건비 신청",
     "department": "지원청 학교통합지원과",
     "law": "",
     "description": "",
@@ -2187,13 +2159,13 @@ window.HAKDOL_TASKS = [
     "id": "task-09-003",
     "month": 9,
     "monthLabel": "9월",
-    "period": "중순",
-    "periodGroup": "중순",
+    "period": "",
+    "periodGroup": "월중",
     "category": "계약",
     "title": "계약심의위원회 안건 제출",
     "department": "지원청 재정지원과",
-    "law": "",
-    "description": "학교 거의 해당되는 내용 없음",
+    "law": "「지방자치단체를 당사자로 하는 계약에 관한 법률」제32조 및 같은 법 시행령 제108조, 「서울특별시교육청 계약심의위원회 운영세칙(2022. 9. 29. 개정)」제3조 제1항",
+    "description": "해당있는 경우만 제출 / ☑️「지방계약법 시행령」으로 정하는 규모 이상(추정가격 70억원 이상 공사 및 20억원 이상 물품·용역)의 계약과 관련된 - 입찰참가자의 자격제한에 관한 사항 - 계약체결 방법에 관한 사항 - 낙찰자 결정방법에 관한 사항 - 관련 업체가 지방계약법 제9조의2에 따른 구매규격 사전공개와 관련하여 이의제기한 사항 ☑️ 부정당업자의 입찰 참가자격 제한에 관한 사항",
     "note": "",
     "source": "기본업무"
   },
@@ -2289,7 +2261,7 @@ window.HAKDOL_TASKS = [
     "periodGroup": "월말",
     "category": "에너지",
     "title": "에너지이용 합리화 추진실적 및 우수사례 제출",
-    "department": "교육재정과",
+    "department": "본청 교육재정과",
     "law": "",
     "description": "우수사례 있는 경우만 제출",
     "note": "",
@@ -2299,13 +2271,13 @@ window.HAKDOL_TASKS = [
     "id": "task-10-006",
     "month": 10,
     "monthLabel": "10월",
-    "period": "월말",
-    "periodGroup": "월말",
+    "period": "",
+    "periodGroup": "월중",
     "category": "계약",
     "title": "계약심의위원회 안건 제출",
     "department": "지원청 재정지원과",
-    "law": "",
-    "description": "학교 거의 해당되는 내용 없음",
+    "law": "「지방자치단체를 당사자로 하는 계약에 관한 법률」제32조 및 같은 법 시행령 제108조, 「서울특별시교육청 계약심의위원회 운영세칙(2022. 9. 29. 개정)」제3조 제1항",
+    "description": "해당있는 경우만 제출 / ☑️「지방계약법 시행령」으로 정하는 규모 이상(추정가격 70억원 이상 공사 및 20억원 이상 물품·용역)의 계약과 관련된 - 입찰참가자의 자격제한에 관한 사항 - 계약체결 방법에 관한 사항 - 낙찰자 결정방법에 관한 사항 - 관련 업체가 지방계약법 제9조의2에 따른 구매규격 사전공개와 관련하여 이의제기한 사항 ☑️ 부정당업자의 입찰 참가자격 제한에 관한 사항",
     "note": "",
     "source": "기본업무"
   },
@@ -2372,7 +2344,7 @@ window.HAKDOL_TASKS = [
     "period": "월초",
     "periodGroup": "월초",
     "category": "급여",
-    "title": "2025년 11~12월 장애인근로자 인건비 신청",
+    "title": "11~12월 장애인근로자 인건비 신청",
     "department": "지원청 학교통합지원과",
     "law": "",
     "description": "",
@@ -2415,7 +2387,7 @@ window.HAKDOL_TASKS = [
     "periodGroup": "중순",
     "category": "인사",
     "title": "전보 공문 처리",
-    "department": "총무과",
+    "department": "본청 총무과, 지원청 행정지원과",
     "law": "상반기 6급 이하 일반직공무원 전보임용 계획 알림",
     "description": "",
     "note": "",
@@ -2456,7 +2428,7 @@ window.HAKDOL_TASKS = [
     "period": "중순",
     "periodGroup": "중순",
     "category": "보험",
-    "title": "(11월 중순부터 약 3주간)교육시설공제 정기가입",
+    "title": "(11월 중순부터 약 3주간) 교육시설공제 정기가입",
     "department": "지원청 재정지원과",
     "law": "",
     "description": "",
@@ -2467,13 +2439,13 @@ window.HAKDOL_TASKS = [
     "id": "task-11-010",
     "month": 11,
     "monthLabel": "11월",
-    "period": "중순",
-    "periodGroup": "중순",
-    "category": "공유재산",
+    "period": "월중",
+    "periodGroup": "기타",
+    "category": "물품재산",
     "title": "공유재산심의회 안건 제출",
     "department": "지원청 재정지원과",
     "law": "",
-    "description": "",
+    "description": "해당사항 있는 경우만 제출 / 공유재산(토지,건물,공작물,입목·죽, 무체재산)의 용도폐지·변경은 공유재산 심의 대상/ ① 공유재산의 취득·처분(5억원 초과) ② 행정재산(일반재산) 용도폐지 ③ 행정재산(일반재산) 용도변경 ④ 복합시설 설치 ⑤ 공유재산의 무상사용(대부) ⑥ 행정재산의 관리위탁 ⑦ 일반재산의 신탁(위탁) ⑧ 수탁기관 선정",
     "note": "",
     "source": "기본업무"
   },
@@ -2529,7 +2501,7 @@ window.HAKDOL_TASKS = [
     "title": "다음학년도 본예산계획서 작성 및 교직원들에게 본예산 요구서 작성안내",
     "department": "",
     "law": "학교회계 예산편성 기본지침",
-    "description": "●교직원들에게 본예산 요구서 작성안내 시 학생 학부모 의견청취한 내용도 같이 정리해서 담당부서 타당성 검토 및 본예산 요구서에 반영 요청 ●(예산 확정 후 예산 공개 시 학부모 및 학생 의견 반영한 사업 안내함)",
+    "description": "교직원들에게 본예산 요구서 작성안내 시 학생 학부모 의견청취한 내용도 같이 정리해서 담당부서 타당성 검토 및 본예산 요구서에 반영 요청 / (예산 확정 후 예산 공개 시 학부모 및 학생 의견 반영한 사업 안내함)",
     "note": "",
     "source": "기본업무"
   },
@@ -2553,7 +2525,7 @@ window.HAKDOL_TASKS = [
     "monthLabel": "12월",
     "period": "월초",
     "periodGroup": "월초",
-    "category": "물품",
+    "category": "물품재산",
     "title": "전년도 공유재산 증감 및 현재액 보고서 제출",
     "department": "지원청 재정지원과",
     "law": "공유재산및물품관리법 제47조(공유재산의 현황작성 등)",
@@ -2582,7 +2554,7 @@ window.HAKDOL_TASKS = [
     "period": "월말",
     "periodGroup": "월말",
     "category": "환경위생",
-    "title": "학교 먹는 물 수질검사 위탁용역 사업물량 조사",
+    "title": "학교 먹는물 수질검사 위탁용역 사업물량 조사",
     "department": "지원청 학교통합지원과",
     "law": "",
     "description": "2026년부터 학교통합지원과에서 통합계약 진행함",
@@ -2599,7 +2571,7 @@ window.HAKDOL_TASKS = [
     "title": "다음년도 보안점검표 만들기",
     "department": "",
     "law": "서울특별시교육청 보안업무 시행 지침",
-    "description": "바쁜시기를 피해 미리 만들어놔도 좋음(단면27장x N실)",
+    "description": "바쁜시기를 피해 미리 만들어도 좋음(단면27장 x N실)",
     "note": "",
     "source": "기본업무"
   },
@@ -2652,7 +2624,7 @@ window.HAKDOL_TASKS = [
     "period": "월말",
     "periodGroup": "월말",
     "category": "지출",
-    "title": "공사대장,하자검사대장 작성",
+    "title": "공사대장, 하자검사대장 작성",
     "department": "",
     "law": "",
     "description": "인사이동 시 결재 누락없도록 확인",
@@ -2683,7 +2655,7 @@ window.HAKDOL_TASKS = [
     "title": "교직원의 본예산요구서 취합",
     "department": "",
     "law": "학교회계 예산편성 기본지침",
-    "description": "●부서별로 방학 전까지 취합받기 ●각 부서에서 제출한 예산요구서를 반영한 예산안 편성작업 시작",
+    "description": "부서별로 방학 전까지 취합받기 / 각 부서에서 제출한 예산요구서를 반영한 예산(안) 편성작업 시작",
     "note": "",
     "source": "기본업무"
   },
@@ -2740,6 +2712,76 @@ window.HAKDOL_TASKS = [
     "department": "관할 자치구청",
     "law": "",
     "description": "",
+    "note": "",
+    "source": "기본업무"
+  },
+  {
+    "id": "task-07-011",
+    "month": 7,
+    "monthLabel": "7월",
+    "period": "중순",
+    "periodGroup": "중순",
+    "category": "시설",
+    "title": "하반기 학교시설통합유지관리 사업 수요조사",
+    "department": "시설관리본부 지원2과",
+    "law": "",
+    "description": "학교수목, 고천장등 유지관리",
+    "note": "",
+    "source": "기본업무"
+  },
+  {
+    "id": "task-09-006",
+    "month": 9,
+    "monthLabel": "9월",
+    "period": "",
+    "periodGroup": "월중",
+    "category": "교직원교육",
+    "title": "하반기 보안교육 실시",
+    "department": "",
+    "law": "교육부 보안업무규정 시행세칙 제75조(보안교육)",
+    "description": "반기별 1회 이상 실시(상반기 1회, 하반기 1회)",
+    "note": "",
+    "source": "기본업무"
+  },
+  {
+    "id": "task-06-016",
+    "month": 6,
+    "monthLabel": "6월",
+    "period": "",
+    "periodGroup": "월중",
+    "category": "교직원교육",
+    "title": "초과근무교육 실시",
+    "department": "",
+    "law": "「지방공무원보수업무 등 처리지침」 (행정안전부예규) 9. 초과근무수당 관리강화 대책",
+    "description": "분기별 1회 이상 실시 / 분기별 1회 이상 교육 시 유연근무 교육은 필수 추진사항은 아니나, 학교별 복무관리 차원에서 자율적으로 실시",
+    "note": "",
+    "source": "기본업무"
+  },
+  {
+    "id": "task-09-007",
+    "month": 9,
+    "monthLabel": "9월",
+    "period": "",
+    "periodGroup": "월중",
+    "category": "교직원교육",
+    "title": "초과근무교육 실시",
+    "department": "",
+    "law": "「지방공무원보수업무 등 처리지침」 (행정안전부예규) 9. 초과근무수당 관리강화 대책",
+    "description": "분기별 1회 이상 실시 / 분기별 1회 이상 교육 시 유연근무 교육은 필수 추진사항은 아니나, 학교별 복무관리 차원에서 자율적으로 실시",
+    "note": "",
+    "source": "기본업무"
+  },
+  {
+    "id": "task-12-018",
+    "month": 12,
+    "monthLabel": "12월",
+    "period": "",
+    "periodGroup": "월중",
+    "category": "교직원교육",
+    "title": "초과근무교육 실시",
+    "department": "",
+    "law": "「지방공무원보수업무 등 처리지침」 (행정안전부예규) 9. 초과근무수당 관리강화 대책",
+    "description": "분기별 1회 이상 실시 / 분기별 1회 이상 교육 시 유연근무 교육은 필수 추진사항은 아니나, 학교별 복무관리 차원에서 자율적으로 실시",
     "note": "",
     "source": "기본업무"
   }

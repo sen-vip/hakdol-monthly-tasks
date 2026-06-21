@@ -7,6 +7,22 @@ const today = new Date();
 const currentMonth = today.getMonth() + 1;
 const periodOrder = ["월초", "월중", "중순", "월말", "수시", "기타"];
 
+
+const categorySortOrder = [
+  "예산", "급여", "세입", "지출", "계약",
+  "물품", "물품재산", "시설", "환경위생",
+  "기록물", "민방위", "보험", "발전기금",
+  "산업안전보건", "안전보건", "학운위", "인사",
+  "교직원교육", "법정교육", "교육통계",
+  "에너지", "보안", "공유재산", "기타"
+];
+
+function categorySortIndex(name = "") {
+  const normalized = String(name || "").replace(/\s+/g, "").trim();
+  const index = categorySortOrder.findIndex(item => item.replace(/\s+/g, "") === normalized);
+  return index === -1 ? 999 : index;
+}
+
 const categoryColorMap = {
   "예산": "budget",
   "세입": "income",
@@ -166,6 +182,10 @@ function extractPeriodDay(period = "") {
 function taskFlowBucket(task) {
   let group = String(task.periodGroup || "").trim();
   const period = String(task.period || "").trim();
+  if (period.includes("월중")) return "월중";
+  if (period.includes("월초")) return "월초";
+  if (period.includes("중순")) return "중순";
+  if (period.includes("월말") || period === "말일" || period.includes("말까지")) return "월말";
   if (!period && (group === "수시/학교별" || group === "")) group = "월중";
   if (group === "수시/학교별") group = "수시";
   if (group === "날짜지정") {
@@ -203,7 +223,6 @@ function getFilteredTasks() {
     if (state.whenType && getWhenType(task) !== state.whenType) return false;
     if (state.categories.length && !state.categories.includes(task.category)) return false;
     if (state.period && taskFlowBucket(task) !== state.period) return false;
-    if (!matchesSubmissionFilter(task)) return false;
     if (!matchesSubmissionFilter(task)) return false;
     if (q) {
       const hay = normalizeText([task.title, task.category, task.department, task.law, task.description, task.note, task.period].join(" "));
@@ -246,7 +265,7 @@ function renderAuth() {
 function renderFilterOptions() {
   els.monthFilter.innerHTML = `<option value="">전체</option>` + Array.from({ length: 12 }, (_, i) => `<option value="${i+1}">${i+1}월</option>`).join("");
   els.monthFilter.value = state.allMode ? "" : String(state.selectedMonth);
-  const categories = [...new Set(getAllTasks().map(t => t.category).filter(Boolean))].sort((a,b) => a.localeCompare(b, "ko"));
+  const categories = [...new Set(getAllTasks().map(t => t.category).filter(Boolean))].sort((a,b) => categorySortIndex(a) - categorySortIndex(b) || a.localeCompare(b, "ko"));
   els.categoryFilter.innerHTML = `<option value="">전체</option>` + categories.map(c => `<option>${escapeHtml(c)}</option>`).join("");
   els.categoryFilter.value = state.categories[0] || "";
   els.periodFilter.value = state.period;
@@ -340,7 +359,7 @@ function renderSelectorBoard() {
   const categoryBase = state.allMode ? base : base.filter(t => t.month === state.selectedMonth);
   const categoryCounts = new Map();
   categoryBase.forEach(t => categoryCounts.set(t.category || "기타", (categoryCounts.get(t.category || "기타") || 0) + 1));
-  const sortedCategories = [...categoryCounts.entries()].sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0], "ko"));
+  const sortedCategories = [...categoryCounts.entries()].sort((a, b) => categorySortIndex(a[0]) - categorySortIndex(b[0]) || a[0].localeCompare(b[0], "ko"));
   const categoryTotal = categoryBase.length;
 
   els.selectorBoard.innerHTML = `
@@ -424,7 +443,7 @@ function renderYearBoard() {
     els.monthFilter.value = String(state.selectedMonth);
     state.showYearBoard = false;
     render();
-    document.getElementById("taskSectionHead").scrollIntoView({ block: "start" });
+    scrollToTaskListStart();
   }));
 }
 
@@ -439,13 +458,12 @@ function renderTaskList() {
   const groups = new Map();
   tasks.sort((a,b) => (a.month - b.month) || (taskSortScore(a) - taskSortScore(b)) || a.title.localeCompare(b.title, "ko"));
   tasks.forEach(t => {
-    const flowGroup = taskFlowBucket(t);
-    const key = state.allMode ? `${t.month}월 · ${flowGroup}` : flowGroup;
+    const key = `${t.month}월`;
     if (!groups.has(key)) groups.set(key, []);
     groups.get(key).push(t);
   });
-  els.taskList.innerHTML = [...groups.entries()].map(([group, list]) => `<article class="period-group">
-    <div class="period-title"><h3>${escapeHtml(group)}</h3><span class="chip">${list.length}건</span></div>
+  els.taskList.innerHTML = [...groups.entries()].map(([group, list]) => `<article class="period-group month-group">
+    <div class="period-title month-title"><h3>${escapeHtml(group)}</h3><span class="chip">${list.length}건</span></div>
     ${list.map(taskCard).join("")}
   </article>`).join("");
   bindTaskButtons();
@@ -457,7 +475,7 @@ function taskCard(task) {
   const cls = ["task-card", `period-${periodClass(flowGroup)}`, st.done ? "done" : "", st.skipped ? "skipped" : ""].join(" ");
   const sourceChip = task.isCustom ? `<span class="chip important">우리 학교 업무</span>` : "";
   const facts = [
-    task.department ? `<span>제출처/안내부서: ${escapeHtml(task.department)}</span>` : "",
+    task.department ? `<span>${escapeHtml(task.department)}</span>` : "",
     task.law ? `<span>근거: ${escapeHtml(task.law)}</span>` : "",
     task.note ? `<span>참고: ${escapeHtml(task.note)}</span>` : ""
   ].filter(Boolean).join("");
@@ -564,13 +582,22 @@ function renderSubmissionFilters() {
 }
 
 function renderScrollStatus() {
-  if (!els.scrollMonthLabel) return;
-  els.scrollMonthLabel.textContent = state.allMode ? "전체" : `${state.selectedMonth}월`;
+  return;
 }
 
 function updateToTopButton() {
   if (!els.toTopBtn) return;
   els.toTopBtn.classList.toggle("show", window.scrollY > 420);
+}
+
+function scrollToTaskListStart() {
+  const target = document.querySelector(".period-group") || document.getElementById("taskList") || document.getElementById("taskSectionHead");
+  if (!target) return;
+  const topbar = document.querySelector(".topbar")?.offsetHeight || 0;
+  const monthHeaderOffset = 16;
+  const offset = topbar + monthHeaderOffset;
+  const top = target.getBoundingClientRect().top + window.scrollY - offset;
+  window.scrollTo({ top: Math.max(top, 0), behavior: "smooth" });
 }
 
 function applyQuickFilter(key) {
@@ -620,7 +647,7 @@ document.addEventListener("click", (ev) => {
       state.whenType = "";
     }
     render();
-    document.getElementById("taskSectionHead")?.scrollIntoView({ block: "start" });
+    setTimeout(scrollToTaskListStart, 0);
   }
 });
 
@@ -705,6 +732,7 @@ function groupPeriod(period) {
   const p = String(period || "").trim();
   if (!p) return "월중";
   if (p.includes("월초") || p === "초" || p.includes("초까지") || p.includes("초경")) return "월초";
+  if (p.includes("월중")) return "월중";
   if (p.includes("중순") || p === "중" || p.includes("중 ")) return "중순";
   if (p.includes("월말") || p === "말" || p.includes("말일") || p.includes("말까지")) return "월말";
   if (["까지","일","경"].some(x => p.includes(x))) return "날짜지정";
