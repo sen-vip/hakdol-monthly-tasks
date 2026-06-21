@@ -1,6 +1,6 @@
 /* hakdol-monthly-tasks NEIS calendar extension
  * A plan: GitHub Pages only + user-provided NEIS API key + localStorage.
- * v2.2: Vercel server mode + yearly schedule cache + real calendar grid.
+ * v2.3: Vercel server mode + diagnostics + yearly schedule cache + real calendar grid.
  */
 (function () {
   'use strict';
@@ -188,9 +188,28 @@
   }
 
   async function fetchJson(url) {
-    const response = await fetch(url, { method: 'GET' });
-    if (!response.ok) throw new Error(`HTTP ${response.status}`);
-    return response.json();
+    let response;
+    try {
+      response = await fetch(url, {
+        method: 'GET',
+        mode: 'cors',
+        credentials: 'omit',
+        cache: 'no-store'
+      });
+    } catch (error) {
+      throw new Error(`백엔드에 연결하지 못했어요. 주소/CORS/네트워크를 확인해주세요. (${error.message || error})`);
+    }
+
+    let json = null;
+    const text = await response.text();
+    try { json = text ? JSON.parse(text) : null; }
+    catch { json = null; }
+
+    if (!response.ok) {
+      const message = json?.error || text || `HTTP ${response.status}`;
+      throw new Error(message);
+    }
+    return json || {};
   }
 
   async function searchSchools({ apiKey, officeCode, schoolName }) {
@@ -430,6 +449,9 @@
 
   function bindEvents() {
     document.getElementById('neisSearchBtn')?.addEventListener('click', onSearchSchools);
+    document.getElementById('neisSchoolName')?.addEventListener('keydown', (event) => {
+      if (event.key === 'Enter') { event.preventDefault(); onSearchSchools(); }
+    });
     document.getElementById('neisSaveKeyBtn')?.addEventListener('click', onSaveKey);
     document.getElementById('neisClearBtn')?.addEventListener('click', clearSettings);
     document.getElementById('neisLoadSchedule')?.addEventListener('click', onLoadYearSchedule);
@@ -643,7 +665,7 @@
       if (!state.schools.length) toast('검색 결과가 없어요. 학교명을 조금 줄여서 다시 검색해보세요.');
     } catch (error) {
       renderSchoolResults(String(error.message || error));
-      toast('학교 검색에 실패했어요. 백엔드 주소와 학교 정보를 확인해주세요.');
+      toast(`학교 검색 실패: ${error.message || error}`);
     } finally {
       setBusy('neisSearchBtn', false, '학교 찾기');
     }
