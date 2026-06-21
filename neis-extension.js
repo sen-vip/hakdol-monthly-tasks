@@ -8,7 +8,7 @@
   const SETTINGS_KEY = 'hakdolNeisSettings';
   const RANGE_MODE = 'calendar-year'; // later: 'school-year'
   const API_MODE = 'server';
-  const SERVER_API_BASE = 'https://hakdol-neis-ffsg21bu9-senvip.vercel.app';
+  const SERVER_API_BASE = 'https://hakdol-neis-api.vercel.app';
 
   const EDUCATION_OFFICES = [
     { code: 'B10', name: '서울특별시교육청' },
