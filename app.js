@@ -3,6 +3,7 @@ const HAS_SUPABASE = Boolean(CONFIG.url && CONFIG.anonKey && window.supabase);
 const supabaseClient = HAS_SUPABASE ? window.supabase.createClient(CONFIG.url, CONFIG.anonKey) : null;
 
 const baseTasks = (window.HAKDOL_TASKS || []).map(t => ({ ...t, isCustom: false }));
+const LOCAL_STATE_KEY = "hakdol-monthly-tasks-local-states-v1";
 const today = new Date();
 const currentMonth = today.getMonth() + 1;
 const periodOrder = ["월초", "월중", "중순", "월말", "수시", "기타"];
@@ -155,6 +156,23 @@ function getAllTasks() {
 
 function getTaskState(taskId) {
   return state.taskStates[taskId] || { done: false, important: false, skipped: false, memo: "" };
+}
+
+function loadLocalTaskStates() {
+  try {
+    const raw = localStorage.getItem(LOCAL_STATE_KEY);
+    return raw ? JSON.parse(raw) : {};
+  } catch (_error) {
+    return {};
+  }
+}
+
+function saveLocalTaskStates() {
+  try {
+    localStorage.setItem(LOCAL_STATE_KEY, JSON.stringify(state.taskStates || {}));
+  } catch (_error) {
+    // 저장 공간 제한 등은 조용히 무시합니다.
+  }
 }
 
 function requireLogin() {
@@ -476,7 +494,7 @@ function taskCard(task) {
   const sourceChip = task.isCustom ? `<span class="chip important">우리 학교 업무</span>` : "";
   const facts = [
     task.department ? `<span>${escapeHtml(task.department)}</span>` : "",
-    task.law ? `<span>근거: ${escapeHtml(task.law)}</span>` : "",
+    task.law ? `<span>${escapeHtml(task.law)}</span>` : "",
     task.note ? `<span>참고: ${escapeHtml(task.note)}</span>` : ""
   ].filter(Boolean).join("");
   const statusChips = `${st.done ? `<span class="chip done">완료</span>` : `<span class="chip status">미완료</span>`}${st.important ? `<span class="chip important">중요</span>` : ""}${st.skipped ? `<span class="chip skipped">해당없음</span>` : ""}`;
@@ -512,7 +530,7 @@ function bindTaskButtons() {
     card.querySelectorAll("[data-toggle]").forEach(btn => {
       btn.addEventListener("click", (ev) => {
         const key = btn.dataset.toggle;
-        if (!requireLogin()) { ev.preventDefault(); return; }
+        if (!state.user && key === "important") { ev.preventDefault(); requireLogin(); return; }
         toggleState(id, key, btn.checked);
       });
     });
@@ -687,7 +705,11 @@ async function updateMemo(taskId, memo) {
 }
 
 async function saveTaskState(taskId, data) {
-  if (!state.user || !HAS_SUPABASE) return;
+  if (!state.user || !HAS_SUPABASE) {
+    state.taskStates[taskId] = { ...getTaskState(taskId), ...data, memo: getTaskState(taskId).memo || "" };
+    saveLocalTaskStates();
+    return;
+  }
   const payload = {
     user_id: state.user.id,
     task_id: taskId,
@@ -704,7 +726,10 @@ async function saveTaskState(taskId, data) {
 async function loadUserData() {
   state.taskStates = {};
   state.customTasks = [];
-  if (!state.user || !HAS_SUPABASE) return;
+  if (!state.user || !HAS_SUPABASE) {
+    state.taskStates = loadLocalTaskStates();
+    return;
+  }
   const { data: states, error: stateError } = await supabaseClient.from("user_task_states").select("task_id,done,important,skipped,memo,updated_at").eq("user_id", state.user.id);
   if (stateError) toast(`개인 체크 불러오기 오류: ${stateError.message}`);
   (states || []).forEach(row => { state.taskStates[row.task_id] = { done: row.done, important: row.important, skipped: row.skipped, memo: row.memo || "" }; });
@@ -766,7 +791,7 @@ els.signupBtn.addEventListener("click", async () => {
 
 async function logout() {
   if (HAS_SUPABASE) await supabaseClient.auth.signOut();
-  state.user = null; state.taskStates = {}; state.customTasks = [];
+  state.user = null; state.taskStates = loadLocalTaskStates(); state.customTasks = [];
   render(); toast("로그아웃했어요.");
 }
 
