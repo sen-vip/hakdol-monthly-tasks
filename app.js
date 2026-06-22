@@ -2,6 +2,9 @@ const CONFIG = window.HAKDOL_SUPABASE_CONFIG || { url: "", anonKey: "" };
 const HAS_SUPABASE = Boolean(CONFIG.url && CONFIG.anonKey && window.supabase);
 const supabaseClient = HAS_SUPABASE ? window.supabase.createClient(CONFIG.url, CONFIG.anonKey) : null;
 
+window.HAKDOL_SUPABASE_CLIENT = supabaseClient;
+window.HAKDOL_HAS_SUPABASE = HAS_SUPABASE;
+
 const baseTasks = (window.HAKDOL_TASKS || []).map(t => ({ ...t, isCustom: false }));
 const LOCAL_STATE_KEY = "hakdol-monthly-tasks-local-states-v1";
 const today = new Date();
@@ -122,6 +125,33 @@ function toast(message) {
   els.toast.textContent = message;
   els.toast.classList.add("show");
   setTimeout(() => els.toast.classList.remove("show"), 2200);
+}
+
+
+function hasAuthReturnSignal() {
+  const url = new URL(window.location.href);
+  const hash = new URLSearchParams((url.hash || '').replace(/^#/, ''));
+  return Boolean(
+    url.searchParams.get('code') ||
+    url.searchParams.get('type') ||
+    hash.get('access_token') ||
+    hash.get('type')
+  );
+}
+
+function cleanAuthReturnUrl() {
+  const cleanPath = window.location.pathname + (window.location.pathname.endsWith('/') ? '' : '');
+  window.history.replaceState({}, document.title, cleanPath);
+}
+
+function showAuthCompleteMessage() {
+  toast(state.user
+    ? '로그인되었습니다. 학교 설정과 직접 추가 일정이 계정에 저장됩니다.'
+    : '가입 확인이 완료되었습니다. 이제 로그인해서 학교 설정과 직접 추가 일정을 저장할 수 있어요.');
+}
+
+function dispatchHakdolAuthChanged() {
+  window.dispatchEvent(new CustomEvent('hakdol-auth-changed', { detail: { user: state.user } }));
 }
 
 function normalizeText(value = "") {
@@ -272,10 +302,10 @@ function renderAuth() {
   if (!HAS_SUPABASE) els.configNotice.hidden = false;
   if (state.user) {
     const email = state.user.email || "로그인 사용자";
-    els.authBox.innerHTML = `<span>내 체크 저장 중 · ${escapeHtml(email)}</span><button class="ghost" id="logoutBtn">로그아웃</button>`;
+    els.authBox.innerHTML = `<span>계정 저장 중 · ${escapeHtml(email)}</span><button class="ghost" id="logoutBtn">로그아웃</button>`;
     $("logoutBtn").addEventListener("click", logout);
   } else {
-    els.authBox.innerHTML = `<span>로그인 없이도 볼 수 있어요 · 로그인하면 저장됩니다</span><button class="primary" id="loginOpenBtn">로그인</button>`;
+    els.authBox.innerHTML = `<span>로그인하면 학교·일정도 저장됩니다</span><button class="primary" id="loginOpenBtn">로그인</button>`;
     $("loginOpenBtn").addEventListener("click", () => openModal("loginModal"));
   }
 }
@@ -776,6 +806,7 @@ els.loginForm.addEventListener("submit", async (e) => {
   const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
   if (error) { toast(error.message); return; }
   state.user = data.user;
+  dispatchHakdolAuthChanged();
   closeModal("loginModal");
   await loadUserData();
   render();
@@ -787,14 +818,19 @@ els.signupBtn.addEventListener("click", async () => {
   const email = els.emailInput.value.trim();
   const password = els.passwordInput.value;
   if (!email || password.length < 6) { toast("이메일과 6자 이상 비밀번호를 입력하세요."); return; }
-  const { error } = await supabaseClient.auth.signUp({ email, password });
+  const { error } = await supabaseClient.auth.signUp({
+    email,
+    password,
+    options: { emailRedirectTo: 'https://sen-vip.github.io/hakdol-monthly-tasks/' }
+  });
   if (error) { toast(error.message); return; }
-  toast("회원가입 메일을 확인하세요.");
+  toast("회원가입 메일을 확인해주세요. 인증 후 앱으로 다시 돌아옵니다.");
 });
 
 async function logout() {
   if (HAS_SUPABASE) await supabaseClient.auth.signOut();
   state.user = null; state.taskStates = loadLocalTaskStates(); state.customTasks = [];
+  dispatchHakdolAuthChanged();
   render(); toast("로그아웃했어요.");
 }
 
@@ -852,15 +888,27 @@ document.addEventListener("keydown", (ev) => {
 window.addEventListener("scroll", updateToTopButton, { passive: true });
 
 async function init() {
+  const hadAuthReturn = hasAuthReturnSignal();
   if (HAS_SUPABASE) {
+    const code = new URL(window.location.href).searchParams.get('code');
+    if (code) {
+      try { await supabaseClient.auth.exchangeCodeForSession(code); }
+      catch (_error) { /* 일부 이메일 링크는 hash 토큰 방식이라 exchange가 필요 없습니다. */ }
+    }
     const { data } = await supabaseClient.auth.getSession();
     state.user = data.session?.user || null;
+    if (hadAuthReturn) {
+      showAuthCompleteMessage();
+      cleanAuthReturnUrl();
+    }
     supabaseClient.auth.onAuthStateChange(async (_event, session) => {
       state.user = session?.user || null;
+      dispatchHakdolAuthChanged();
       await loadUserData();
       render();
     });
     await loadUserData();
+    dispatchHakdolAuthChanged();
   }
   render();
 }

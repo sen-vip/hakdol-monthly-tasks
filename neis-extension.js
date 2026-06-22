@@ -1,6 +1,6 @@
 /* hakdol-monthly-tasks NEIS calendar extension
  * A plan: GitHub Pages only + user-provided NEIS API key + localStorage.
- * v2.4: 학사일정 + 시간표 기반 행사성 일정 보완 + 월별 캐싱.
+ * v2.5: Supabase 로그인 저장 + 이메일 인증/학교설정/직접일정 동기화.
  */
 (function () {
   'use strict';
@@ -111,7 +111,9 @@
     schools: [],
     selectedDate: formatIsoDate(today),
     activeTab: 'all',
-    timetableLoading: false
+    timetableLoading: false,
+    authUser: null,
+    manualEvents: loadManualEvents()
   };
 
   function esc(value) {
@@ -128,6 +130,90 @@
     localStorage.setItem(SETTINGS_KEY, JSON.stringify(state.settings));
   }
 
+
+  function getSupabaseClient() {
+    if (window.HAKDOL_SUPABASE_CLIENT) return window.HAKDOL_SUPABASE_CLIENT;
+    const config = window.HAKDOL_SUPABASE_CONFIG || {};
+    if (!window.supabase || !config.url || !config.anonKey) return null;
+    window.HAKDOL_SUPABASE_CLIENT = window.supabase.createClient(config.url, config.anonKey);
+    return window.HAKDOL_SUPABASE_CLIENT;
+  }
+
+  async function refreshAuthUser() {
+    const client = getSupabaseClient();
+    if (!client) {
+      state.authUser = null;
+      return null;
+    }
+    const { data } = await client.auth.getUser();
+    state.authUser = data?.user || null;
+    return state.authUser;
+  }
+
+  function schoolToRemotePayload(school) {
+    if (!state.authUser) return null;
+    return {
+      user_id: state.authUser.id,
+      office_code: school.officeCode || '',
+      office_name: school.officeName || getOfficeName(school.officeCode) || '',
+      school_code: school.schoolCode || '',
+      school_name: school.schoolName || '',
+      school_level: school.schoolKind || school.schoolLevel || '',
+      school_address: school.address || school.schoolAddress || '',
+      updated_at: new Date().toISOString()
+    };
+  }
+
+  function remoteSchoolToLocal(row) {
+    return {
+      officeCode: row.office_code || '',
+      officeName: row.office_name || getOfficeName(row.office_code) || '',
+      schoolCode: row.school_code || '',
+      schoolName: row.school_name || '',
+      schoolKind: row.school_level || '',
+      address: row.school_address || ''
+    };
+  }
+
+  async function saveSettingsToSupabase(settings = state.settings) {
+    const client = getSupabaseClient();
+    if (!client || !state.authUser || !settings.schoolCode) return;
+    const payload = schoolToRemotePayload(settings);
+    const { error } = await client.from('user_school_settings').upsert(payload, { onConflict: 'user_id' });
+    if (error) toast(`학교 설정 계정 저장 오류: ${error.message}`);
+  }
+
+  async function loadSettingsFromSupabase() {
+    const client = getSupabaseClient();
+    if (!client || !state.authUser) return false;
+    const { data, error } = await client
+      .from('user_school_settings')
+      .select('*')
+      .eq('user_id', state.authUser.id)
+      .maybeSingle();
+    if (error) {
+      toast(`학교 설정 불러오기 오류: ${error.message}`);
+      return false;
+    }
+    if (data?.school_code) {
+      state.settings = { ...state.settings, ...remoteSchoolToLocal(data) };
+      localStorage.setItem(SETTINGS_KEY, JSON.stringify(state.settings));
+      return true;
+    }
+    if (state.settings?.schoolCode) {
+      await saveSettingsToSupabase(state.settings);
+      toast('브라우저에 저장된 학교 설정을 계정에 저장했어요.');
+      return true;
+    }
+    return false;
+  }
+
+  async function deleteSchoolSettingFromSupabase() {
+    const client = getSupabaseClient();
+    if (!client || !state.authUser) return;
+    await client.from('user_school_settings').delete().eq('user_id', state.authUser.id);
+  }
+
   function loadManualEvents() {
     try {
       const rows = JSON.parse(localStorage.getItem(MANUAL_EVENTS_KEY) || '[]');
@@ -138,7 +224,8 @@
   }
 
   function saveManualEvents(events) {
-    localStorage.setItem(MANUAL_EVENTS_KEY, JSON.stringify(events || []));
+    state.manualEvents = Array.isArray(events) ? events : [];
+    localStorage.setItem(MANUAL_EVENTS_KEY, JSON.stringify(state.manualEvents));
   }
 
   function makeManualEvent(row) {
@@ -156,7 +243,7 @@
   }
 
   function getManualMonthEvents(year = state.year, month = state.month) {
-    return loadManualEvents()
+    return (state.manualEvents || [])
       .filter((row) => {
         const [y, m] = String(row.date || '').split('-').map(Number);
         return y === Number(year) && m === Number(month);
@@ -164,23 +251,135 @@
       .map(makeManualEvent);
   }
 
-  function addManualEvent(date, title, memo = '') {
+  function remoteManualToLocal(row) {
+    return {
+      id: row.id,
+      date: row.date,
+      title: row.title,
+      memo: row.memo || '',
+      source: row.source || '직접추가',
+      createdAt: row.created_at || row.createdAt || new Date().toISOString(),
+      updatedAt: row.updated_at || row.updatedAt || ''
+    };
+  }
+
+  async function loadManualEventsFromSupabase() {
+    const client = getSupabaseClient();
+    if (!client || !state.authUser) {
+      state.manualEvents = loadManualEvents();
+      return state.manualEvents;
+    }
+
+    const { data, error } = await client
+      .from('user_manual_events')
+      .select('id,date,title,memo,source,created_at,updated_at')
+      .eq('user_id', state.authUser.id)
+      .order('date', { ascending: true });
+
+    if (error) {
+      toast(`직접 추가 일정 불러오기 오류: ${error.message}`);
+      state.manualEvents = loadManualEvents();
+      return state.manualEvents;
+    }
+
+    const remote = (data || []).map(remoteManualToLocal);
+    const local = loadManualEvents();
+    if (!remote.length && local.length) {
+      await migrateLocalManualEventsToSupabase(local);
+      return state.manualEvents;
+    }
+
+    saveManualEvents(remote);
+    return state.manualEvents;
+  }
+
+  async function migrateLocalManualEventsToSupabase(localEvents = loadManualEvents()) {
+    const client = getSupabaseClient();
+    if (!client || !state.authUser || !localEvents.length) return;
+    const unique = [];
+    const seen = new Set();
+    localEvents.forEach((row) => {
+      const key = `${row.date || ''}_${String(row.title || '').replace(/\s+/g, '')}`;
+      if (row.date && row.title && !seen.has(key)) {
+        seen.add(key);
+        unique.push(row);
+      }
+    });
+    if (!unique.length) return;
+    const payload = unique.map((row) => ({
+      user_id: state.authUser.id,
+      date: row.date,
+      title: row.title,
+      memo: row.memo || '',
+      source: '직접추가',
+      created_at: row.createdAt || new Date().toISOString(),
+      updated_at: new Date().toISOString()
+    }));
+    const { data, error } = await client
+      .from('user_manual_events')
+      .insert(payload)
+      .select('id,date,title,memo,source,created_at,updated_at');
+    if (error) {
+      toast(`브라우저 일정 계정 저장 오류: ${error.message}`);
+      return;
+    }
+    saveManualEvents((data || []).map(remoteManualToLocal));
+    toast('브라우저에 저장된 직접 추가 일정을 계정에 저장했어요.');
+  }
+
+  async function addManualEvent(date, title, memo = '') {
     const cleanTitle = String(title || '').trim();
     if (!cleanTitle) return false;
-    const events = loadManualEvents();
-    events.push({
+    const row = {
       id: `manual-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
       date,
       title: cleanTitle,
       memo: String(memo || '').trim(),
-      createdAt: new Date().toISOString()
-    });
-    saveManualEvents(events);
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    };
+
+    const client = getSupabaseClient();
+    if (client && state.authUser) {
+      const { data, error } = await client
+        .from('user_manual_events')
+        .insert({
+          user_id: state.authUser.id,
+          date: row.date,
+          title: row.title,
+          memo: row.memo,
+          source: '직접추가',
+          created_at: row.createdAt,
+          updated_at: row.updatedAt
+        })
+        .select('id,date,title,memo,source,created_at,updated_at')
+        .single();
+      if (error) {
+        toast(`일정 계정 저장 오류: ${error.message}`);
+        return false;
+      }
+      row.id = data.id;
+    }
+
+    saveManualEvents([...(state.manualEvents || loadManualEvents()), row]);
     return true;
   }
 
-  function deleteManualEvent(id) {
-    saveManualEvents(loadManualEvents().filter((row) => row.id !== id));
+  async function deleteManualEvent(id) {
+    const client = getSupabaseClient();
+    if (client && state.authUser) {
+      const { error } = await client
+        .from('user_manual_events')
+        .delete()
+        .eq('user_id', state.authUser.id)
+        .eq('id', id);
+      if (error) {
+        toast(`일정 삭제 오류: ${error.message}`);
+        return false;
+      }
+    }
+    saveManualEvents((state.manualEvents || loadManualEvents()).filter((row) => row.id !== id));
+    return true;
   }
 
   function trimTrailingMeta(title = '') {
@@ -206,7 +405,12 @@
   }
 
 
-  function clearSettings() {
+  async function clearSettings() {
+    const message = state.authUser
+      ? '학교 설정을 초기화할까요? 직접 추가한 일정은 유지됩니다.'
+      : '학교 설정을 초기화할까요? 직접 추가한 일정은 유지됩니다.';
+    if (!confirm(message)) return;
+    await deleteSchoolSettingFromSupabase();
     localStorage.removeItem(SETTINGS_KEY);
     Object.keys(localStorage).forEach((key) => {
       if (key.startsWith('hakdolNeisSchedules_') || key.startsWith('hakdolNeisTimetables_')) localStorage.removeItem(key);
@@ -215,7 +419,7 @@
     state.schools = [];
     state.selectedDate = `${state.year}-${pad2(state.month)}-01`;
     renderAll();
-    toast('학교 설정과 저장된 학사일정을 초기화했어요.');
+    toast('학교 설정과 저장된 학사일정을 초기화했어요. 직접 추가 일정은 유지했어요.');
   }
 
   function pad2(value) {
@@ -752,7 +956,7 @@
 
           <button class="ghost" id="neisClearBtn" type="button">설정 초기화</button>
         </div>
-        <p class="neis-help">학교 정보와 불러온 일정은 이 브라우저에만 저장됩니다. 시간표 일정은 수업내용 키워드로 자동 감지한 참고 일정입니다.</p>
+        <p class="neis-help"><span id="neisStorageHelp">학교 정보와 직접 추가 일정은 이 브라우저에만 저장됩니다. 로그인하면 다른 PC에서도 이어서 사용할 수 있어요.</span> 시간표 일정은 수업내용 키워드로 자동 감지한 참고 일정입니다.</p>
         <div id="neisSchoolResults" class="neis-results" hidden></div>
       </div>
       <div class="neis-calendar-card">
@@ -788,7 +992,7 @@
       if (event.key === 'Enter') { event.preventDefault(); onSearchSchools(); }
     });
     document.getElementById('neisSaveKeyBtn')?.addEventListener('click', onSaveKey);
-    document.getElementById('neisClearBtn')?.addEventListener('click', clearSettings);
+    document.getElementById('neisClearBtn')?.addEventListener('click', () => clearSettings());
     document.getElementById('neisLoadSchedule')?.addEventListener('click', onLoadYearSchedule);
     document.getElementById('neisPrevMonth')?.addEventListener('click', () => changeMonth(-1));
     document.getElementById('neisNextMonth')?.addEventListener('click', () => changeMonth(1));
@@ -814,6 +1018,12 @@
     const apiKeyInput = document.getElementById('neisApiKey');
     if (schoolNameInput) schoolNameInput.value = state.settings.schoolName || '';
     if (apiKeyInput) apiKeyInput.value = state.settings.apiKey || '';
+    const storageHelp = document.getElementById('neisStorageHelp');
+    if (storageHelp) {
+      storageHelp.textContent = state.authUser
+        ? '학교 정보와 직접 추가 일정이 계정에 저장됩니다.'
+        : '학교 정보와 직접 추가 일정은 이 브라우저에만 저장됩니다. 로그인하면 다른 PC에서도 이어서 사용할 수 있어요.';
+    }
     const saved = document.getElementById('neisSavedSchool');
     if (!saved) return;
     if (state.settings.schoolCode) {
@@ -978,18 +1188,20 @@
       });
     });
     scope.querySelectorAll('[data-manual-form]').forEach((form) => {
-      form.addEventListener('submit', (event) => {
+      form.addEventListener('submit', async (event) => {
         event.preventDefault();
         const title = form.elements.manualTitle?.value || '';
         const memo = form.elements.manualMemo?.value || '';
-        if (!addManualEvent(state.selectedDate, title, memo)) return toast('일정명을 입력해주세요.');
-        toast('우리 학교 일정을 추가했어요.');
+        const saved = await addManualEvent(state.selectedDate, title, memo);
+        if (!saved) return toast('일정명을 입력해주세요.');
+        toast(state.authUser ? '우리 학교 일정을 계정에 저장했어요.' : '우리 학교 일정을 이 브라우저에 추가했어요.');
         renderCalendar();
       });
     });
     scope.querySelectorAll('[data-delete-manual]').forEach((btn) => {
-      btn.addEventListener('click', () => {
-        deleteManualEvent(btn.dataset.deleteManual);
+      btn.addEventListener('click', async () => {
+        const ok = await deleteManualEvent(btn.dataset.deleteManual);
+        if (!ok) return;
         toast('직접 추가한 일정을 삭제했어요.');
         renderCalendar();
       });
@@ -1069,15 +1281,16 @@
     box.querySelectorAll('[data-school-index]').forEach((btn) => btn.addEventListener('click', () => selectSchool(Number(btn.dataset.schoolIndex))));
   }
 
-  function selectSchool(index) {
+  async function selectSchool(index) {
     const school = state.schools[index];
     if (!school) return;
     const apiKey = API_MODE === 'client' ? (document.getElementById('neisApiKey')?.value.trim() || state.settings.apiKey || '') : '';
     saveSettings({ apiKey, ...school });
+    await saveSettingsToSupabase(state.settings);
     const results = document.getElementById('neisSchoolResults');
     if (results) results.hidden = true;
     renderAll();
-    toast(`${school.schoolName}을 저장했어요.`);
+    toast(state.authUser ? `${school.schoolName}을 계정에 저장했어요.` : `${school.schoolName}을 이 브라우저에 저장했어요.`);
   }
 
   function onSaveKey() {
@@ -1149,24 +1362,38 @@
   }
 
   function addGithubLinkIfMissing() {
-    const has = [...document.querySelectorAll('a')].some((a) => /github\.com\/sen-vip\/hakdol-monthly-tasks/.test(a.href));
-    if (has) return;
-    const nav = document.querySelector('.topnav') || document.querySelector('.topbar') || document.body;
-    const a = document.createElement('a');
-    a.href = 'https://github.com/sen-vip/hakdol-monthly-tasks';
-    a.target = '_blank';
-    a.rel = 'noopener noreferrer';
-    a.className = 'ghost nav-link neis-github-link';
-    a.textContent = 'GitHub';
-    nav.appendChild(a);
+    return;
   }
 
-  function init() {
+  async function hydrateAccountData() {
+    await refreshAuthUser();
+    if (state.authUser) {
+      await loadSettingsFromSupabase();
+      await loadManualEventsFromSupabase();
+    } else {
+      state.manualEvents = loadManualEvents();
+    }
+  }
+
+  async function init() {
     injectPanel();
     bindEvents();
+    await hydrateAccountData();
     renderAll();
     if (loadYearCache()) ensureTimetableMonthLoaded();
-    addGithubLinkIfMissing();
+    const client = getSupabaseClient();
+    if (client) {
+      client.auth.onAuthStateChange(async (_event, session) => {
+        state.authUser = session?.user || null;
+        await hydrateAccountData();
+        renderAll();
+      });
+    }
+    window.addEventListener('hakdol-auth-changed', async (event) => {
+      state.authUser = event.detail?.user || null;
+      await hydrateAccountData();
+      renderAll();
+    });
   }
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
