@@ -324,3 +324,29 @@ textarea.card-memo{resize:none}
 @media(max-width:900px){.period-title.month-title{top:54px}.period-group,#taskList,#taskSectionHead{scroll-margin-top:78px!important}}
 @media(max-width:560px){.period-title.month-title{top:50px}.period-group,#taskList,#taskSectionHead{scroll-margin-top:74px!important}}
 @media print{.period-title.month-title{position:static;top:auto;box-shadow:none}}
+
+/* 20260622 상단 대시보드 슬림화 + 도움말 */
+.hero.slim-hero{display:block;margin-bottom:8px}
+.hero.slim-hero>div{padding:15px 18px;border-radius:18px;box-shadow:0 8px 22px rgba(15,23,42,.035)}
+.hero-title-row{display:flex;align-items:flex-end;justify-content:space-between;gap:16px}
+.hero.slim-hero .eyebrow{margin-bottom:2px;font-size:11px;letter-spacing:.08em;color:#0f766e}
+.hero.slim-hero h1{font-size:25px;line-height:1.14;letter-spacing:-.05em}
+.hero.slim-hero .hero-desc{margin-top:7px;font-size:13px;color:#667085;max-width:none}
+.hero-summary-text{margin:0 0 2px;color:#667085;font-size:13px;text-align:right;white-space:nowrap}
+.stats-grid.slim-stats{display:flex;flex-wrap:wrap;gap:7px;margin:0 0 12px;padding:0;background:transparent;border:0;box-shadow:none}
+.summary-chip{display:inline-flex;align-items:center;gap:5px;border:1px solid #e2e8f0;background:#fff;color:#475569;border-radius:999px;min-height:30px;padding:5px 10px;box-shadow:0 4px 12px rgba(15,23,42,.03);font-size:12.5px}
+.summary-chip:hover{background:#f8fafc;border-color:#cbd5e1}
+.summary-chip span{color:#64748b;font-weight:600}
+.summary-chip strong{font-size:13px;color:#111827;letter-spacing:-.02em}
+.help-modal{width:min(620px,100%)}
+.help-modal h2{margin:0 0 12px;font-size:22px;letter-spacing:-.04em}
+.help-list{display:grid;gap:10px;margin-top:12px}
+.help-list section{border:1px solid #eef2f7;background:#fbfdff;border-radius:14px;padding:11px 12px}
+.help-list h3{margin:0 0 4px;font-size:14px;color:#111827}
+.help-list p{margin:0;color:#667085;font-size:13px;line-height:1.55}
+.help-footer{margin:14px 0 0;padding-top:12px;border-top:1px solid #eef2f7;color:#667085;font-size:13px}
+.help-footer a{color:#0f766e;font-weight:700;text-decoration:none}
+.help-footer a:hover{text-decoration:underline}
+@media(max-width:900px){.hero-title-row{align-items:flex-start;flex-direction:column;gap:6px}.hero-summary-text{text-align:left;white-space:normal}.stats-grid.slim-stats{gap:6px}.summary-chip{flex:0 1 auto}}
+@media(max-width:560px){.hero.slim-hero>div{padding:13px 14px}.hero.slim-hero h1{font-size:22px}.summary-chip{min-height:29px;padding:5px 8px;font-size:12px}.summary-chip strong{font-size:12.5px}.help-list section{padding:10px}}
+@media print{.stats-grid.slim-stats{display:none!important}.hero-summary-text{display:none!important}}

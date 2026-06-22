@@ -8,10 +8,10 @@
   <link rel="preconnect" href="https://cdn.jsdelivr.net" />
   <link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%20100%20100%22%3E%3Ctext%20y%3D%22.9em%22%20font-size%3D%2290%22%3E%F0%9F%93%85%3C/text%3E%3C/svg%3E" />
   <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%20100%20100%22%3E%3Ctext%20y%3D%22.9em%22%20font-size%3D%2290%22%3E%F0%9F%93%85%3C/text%3E%3C/svg%3E" />
-  <link rel="stylesheet" href="./styles.css" />
+  <link rel="stylesheet" href="./styles.css?v=20260622-slim1" />
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="./supabase-config.js"></script>
-  <script src="./data/tasks.js?v=20260622-ver4"></script>
+  <script src="./data/tasks.js?v=20260622-ver4-slim1"></script>
   <link rel="stylesheet" href="./neis-extension.css?v=20260622-manual1">
 </head>
 <body>
@@ -28,7 +28,7 @@
       <button class="ghost" data-action="go-year">연간보기</button>
       <button class="ghost" data-action="show-all">전체업무</button>
       <button class="ghost" data-action="print">프린트</button>
-      <a class="ghost nav-link" href="https://github.com/sen-vip/hakdol-monthly-tasks" target="_blank" rel="noopener noreferrer">GitHub</a>
+      <button class="ghost" data-action="help" type="button">도움말</button>
     </nav>
     <div class="auth-box" id="authBox">
       <span id="authHint">로그인 없이도 볼 수 있어요 · 로그인하면 저장됩니다</span>
@@ -37,20 +37,20 @@
   </header>
 
   <main class="app-shell">
-    <section class="hero" id="hero">
-      <div>
-        <p class="eyebrow">Monthly Task Board</p>
-        <h1 id="heroTitle">이번 달 업무판</h1>
-        <p class="hero-desc">이번 달에 챙길 필수업무를 월초·중순·월말 순서로 확인하세요. 완료, 중요, 해당없음, 메모로 우리 학교 상황에 맞게 관리할 수 있습니다.</p>
-      </div>
-      <div class="hero-card">
-        <span class="hero-label">현재 보기</span>
-        <strong id="heroMonthTitle">이번 달</strong>
-        <p id="heroSummary">업무를 불러오는 중입니다.</p>
+    <section class="hero slim-hero" id="hero">
+      <div class="hero-main">
+        <div class="hero-title-row">
+          <div>
+            <p class="eyebrow">Monthly Task Board</p>
+            <h1 id="heroTitle">이번 달 업무판</h1>
+          </div>
+          <p class="hero-summary-text" id="heroSummary">업무를 불러오는 중입니다.</p>
+        </div>
+        <p class="hero-desc">월초·중순·월말 순서로 이번 달 업무를 확인하세요.</p>
       </div>
     </section>
 
-    <section class="stats-grid" id="statsGrid" aria-label="요약 통계"></section>
+    <section class="stats-grid slim-stats" id="statsGrid" aria-label="요약 통계"></section>
 
     <section class="notice no-print" id="configNotice" hidden>
       <span>로그인 저장 설정 전입니다. 업무 목록은 그대로 볼 수 있고, 로그인 저장을 쓰려면 <code>supabase-config.js</code>를 설정하세요.</span>
@@ -125,6 +125,36 @@
     </article>
   </div>
 
+  <div class="modal-backdrop no-print" id="helpModal" hidden>
+    <article class="modal help-modal" role="dialog" aria-modal="true" aria-labelledby="helpTitle">
+      <button class="modal-close" data-close="helpModal" aria-label="닫기">×</button>
+      <h2 id="helpTitle">학돌 월별필수업무 도움말</h2>
+      <div class="help-list">
+        <section>
+          <h3>1. 월별업무 보는 법</h3>
+          <p>월초·월중·중순·월말 순서로 해당 월의 주요 업무를 확인할 수 있습니다.</p>
+        </section>
+        <section>
+          <h3>2. 제출업무 필터</h3>
+          <p>공문이 오면 처리하는 제출성 업무는 기본 보기에서 제외됩니다. 필요한 경우 제출업무만 보기 또는 전체 보기로 전환할 수 있습니다.</p>
+        </section>
+        <section>
+          <h3>3. 나이스 학사일정 연결</h3>
+          <p>학교를 선택하면 나이스 학사일정과 시간표 기반 감지 일정을 함께 확인할 수 있습니다.</p>
+        </section>
+        <section>
+          <h3>4. 우리 학교 일정 직접 추가</h3>
+          <p>나이스에 입력되지 않은 수련활동, 현장체험학습, 진로체험 등은 달력에서 날짜를 선택해 직접 추가할 수 있습니다.</p>
+        </section>
+        <section>
+          <h3>5. 저장 안내</h3>
+          <p>직접 추가한 일정과 일부 상태값은 현재 브라우저에 저장됩니다. 다른 PC나 브라우저에서는 보이지 않을 수 있습니다.</p>
+        </section>
+      </div>
+      <p class="help-footer">제작/소스 보기: <a href="https://github.com/sen-vip/hakdol-monthly-tasks" target="_blank" rel="noopener noreferrer">GitHub</a></p>
+    </article>
+  </div>
+
   <div class="modal-backdrop no-print" id="loginModal" hidden>
     <article class="modal small" role="dialog" aria-modal="true" aria-labelledby="loginTitle">
       <button class="modal-close" data-close="loginModal" aria-label="닫기">×</button>
@@ -160,7 +190,7 @@
 
   <button type="button" class="to-top-btn no-print" id="toTopBtn" data-action="go-top" aria-label="맨 위로 올리기">↑</button>
   <div class="toast no-print" id="toast" role="status" aria-live="polite"></div>
-  <script src="./app.js"></script>
+  <script src="./app.js?v=20260622-slim1"></script>
   <script src="./neis-extension.js?v=20260622-manual1" defer></script>
 </body>
 </html>

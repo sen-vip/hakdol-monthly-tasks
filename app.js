@@ -321,18 +321,18 @@ function renderHeroAndStats() {
   const undoneDesc = state.user ? "완료·해당없음 제외" : "로그인 후 확인";
 
   els.heroTitle.textContent = state.allMode ? "전체 업무판" : `${state.selectedMonth}월 업무판`;
-  els.heroMonthTitle.textContent = state.allMode ? "전체업무 보기" : `${state.selectedMonth}월 필수업무`;
+  if (els.heroMonthTitle) els.heroMonthTitle.textContent = state.allMode ? "전체업무 보기" : `${state.selectedMonth}월 필수업무`;
   els.heroSummary.textContent = state.allMode
-    ? `조건에 맞는 업무 ${tasks.length}건 표시 중 · 월별 업무 흐름을 전체로 확인합니다.`
-    : `업무 ${visibleBase.length}건 · 제출업무 ${submitCount}건 · 완료율 ${rate}%`;
+    ? `조건에 맞는 업무 ${tasks.length}건 표시 중`
+    : `제출성 업무는 기본 보기에서 제외됩니다 · 완료율 ${rate}%`;
 
   const cards = [
-    { key: "all", label: "전체 업무", value: `${base.length}건`, desc: state.allMode ? "등록된 전체 기준" : `${state.selectedMonth}월 기준` },
-    { key: "submission", label: "제출업무", value: `${submitCount}건`, desc: "안내부서 제출 필요" },
+    { key: "all", label: "전체", value: `${base.length}건`, desc: state.allMode ? "등록 전체" : `${state.selectedMonth}월` },
+    { key: "submission", label: "제출", value: `${submitCount}건`, desc: "공문 처리" },
     { key: "undone", label: "미완료", value: undoneValue, desc: undoneDesc },
-    { key: "flow", label: "업무 흐름", value: `월초 ${early} · 월중 ${monthMiddle} · 중순 ${middle} · 월말 ${late}`, desc: "월 흐름순 정렬" }
+    { key: "flow", label: "흐름", value: `월초 ${early} · 월중 ${monthMiddle} · 중순 ${middle} · 월말 ${late}`, desc: "월 흐름" }
   ];
-  els.statsGrid.innerHTML = cards.map(card => `<button type="button" class="stat-card stat-button" data-stat-action="${card.key}"><small>${card.label}</small><strong>${card.value}</strong><small>${card.desc}</small></button>`).join("");
+  els.statsGrid.innerHTML = cards.map(card => `<button type="button" class="summary-chip" data-stat-action="${card.key}" title="${escapeHtml(card.desc)}"><span>${card.label}</span><strong>${card.value}</strong></button>`).join("");
 }
 
 function getSelectorBaseTasks() {
@@ -636,11 +636,14 @@ function applyQuickFilter(key) {
 document.addEventListener("click", (ev) => {
   const close = ev.target?.dataset?.close;
   if (close) closeModal(close);
+  if (ev.target?.classList?.contains("modal-backdrop")) closeModal(ev.target.id);
   const action = ev.target?.dataset?.action;
   if (action === "go-today") { state.selectedMonth = currentMonth; state.allMode = false; state.showYearBoard = false; resetSoftFilters(); render(); }
   if (action === "go-year") { state.showYearBoard = true; render(); document.getElementById("yearBoard").scrollIntoView({ block: "start" }); }
   if (action === "show-all") { state.allMode = true; state.showYearBoard = false; els.monthFilter.value = ""; render(); }
   if (action === "print") window.print();
+  if (action === "help") openModal("helpModal");
+  if (action === "go-top") window.scrollTo({ top: 0, behavior: "smooth" });
   const statAction = ev.target?.closest?.("[data-stat-action]")?.dataset?.statAction;
   if (statAction) {
     if (statAction === "all") {
@@ -840,6 +843,11 @@ function render() {
   renderScrollStatus();
   updateToTopButton();
 }
+
+document.addEventListener("keydown", (ev) => {
+  if (ev.key !== "Escape") return;
+  document.querySelectorAll(".modal-backdrop:not([hidden])").forEach(modal => closeModal(modal.id));
+});
 
 window.addEventListener("scroll", updateToTopButton, { passive: true });
 
