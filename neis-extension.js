@@ -8,7 +8,7 @@
   const SETTINGS_KEY = 'hakdolNeisSettings';
   const RANGE_MODE = 'calendar-year'; // later: 'school-year'
   const API_MODE = 'server';
-  const SERVER_API_BASE = 'https://hakdol-neis-api.vercel.app';
+  const SERVER_API_BASE = 'https://hakdol-monthly-tasks.vercel.app';
   const TIMETABLE_PAGE_SIZE = 300;
   const TIMETABLE_MAX_PAGES_PER_DAY = 4;
   const TIMETABLE_CACHE_TTL = 1000 * 60 * 60 * 24;
