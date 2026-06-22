@@ -1,6 +1,6 @@
 /* hakdol-monthly-tasks NEIS calendar extension
  * A plan: GitHub Pages only + user-provided NEIS API key + localStorage.
- * v2.3: Vercel server mode + diagnostics + yearly schedule cache + real calendar grid.
+ * v2.4: 학사일정 + 시간표 기반 행사성 일정 보완 + 월별 캐싱.
  */
 (function () {
   'use strict';
@@ -9,6 +9,15 @@
   const RANGE_MODE = 'calendar-year'; // later: 'school-year'
   const API_MODE = 'server';
   const SERVER_API_BASE = 'https://hakdol-neis-api.vercel.app';
+  const TIMETABLE_PAGE_SIZE = 300;
+  const TIMETABLE_MAX_PAGES_PER_DAY = 4;
+  const TIMETABLE_CACHE_TTL = 1000 * 60 * 60 * 24;
+
+  const TIMETABLE_EVENT_KEYWORDS = [
+    '수련활동', '수련회', '체험학습', '현장체험학습', '수학여행', '진로체험', '직업체험',
+    '봉사활동', '창의적체험활동', '창체', '자율활동', '동아리', '스포츠클럽',
+    '행사', '축제', '학급행사', '학교행사', '운동회', '체육대회', '학예회', '발표회'
+  ];
 
   const EDUCATION_OFFICES = [
     { code: 'B10', name: '서울특별시교육청' },
@@ -100,7 +109,8 @@
     month: today.getMonth() + 1,
     schools: [],
     selectedDate: formatIsoDate(today),
-    activeTab: 'all'
+    activeTab: 'all',
+    timetableLoading: false
   };
 
   function esc(value) {
@@ -120,7 +130,7 @@
   function clearSettings() {
     localStorage.removeItem(SETTINGS_KEY);
     Object.keys(localStorage).forEach((key) => {
-      if (key.startsWith('hakdolNeisSchedules_')) localStorage.removeItem(key);
+      if (key.startsWith('hakdolNeisSchedules_') || key.startsWith('hakdolNeisTimetables_')) localStorage.removeItem(key);
     });
     state.settings = {};
     state.schools = [];
@@ -282,6 +292,8 @@
       eventName: row.EVENT_NM || '',
       eventContent: row.EVENT_CNTNT || '',
       gradeText: gradeText(row),
+      source: '학사일정',
+      sourceType: 'schedule',
       raw: row
     })).filter((item) => item.date).sort((a, b) => a.date.localeCompare(b.date));
   }
@@ -296,6 +308,236 @@
       ['SIX_GRADE_EVENT_YN', '6학년']
     ];
     return checks.filter(([key]) => String(row?.[key] || '').toUpperCase() === 'Y').map(([, label]) => label).join(', ');
+  }
+
+
+  function timetableRootName(schoolKind = state.settings.schoolKind || '') {
+    const text = String(schoolKind || '').replace(/\s+/g, '');
+    if (text.includes('초등')) return 'elsTimetable';
+    if (text.includes('중학')) return 'misTimetable';
+    return 'hisTimetable';
+  }
+
+  function schoolLevelText(schoolKind = state.settings.schoolKind || '') {
+    const root = timetableRootName(schoolKind);
+    if (root === 'elsTimetable') return '초등학교 시간표';
+    if (root === 'misTimetable') return '중학교 시간표';
+    return '고등학교 시간표';
+  }
+
+  function daysInMonth(year, month) {
+    const last = new Date(year, month, 0).getDate();
+    return Array.from({ length: last }, (_, idx) => `${year}${pad2(month)}${pad2(idx + 1)}`);
+  }
+
+  function isEventLikeLesson(content = '') {
+    const compact = String(content || '').replace(/\s+/g, '');
+    return Boolean(compact) && TIMETABLE_EVENT_KEYWORDS.some((keyword) => compact.includes(keyword.replace(/\s+/g, '')));
+  }
+
+  function normalizeLessonTitle(content = '') {
+    return String(content || '시간표 감지 일정').replace(/\s+/g, ' ').trim();
+  }
+
+  function gradeLabel(value) {
+    const raw = String(value || '').trim();
+    if (!raw) return '';
+    return raw.endsWith('학년') ? raw : `${raw}학년`;
+  }
+
+  function classLabel(grade, className) {
+    const g = String(grade || '').trim();
+    const c = String(className || '').trim();
+    if (g && c) return `${g}-${c}`;
+    return c || g || '';
+  }
+
+  function formatGrades(grades = []) {
+    const clean = [...new Set(grades.map((g) => String(g || '').trim()).filter(Boolean))].sort((a, b) => Number(a) - Number(b));
+    if (!clean.length) return '';
+    return clean.map((g) => gradeLabel(g)).join(', ');
+  }
+
+  function timetableCacheKey(year = state.year, month = state.month, settings = state.settings) {
+    if (!settings.officeCode || !settings.schoolCode) return '';
+    return `hakdolNeisTimetables_${year}_${pad2(month)}_${settings.officeCode}_${settings.schoolCode}`;
+  }
+
+  function loadTimetableCache(year = state.year, month = state.month) {
+    const key = timetableCacheKey(year, month);
+    if (!key) return null;
+    try {
+      const cache = JSON.parse(localStorage.getItem(key) || 'null');
+      if (!cache) return null;
+      if (Date.now() - new Date(cache.fetchedAt || 0).getTime() > TIMETABLE_CACHE_TTL) return null;
+      return cache;
+    } catch { return null; }
+  }
+
+  function saveTimetableCache(year, month, events) {
+    const s = state.settings;
+    const key = timetableCacheKey(year, month, s);
+    if (!key) return;
+    localStorage.setItem(key, JSON.stringify({
+      year,
+      month,
+      officeCode: s.officeCode,
+      schoolCode: s.schoolCode,
+      schoolName: s.schoolName,
+      schoolKind: s.schoolKind || '',
+      fetchedAt: new Date().toISOString(),
+      events
+    }));
+  }
+
+  async function fetchTimetableRows({ apiKey, officeCode, schoolCode, schoolKind, year, month }) {
+    const rootName = timetableRootName(schoolKind);
+    if (API_MODE === 'server') {
+      const params = {
+        officeCode,
+        schoolCode,
+        schoolKind: schoolKind || '',
+        rootName,
+        year,
+        month,
+        pageSize: String(TIMETABLE_PAGE_SIZE)
+      };
+      const paths = ['timetables', 'timetable'];
+      let lastError = null;
+      for (const path of paths) {
+        try {
+          const json = await fetchJson(serverUrl(path, params));
+          if (json.error) throw new Error(json.error);
+          return json.rows || json.timetables || json.events || [];
+        } catch (error) {
+          lastError = error;
+        }
+      }
+      console.warn('[Hakdol NEIS] 서버 시간표 API 호출 실패. 백엔드에 /api/timetables 엔드포인트가 필요합니다.', lastError);
+      return [];
+    }
+
+    const rows = [];
+    for (const allTiYmd of daysInMonth(year, month)) {
+      for (let page = 1; page <= TIMETABLE_MAX_PAGES_PER_DAY; page += 1) {
+        const url = apiUrl(rootName, {
+          KEY: apiKey,
+          pIndex: String(page),
+          pSize: String(TIMETABLE_PAGE_SIZE),
+          ATPT_OFCDC_SC_CODE: officeCode,
+          SD_SCHUL_CODE: schoolCode,
+          AY: String(year),
+          ALL_TI_YMD: allTiYmd
+        });
+        const json = await fetchJson(url);
+        const error = parseNeisError(json, rootName);
+        if (error && !/자료가 존재하지 않습니다/.test(error)) throw new Error(error);
+        const pageRows = json?.[rootName]?.[1]?.row || [];
+        rows.push(...pageRows);
+        if (pageRows.length < TIMETABLE_PAGE_SIZE) break;
+      }
+    }
+    return rows;
+  }
+
+  function extractTimetableEvents(rows = []) {
+    const rawEvents = rows
+      .filter((row) => isEventLikeLesson(row.ITRT_CNTNT || row.itrtCntnt || row.content))
+      .map((row) => {
+        const dateRaw = row.ALL_TI_YMD || row.allTiYmd || row.date || '';
+        const date = toIsoDate(dateRaw);
+        const title = normalizeLessonTitle(row.ITRT_CNTNT || row.itrtCntnt || row.content);
+        const grade = row.GRADE || row.grade || '';
+        const className = row.CLASS_NM || row.className || row.classNm || '';
+        return {
+          date,
+          ymd: String(dateRaw || '').replace(/\D/g, ''),
+          dateText: dateTextFromYmd(dateRaw),
+          eventName: title,
+          eventContent: '시간표 수업내용에서 자동 감지된 참고 일정입니다.',
+          gradeText: gradeLabel(grade),
+          source: '시간표',
+          sourceType: 'timetable',
+          grade: String(grade || '').trim(),
+          className: String(className || '').trim(),
+          period: String(row.PERIO || row.period || '').trim(),
+          raw: row
+        };
+      })
+      .filter((item) => item.date && item.eventName);
+
+    return mergeTimetableEvents(rawEvents);
+  }
+
+  function mergeTimetableEvents(events = []) {
+    const map = new Map();
+    events.forEach((event) => {
+      const key = `${event.date}_${event.eventName.replace(/\s+/g, '')}`;
+      if (!map.has(key)) {
+        map.set(key, {
+          ...event,
+          grades: new Set(),
+          classes: [],
+          periods: new Set()
+        });
+      }
+      const merged = map.get(key);
+      if (event.grade) merged.grades.add(event.grade);
+      const cls = classLabel(event.grade, event.className);
+      if (cls) merged.classes.push(cls);
+      if (event.period) merged.periods.add(event.period);
+    });
+
+    return Array.from(map.values()).map((event) => {
+      const grades = Array.from(event.grades).sort((a, b) => Number(a) - Number(b));
+      const classes = [...new Set(event.classes)].sort((a, b) => a.localeCompare(b, 'ko-KR', { numeric: true }));
+      const periods = Array.from(event.periods).sort((a, b) => Number(a) - Number(b));
+      const gradeTextValue = formatGrades(grades);
+      return {
+        ...event,
+        grades,
+        classes,
+        periods,
+        gradeText: gradeTextValue,
+        eventName: gradeTextValue ? `${gradeTextValue} ${event.eventName}` : event.eventName
+      };
+    }).sort((a, b) => a.date.localeCompare(b.date) || a.eventName.localeCompare(b.eventName, 'ko-KR'));
+  }
+
+  async function fetchTimetableMonthEvents({ apiKey, officeCode, schoolCode, schoolKind, year, month, force = false }) {
+    if (!force) {
+      const cached = loadTimetableCache(year, month);
+      if (cached) return cached.events || [];
+    }
+    const rows = await fetchTimetableRows({ apiKey, officeCode, schoolCode, schoolKind, year, month });
+    const events = extractTimetableEvents(rows);
+    saveTimetableCache(year, month, events);
+    return events;
+  }
+
+  async function ensureTimetableMonthLoaded({ force = false } = {}) {
+    const s = state.settings;
+    if (!s.schoolCode || !s.officeCode || state.timetableLoading) return;
+    if (!force && loadTimetableCache(state.year, state.month)) return;
+    state.timetableLoading = true;
+    renderCalendar();
+    try {
+      const events = await fetchTimetableMonthEvents({
+        apiKey: s.apiKey,
+        officeCode: s.officeCode,
+        schoolCode: s.schoolCode,
+        schoolKind: s.schoolKind,
+        year: state.year,
+        month: state.month,
+        force
+      });
+      console.info(`[Hakdol NEIS] ${state.year}-${pad2(state.month)} 시간표 감지 일정 ${events.length}건`);
+    } catch (error) {
+      console.warn('[Hakdol NEIS] 시간표 일정 불러오기 실패', error);
+    } finally {
+      state.timetableLoading = false;
+      renderCalendar();
+    }
   }
 
   function scheduleCacheKey(year = state.year, settings = state.settings) {
@@ -326,19 +568,31 @@
     localStorage.setItem(key, JSON.stringify(payload));
   }
 
+  function getBaseYearSchedules(year = state.year) {
+    return (loadYearCache(year)?.schedules || []).map((item) => ({ source: '학사일정', sourceType: 'schedule', ...item }));
+  }
+
+  function getTimetableMonthEvents(year = state.year, month = state.month) {
+    return loadTimetableCache(year, month)?.events || [];
+  }
+
   function getYearSchedules(year = state.year) {
-    return loadYearCache(year)?.schedules || [];
+    const base = getBaseYearSchedules(year);
+    const timetable = getTimetableMonthEvents(year, state.month);
+    return [...base, ...timetable].sort((a, b) => String(a.date).localeCompare(String(b.date)) || String(a.eventName).localeCompare(String(b.eventName), 'ko-KR'));
   }
 
   function getMonthSchedules(year = state.year, month = state.month) {
-    return getYearSchedules(year).filter((item) => {
+    const base = getBaseYearSchedules(year).filter((item) => {
       const [y, m] = String(item.date).split('-').map(Number);
       return y === Number(year) && m === Number(month);
     });
+    const timetable = getTimetableMonthEvents(year, month);
+    return [...base, ...timetable].sort((a, b) => String(a.date).localeCompare(String(b.date)) || String(a.eventName).localeCompare(String(b.eventName), 'ko-KR'));
   }
 
   function getSchedulesByDate(iso) {
-    return getYearSchedules(state.year).filter((item) => item.date === iso);
+    return getMonthSchedules(state.year, state.month).filter((item) => item.date === iso);
   }
 
   function recommendationsFor(schedule) {
@@ -402,7 +656,7 @@
         <div>
           <p class="neis-eyebrow">NEIS Connected Board</p>
           <h2>우리 학교 학사일정 연결</h2>
-          <p>나이스 1년 학사일정을 한 번에 불러와 월별 필수업무와 연결해 보여줍니다.</p>
+          <p>나이스 학사일정에 시간표 속 체험·수련활동까지 보완해 월별 필수업무와 연결합니다.</p>
         </div>
         <div class="neis-saved" id="neisSavedSchool">학교 설정 전</div>
       </div>
@@ -417,7 +671,7 @@
 
           <button class="ghost" id="neisClearBtn" type="button">설정 초기화</button>
         </div>
-        <p class="neis-help">학교 정보와 불러온 학사일정은 이 브라우저에만 저장됩니다. 일반 사용자는 나이스 API 인증키를 입력하지 않아도 됩니다.</p>
+        <p class="neis-help">학교 정보와 불러온 일정은 이 브라우저에만 저장됩니다. 시간표 일정은 수업내용 키워드로 자동 감지한 참고 일정입니다.</p>
         <div id="neisSchoolResults" class="neis-results" hidden></div>
       </div>
       <div class="neis-calendar-card">
@@ -429,13 +683,13 @@
           </div>
           <div class="neis-month-controls">
             <button class="ghost" id="neisPrevMonth" type="button">← 이전달</button>
-            <button class="primary" id="neisLoadSchedule" type="button">1년 학사일정 불러오기</button>
+            <button class="primary" id="neisLoadSchedule" type="button">학사+시간표 불러오기</button>
             <button class="ghost" id="neisNextMonth" type="button">다음달 →</button>
           </div>
         </div>
         <div class="neis-tabs" role="tablist">
           <button data-neis-tab="all" class="active" type="button">전체보기</button>
-          <button data-neis-tab="calendar" type="button">나이스 달력</button>
+          <button data-neis-tab="calendar" type="button">통합 달력</button>
           <button data-neis-tab="recommend" type="button">추천업무</button>
           <button data-neis-tab="monthly" type="button">월별업무 연결</button>
         </div>
@@ -502,10 +756,10 @@
     const recCount = recommendationsForSchedules(monthSchedules).length;
     const school = state.settings.schoolName ? `${state.settings.officeName || getOfficeName(state.settings.officeCode)} · ${state.settings.schoolName}` : '학교 설정 전';
 
-    title.textContent = `${state.year}년 ${state.month}월 우리 학교 학사일정 달력`;
-    meta.textContent = `${school} · 이번 달 학사일정 ${monthSchedules.length}건 · 추천업무 ${recCount}종`;
+    title.textContent = `${state.year}년 ${state.month}월 우리 학교 통합 일정 달력`;
+    meta.textContent = `${school} · 이번 달 통합일정 ${monthSchedules.length}건 · 추천업무 ${recCount}종`;
     if (cacheMeta) cacheMeta.textContent = cacheStatusText(yearCache);
-    if (loadBtn) loadBtn.textContent = yearCache ? '학사일정 새로고침' : '1년 학사일정 불러오기';
+    if (loadBtn) loadBtn.textContent = yearCache ? '학사+시간표 새로고침' : '학사+시간표 불러오기';
 
     const sections = [];
     if (state.activeTab === 'all' || state.activeTab === 'calendar') sections.push(renderCalendarSection());
@@ -517,8 +771,12 @@
 
   function cacheStatusText(cache) {
     if (!state.settings.schoolCode) return '우리 학교를 먼저 설정해주세요.';
-    if (!cache) return `${state.year}년 학사일정을 아직 불러오지 않았어요. 1년 학사일정을 먼저 불러와주세요.`;
-    return `${cache.year}년 학사일정 ${cache.schedules?.length || 0}건 저장됨 · 마지막 업데이트 ${formatDateTime(cache.fetchedAt)}`;
+    const timetableCache = loadTimetableCache(state.year, state.month);
+    const timetableText = state.timetableLoading
+      ? '시간표 감지 일정 불러오는 중'
+      : (timetableCache ? `시간표 감지 ${timetableCache.events?.length || 0}건` : '시간표 감지 일정 미저장');
+    if (!cache) return `${state.year}년 학사일정을 아직 불러오지 않았어요. [학사+시간표 불러오기]를 눌러주세요.`;
+    return `${cache.year}년 학사일정 ${cache.schedules?.length || 0}건 · ${timetableText} · 마지막 업데이트 ${formatDateTime(cache.fetchedAt)}`;
   }
 
   function formatDateTime(iso) {
@@ -531,12 +789,13 @@
   function renderCalendarSection() {
     const cache = loadYearCache();
     if (!cache) {
-      return `<div class="neis-empty"><strong>불러온 학사일정이 없어요.</strong><span>학교 설정 후 [1년 학사일정 불러오기]를 눌러주세요. 한 번 불러오면 월을 바꿔도 자동으로 표시됩니다.</span></div>`;
+      return `<div class="neis-empty"><strong>불러온 나이스 일정이 없어요.</strong><span>학교 설정 후 [학사+시간표 불러오기]를 눌러주세요. 학사일정은 연 단위, 시간표 감지 일정은 월 단위로 저장됩니다.</span></div>`;
     }
     const selectedSchedules = getSchedulesByDate(state.selectedDate);
     const selectedRules = recommendationsForSchedules(selectedSchedules);
     return `<div class="neis-section">
-      <div class="neis-section-head"><h4>📅 나이스 달력</h4><span>${esc(state.year)}년 ${esc(state.month)}월</span></div>
+      <div class="neis-section-head"><h4>📅 나이스 통합 달력</h4><span>${esc(state.year)}년 ${esc(state.month)}월</span></div>
+      <div class="neis-calendar-legend"><span class="neis-source-badge schedule">학사일정</span><span class="neis-source-badge timetable">시간표 감지</span><em>${esc(schoolLevelText())} 수업내용 중 체험·수련·행사 키워드만 보완 표시</em></div>
       ${renderMonthGrid()}
       ${renderSelectedDatePanel(selectedSchedules, selectedRules)}
     </div>`;
@@ -568,7 +827,7 @@
       const taskCount = uniqueTasks(rules).length;
       const isToday = iso === formatIsoDate(new Date());
       const isSelected = iso === state.selectedDate;
-      const events = schedules.slice(0, 2).map((s) => `<span class="neis-event-dot">${esc(s.eventName || '학사일정')}</span>`).join('');
+      const events = schedules.slice(0, 2).map((s) => `<span class="neis-event-dot ${s.sourceType === 'timetable' ? 'is-timetable' : 'is-schedule'}">${esc(s.eventName || '일정')}</span>`).join('');
       const more = schedules.length > 2 ? `<span class="neis-more">+${schedules.length - 2}개 더</span>` : '';
       const recBadge = taskCount ? `<span class="neis-rec-badge">추천 ${taskCount}</span>` : '';
       cells.push(`<button class="neis-day ${isToday ? 'is-today' : ''} ${isSelected ? 'is-selected' : ''} ${schedules.length ? 'has-event' : ''}" type="button" data-date="${esc(iso)}">
@@ -591,14 +850,14 @@
     if (!schedules.length) {
       return `<aside class="neis-detail-panel">
         <h4>${esc(dateLabel)}</h4>
-        <div class="neis-empty small"><strong>선택한 날짜에 등록된 나이스 학사일정이 없어요.</strong><span>월별 필수업무는 아래 목록에서 확인할 수 있어요.</span></div>
+        <div class="neis-empty small"><strong>선택한 날짜에 등록된 나이스 통합 일정이 없어요.</strong><span>월별 필수업무는 아래 목록에서 확인할 수 있어요.</span></div>
       </aside>`;
     }
     return `<aside class="neis-detail-panel">
       <h4>${esc(dateLabel)}</h4>
       <div class="neis-detail-block">
-        <strong>나이스 학사일정</strong>
-        <ul>${schedules.map((item) => `<li>${esc(item.eventName || '학사일정')}${item.eventContent ? `<p>${esc(item.eventContent)}</p>` : ''}${item.gradeText ? `<span>${esc(item.gradeText)}</span>` : ''}</li>`).join('')}</ul>
+        <strong>나이스 통합 일정</strong>
+        <ul>${schedules.map((item) => `<li><span class="neis-source-badge ${item.sourceType === 'timetable' ? 'timetable' : 'schedule'}">${esc(item.source || '학사일정')}</span> ${esc(item.eventName || '일정')}${item.eventContent ? `<p>${esc(item.eventContent)}</p>` : ''}${item.gradeText && item.sourceType !== 'timetable' ? `<span>${esc(item.gradeText)}</span>` : ''}${item.sourceType === 'timetable' && item.classes?.length ? `<p>${esc(item.classes.slice(0, 12).join(', '))}${item.classes.length > 12 ? ` 외 ${item.classes.length - 12}개 반` : ''}</p>` : ''}</li>`).join('')}</ul>
       </div>
       <div class="neis-detail-block">
         <strong>추천 확인</strong>
@@ -621,10 +880,10 @@
     const monthSchedules = getMonthSchedules();
     const recs = recommendationsForSchedules(monthSchedules);
     if (!loadYearCache()) {
-      return `<div class="neis-empty"><strong>추천업무를 표시하려면 학사일정이 필요해요.</strong><span>1년 학사일정을 먼저 불러와주세요.</span></div>`;
+      return `<div class="neis-empty"><strong>추천업무를 표시하려면 나이스 일정이 필요해요.</strong><span>학사+시간표 일정을 먼저 불러와주세요.</span></div>`;
     }
     if (!recs.length) {
-      return `<div class="neis-empty"><strong>이번 달 자동 추천된 업무가 없어요.</strong><span>학사일정명에 따라 현장체험학습, 방학, 행사, 시험 관련 업무가 표시됩니다.</span></div>`;
+      return `<div class="neis-empty"><strong>이번 달 자동 추천된 업무가 없어요.</strong><span>학사일정과 시간표 감지 일정에 따라 현장체험학습, 방학, 행사, 시험 관련 업무가 표시됩니다.</span></div>`;
     }
     return `<div class="neis-section"><h4>🧭 일정 기반 추천업무</h4><div class="neis-recommend-grid">${recs.map((rule) => `<article class="neis-recommend-card ${rule.priority === 'high' ? 'is-high' : ''}">
       <div class="neis-rec-head"><strong>${esc(rule.title)}</strong><span>${rule.priority === 'high' ? '중요' : '확인'}</span></div>
@@ -714,17 +973,26 @@
     const s = state.settings;
     if (API_MODE === 'client' && !s.apiKey) return toast('나이스 API 인증키를 먼저 입력해주세요.');
     if (!s.schoolCode || !s.officeCode) return toast('우리 학교를 먼저 선택해주세요.');
-    setBusy('neisLoadSchedule', true, '불러오는 중');
+    setBusy('neisLoadSchedule', true, '일정 불러오는 중');
     try {
       const items = await fetchSchoolScheduleYear({ apiKey: s.apiKey, officeCode: s.officeCode, schoolCode: s.schoolCode, year: state.year });
       saveYearCache(state.year, items);
+      const timetableEvents = await fetchTimetableMonthEvents({
+        apiKey: s.apiKey,
+        officeCode: s.officeCode,
+        schoolCode: s.schoolCode,
+        schoolKind: s.schoolKind,
+        year: state.year,
+        month: state.month,
+        force: true
+      });
       state.selectedDate = `${state.year}-${pad2(state.month)}-01`;
       renderCalendar();
-      toast(items.length ? `${state.year}년 학사일정 ${items.length}건을 저장했어요. 이제 월을 바꿔도 자동으로 표시됩니다.` : `${state.year}년 등록된 학사일정이 없어요.`);
+      toast(`학사일정 ${items.length}건, 시간표 감지 일정 ${timetableEvents.length}건을 저장했어요.`);
     } catch (error) {
       toast(String(error.message || error || '나이스 API 호출에 실패했어요.'));
     } finally {
-      setBusy('neisLoadSchedule', false, loadYearCache() ? '학사일정 새로고침' : '1년 학사일정 불러오기');
+      setBusy('neisLoadSchedule', false, loadYearCache() ? '학사+시간표 새로고침' : '학사+시간표 불러오기');
     }
   }
 
@@ -734,6 +1002,7 @@
     state.month = next.getMonth() + 1;
     state.selectedDate = `${state.year}-${pad2(state.month)}-01`;
     renderCalendar();
+    if (loadYearCache()) ensureTimetableMonthLoaded();
   }
 
   function setBusy(id, busy, text) {
@@ -776,6 +1045,7 @@
     injectPanel();
     bindEvents();
     renderAll();
+    if (loadYearCache()) ensureTimetableMonthLoaded();
     addGithubLinkIfMissing();
   }
 
