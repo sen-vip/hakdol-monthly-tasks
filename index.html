@@ -12,7 +12,7 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="./supabase-config.js"></script>
   <script src="./data/tasks.js"></script>
-  <link rel="stylesheet" href="./neis-extension.css?v=20260622-timetable1">
+  <link rel="stylesheet" href="./neis-extension.css?v=20260622-manual1">
 </head>
 <body>
   <header class="topbar no-print">
@@ -62,9 +62,9 @@
         <input id="searchInput" type="search" placeholder="업무명, 분류, 근거, 안내부서 검색" />
       </label>
       <div class="submission-filter-wrap" aria-label="제출업무 필터">
-        <button type="button" class="submit-filter-chip active" data-submission-filter="">전체</button>
+        <button type="button" class="submit-filter-chip" data-submission-filter="">전체</button>
         <button type="button" class="submit-filter-chip" data-submission-filter="only">제출만 보기</button>
-        <button type="button" class="submit-filter-chip" data-submission-filter="exclude">제출 제외 보기</button>
+        <button type="button" class="submit-filter-chip active" data-submission-filter="exclude">제출 제외 보기</button>
       </div>
       <button class="ghost" id="detailFilterToggle" type="button" aria-expanded="false" hidden>상세 필터</button>
       <button class="primary" id="addTaskBtn">+ 우리 학교 업무 추가</button>
@@ -161,6 +161,6 @@
   <button type="button" class="to-top-btn no-print" id="toTopBtn" data-action="go-top" aria-label="맨 위로 올리기">↑</button>
   <div class="toast no-print" id="toast" role="status" aria-live="polite"></div>
   <script src="./app.js"></script>
-  <script src="./neis-extension.js?v=20260622-timetable1" defer></script>
+  <script src="./neis-extension.js?v=20260622-manual1" defer></script>
 </body>
 </html>

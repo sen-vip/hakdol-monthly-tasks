@@ -6,6 +6,7 @@
   'use strict';
 
   const SETTINGS_KEY = 'hakdolNeisSettings';
+  const MANUAL_EVENTS_KEY = 'hakdolNeisManualEvents_v1';
   const RANGE_MODE = 'calendar-year'; // later: 'school-year'
   const API_MODE = 'server';
   const SERVER_API_BASE = 'https://hakdol-monthly-tasks.vercel.app';
@@ -126,6 +127,84 @@
     state.settings = { ...state.settings, ...settings };
     localStorage.setItem(SETTINGS_KEY, JSON.stringify(state.settings));
   }
+
+  function loadManualEvents() {
+    try {
+      const rows = JSON.parse(localStorage.getItem(MANUAL_EVENTS_KEY) || '[]');
+      return Array.isArray(rows) ? rows : [];
+    } catch {
+      return [];
+    }
+  }
+
+  function saveManualEvents(events) {
+    localStorage.setItem(MANUAL_EVENTS_KEY, JSON.stringify(events || []));
+  }
+
+  function makeManualEvent(row) {
+    return {
+      id: row.id,
+      date: row.date,
+      ymd: String(row.date || '').replace(/\D/g, ''),
+      dateText: dateTextFromIso(row.date),
+      eventName: row.title || '직접 추가 일정',
+      eventContent: row.memo || '내가 직접 추가한 우리 학교 일정입니다.',
+      source: '직접추가',
+      sourceType: 'manual',
+      raw: row
+    };
+  }
+
+  function getManualMonthEvents(year = state.year, month = state.month) {
+    return loadManualEvents()
+      .filter((row) => {
+        const [y, m] = String(row.date || '').split('-').map(Number);
+        return y === Number(year) && m === Number(month);
+      })
+      .map(makeManualEvent);
+  }
+
+  function addManualEvent(date, title, memo = '') {
+    const cleanTitle = String(title || '').trim();
+    if (!cleanTitle) return false;
+    const events = loadManualEvents();
+    events.push({
+      id: `manual-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+      date,
+      title: cleanTitle,
+      memo: String(memo || '').trim(),
+      createdAt: new Date().toISOString()
+    });
+    saveManualEvents(events);
+    return true;
+  }
+
+  function deleteManualEvent(id) {
+    saveManualEvents(loadManualEvents().filter((row) => row.id !== id));
+  }
+
+  function trimTrailingMeta(title = '') {
+    let text = String(title || '').trim();
+    let prev = '';
+    while (text !== prev) {
+      prev = text;
+      text = text
+        .replace(/\([^)]*\)\s*$/, '')
+        .replace(/（[^）]*）\s*$/, '')
+        .replace(/\[[^\]]*\]\s*$/, '')
+        .replace(/[.·,:;]+\s*$/, '')
+        .trim();
+    }
+    return text;
+  }
+
+  function isSubmissionTask(task) {
+    const department = String(task.department || '').trim();
+    if (!department) return false;
+    const normalizedTitle = trimTrailingMeta(task.title).replace(/\s+/g, '');
+    return /(제출|신청|협조)$/.test(normalizedTitle);
+  }
+
 
   function clearSettings() {
     localStorage.removeItem(SETTINGS_KEY);
@@ -579,7 +658,8 @@
   function getYearSchedules(year = state.year) {
     const base = getBaseYearSchedules(year);
     const timetable = getTimetableMonthEvents(year, state.month);
-    return [...base, ...timetable].sort((a, b) => String(a.date).localeCompare(String(b.date)) || String(a.eventName).localeCompare(String(b.eventName), 'ko-KR'));
+    const manual = getManualMonthEvents(year, state.month);
+    return [...base, ...timetable, ...manual].sort((a, b) => String(a.date).localeCompare(String(b.date)) || String(a.eventName).localeCompare(String(b.eventName), 'ko-KR'));
   }
 
   function getMonthSchedules(year = state.year, month = state.month) {
@@ -588,7 +668,8 @@
       return y === Number(year) && m === Number(month);
     });
     const timetable = getTimetableMonthEvents(year, month);
-    return [...base, ...timetable].sort((a, b) => String(a.date).localeCompare(String(b.date)) || String(a.eventName).localeCompare(String(b.eventName), 'ko-KR'));
+    const manual = getManualMonthEvents(year, month);
+    return [...base, ...timetable, ...manual].sort((a, b) => String(a.date).localeCompare(String(b.date)) || String(a.eventName).localeCompare(String(b.eventName), 'ko-KR'));
   }
 
   function getSchedulesByDate(iso) {
@@ -630,7 +711,7 @@
 
   function getCurrentMonthTasks() {
     const source = Array.isArray(window.HAKDOL_TASKS) ? window.HAKDOL_TASKS : [];
-    return source.filter((task) => Number(task.month) === Number(state.month));
+    return source.filter((task) => Number(task.month) === Number(state.month) && !isSubmissionTask(task));
   }
 
   function linkedMonthlyTasks() {
@@ -775,8 +856,9 @@
     const timetableText = state.timetableLoading
       ? '시간표 감지 일정 불러오는 중'
       : (timetableCache ? `시간표 감지 ${timetableCache.events?.length || 0}건` : '시간표 감지 일정 미저장');
-    if (!cache) return `${state.year}년 학사일정을 아직 불러오지 않았어요. [학사+시간표 불러오기]를 눌러주세요.`;
-    return `${cache.year}년 학사일정 ${cache.schedules?.length || 0}건 · ${timetableText} · 마지막 업데이트 ${formatDateTime(cache.fetchedAt)}`;
+    const manualText = `직접추가 ${getManualMonthEvents(state.year, state.month).length}건`;
+    if (!cache) return `${state.year}년 학사일정 미저장 · ${manualText} · 직접 추가 일정은 바로 사용할 수 있어요.`;
+    return `${cache.year}년 학사일정 ${cache.schedules?.length || 0}건 · ${timetableText} · ${manualText} · 마지막 업데이트 ${formatDateTime(cache.fetchedAt)}`;
   }
 
   function formatDateTime(iso) {
@@ -788,14 +870,13 @@
 
   function renderCalendarSection() {
     const cache = loadYearCache();
-    if (!cache) {
-      return `<div class="neis-empty"><strong>불러온 나이스 일정이 없어요.</strong><span>학교 설정 후 [학사+시간표 불러오기]를 눌러주세요. 학사일정은 연 단위, 시간표 감지 일정은 월 단위로 저장됩니다.</span></div>`;
-    }
     const selectedSchedules = getSchedulesByDate(state.selectedDate);
     const selectedRules = recommendationsForSchedules(selectedSchedules);
+    const cacheNotice = cache ? '' : `<div class="neis-empty small neis-calendar-notice"><strong>나이스 일정은 아직 불러오지 않았어요.</strong><span>학교 설정 후 [학사+시간표 불러오기]를 누르거나, 아래 달력에서 우리 학교 일정을 직접 추가할 수 있어요.</span></div>`;
     return `<div class="neis-section">
-      <div class="neis-section-head"><h4>📅 나이스 통합 달력</h4><span>${esc(state.year)}년 ${esc(state.month)}월</span></div>
-      <div class="neis-calendar-legend"><span class="neis-source-badge schedule">학사일정</span><span class="neis-source-badge timetable">시간표 감지</span><em>${esc(schoolLevelText())} 수업내용 중 체험·수련·행사 키워드만 보완 표시</em></div>
+      <div class="neis-section-head"><h4>📅 우리 학교 통합 달력</h4><span>${esc(state.year)}년 ${esc(state.month)}월</span></div>
+      <div class="neis-calendar-legend"><span class="neis-source-badge schedule">학사일정</span><span class="neis-source-badge timetable">시간표 감지</span><span class="neis-source-badge manual">직접추가</span><em>${esc(schoolLevelText())} 수업내용 감지 + 우리 학교 직접 일정</em></div>
+      ${cacheNotice}
       ${renderMonthGrid()}
       ${renderSelectedDatePanel(selectedSchedules, selectedRules)}
     </div>`;
@@ -827,7 +908,7 @@
       const taskCount = uniqueTasks(rules).length;
       const isToday = iso === formatIsoDate(new Date());
       const isSelected = iso === state.selectedDate;
-      const events = schedules.slice(0, 2).map((s) => `<span class="neis-event-dot ${s.sourceType === 'timetable' ? 'is-timetable' : 'is-schedule'}">${esc(s.eventName || '일정')}</span>`).join('');
+      const events = schedules.slice(0, 2).map((s) => `<span class="neis-event-dot ${s.sourceType === 'timetable' ? 'is-timetable' : (s.sourceType === 'manual' ? 'is-manual' : 'is-schedule')}">${esc(s.eventName || '일정')}</span>`).join('');
       const more = schedules.length > 2 ? `<span class="neis-more">+${schedules.length - 2}개 더</span>` : '';
       const recBadge = taskCount ? `<span class="neis-rec-badge">추천 ${taskCount}</span>` : '';
       cells.push(`<button class="neis-day ${isToday ? 'is-today' : ''} ${isSelected ? 'is-selected' : ''} ${schedules.length ? 'has-event' : ''}" type="button" data-date="${esc(iso)}">
@@ -843,6 +924,26 @@
     </div>`;
   }
 
+
+
+  function renderScheduleListItem(item) {
+    const badgeClass = item.sourceType === 'timetable' ? 'timetable' : (item.sourceType === 'manual' ? 'manual' : 'schedule');
+    const deleteButton = item.sourceType === 'manual' && item.id ? `<button type="button" class="neis-delete-manual" data-delete-manual="${esc(item.id)}" title="직접 추가 일정 삭제">삭제</button>` : '';
+    return `<li><span class="neis-source-badge ${badgeClass}">${esc(item.source || '학사일정')}</span> ${esc(item.eventName || '일정')}${deleteButton}${item.eventContent ? `<p>${esc(item.eventContent)}</p>` : ''}${item.gradeText && item.sourceType !== 'timetable' ? `<span>${esc(item.gradeText)}</span>` : ''}${item.sourceType === 'timetable' && item.classes?.length ? `<p>${esc(item.classes.slice(0, 12).join(', '))}${item.classes.length > 12 ? ` 외 ${item.classes.length - 12}개 반` : ''}</p>` : ''}</li>`;
+  }
+
+  function renderManualEventForm() {
+    return `<form class="neis-manual-form" data-manual-form>
+      <strong>우리 학교 일정 직접 추가</strong>
+      <div class="neis-manual-row">
+        <input name="manualTitle" required maxlength="60" placeholder="예: 1학년 현장체험학습, 수련활동" />
+        <button type="submit" class="primary">추가</button>
+      </div>
+      <input name="manualMemo" maxlength="120" placeholder="메모 선택 입력: 장소, 학년, 준비사항 등" />
+      <small>나이스에 없는 일정도 이 브라우저에 저장해서 달력에 같이 표시합니다.</small>
+    </form>`;
+  }
+
   function renderSelectedDatePanel(schedules, rules) {
     const taskList = uniqueTasks(rules);
     const tools = uniqueTools(rules);
@@ -850,15 +951,17 @@
     if (!schedules.length) {
       return `<aside class="neis-detail-panel">
         <h4>${esc(dateLabel)}</h4>
-        <div class="neis-empty small"><strong>선택한 날짜에 등록된 나이스 통합 일정이 없어요.</strong><span>월별 필수업무는 아래 목록에서 확인할 수 있어요.</span></div>
+        <div class="neis-empty small"><strong>선택한 날짜에 등록된 일정이 없어요.</strong><span>아래에서 우리 학교 일정을 직접 추가할 수 있어요.</span></div>
+        ${renderManualEventForm()}
       </aside>`;
     }
     return `<aside class="neis-detail-panel">
       <h4>${esc(dateLabel)}</h4>
       <div class="neis-detail-block">
         <strong>나이스 통합 일정</strong>
-        <ul>${schedules.map((item) => `<li><span class="neis-source-badge ${item.sourceType === 'timetable' ? 'timetable' : 'schedule'}">${esc(item.source || '학사일정')}</span> ${esc(item.eventName || '일정')}${item.eventContent ? `<p>${esc(item.eventContent)}</p>` : ''}${item.gradeText && item.sourceType !== 'timetable' ? `<span>${esc(item.gradeText)}</span>` : ''}${item.sourceType === 'timetable' && item.classes?.length ? `<p>${esc(item.classes.slice(0, 12).join(', '))}${item.classes.length > 12 ? ` 외 ${item.classes.length - 12}개 반` : ''}</p>` : ''}</li>`).join('')}</ul>
+        <ul>${schedules.map(renderScheduleListItem).join('')}</ul>
       </div>
+      ${renderManualEventForm()}
       <div class="neis-detail-block">
         <strong>추천 확인</strong>
         ${taskList.length ? `<ul>${taskList.map((task) => `<li>${esc(task)}</li>`).join('')}</ul>` : '<p>자동 추천된 업무가 없어요.</p>'}
@@ -871,6 +974,23 @@
     scope.querySelectorAll('[data-date]').forEach((btn) => {
       btn.addEventListener('click', () => {
         state.selectedDate = btn.dataset.date;
+        renderCalendar();
+      });
+    });
+    scope.querySelectorAll('[data-manual-form]').forEach((form) => {
+      form.addEventListener('submit', (event) => {
+        event.preventDefault();
+        const title = form.elements.manualTitle?.value || '';
+        const memo = form.elements.manualMemo?.value || '';
+        if (!addManualEvent(state.selectedDate, title, memo)) return toast('일정명을 입력해주세요.');
+        toast('우리 학교 일정을 추가했어요.');
+        renderCalendar();
+      });
+    });
+    scope.querySelectorAll('[data-delete-manual]').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        deleteManualEvent(btn.dataset.deleteManual);
+        toast('직접 추가한 일정을 삭제했어요.');
         renderCalendar();
       });
     });
@@ -900,7 +1020,7 @@
       return `<div class="neis-empty"><strong>현재 월별업무 데이터와 연결할 수 없어요.</strong><span>기존 앱의 HAKDOL_TASKS 데이터가 있으면 자동으로 연결됩니다.</span></div>`;
     }
     const list = linked.length ? linked : monthTasks.slice(0, 6);
-    const lead = linked.length ? '나이스 일정과 연결된 월별업무' : '이번 달 월별 필수업무';
+    const lead = linked.length ? '나이스 일정과 연결된 업무' : '이번 달 챙길 업무';
     return `<div class="neis-section"><h4>🗂️ ${esc(lead)}</h4><div class="neis-monthly-list">${list.map((task) => `<article class="neis-monthly-card">
       <span class="neis-chip">${esc(task.period || task.periodGroup || '월중')}</span>
       <span class="neis-chip soft">${esc(task.category || '업무')}</span>

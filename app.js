@@ -94,7 +94,7 @@ const state = {
   period: "",
   whenType: "",
   stateFilter: "",
-  submissionFilter: "",
+  submissionFilter: "exclude",
   taskStates: {},
   customTasks: [],
   allMode: false,
@@ -670,7 +670,7 @@ document.addEventListener("click", (ev) => {
 });
 
 function resetSoftFilters() {
-  state.query = ""; state.categories = []; state.period = ""; state.whenType = ""; state.stateFilter = ""; state.submissionFilter = "";
+  state.query = ""; state.categories = []; state.period = ""; state.whenType = ""; state.stateFilter = ""; state.submissionFilter = "exclude";
   els.searchInput.value = "";
 }
 
