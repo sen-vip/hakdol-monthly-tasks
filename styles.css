@@ -366,3 +366,374 @@ textarea.card-memo{resize:none}
 body{background:var(--bg);color:var(--ink);font-size:14px}.topbar{padding:9px 22px;background:rgba(255,255,255,.94);border-bottom:1px solid #dbe3ef;box-shadow:0 5px 20px rgba(31,42,68,.035)}.brand{min-width:210px}.brand-icon{font-size:23px}.brand strong{font-size:15px;color:#172033}.brand small{font-size:11.5px;color:#64748b}.topnav{gap:6px}.topnav .ghost,.auth-box .ghost{min-height:32px;padding:6px 10px;border-radius:10px;font-size:12.5px}.auth-box{font-size:11.5px;color:#718096;gap:7px}.auth-box .primary{min-height:32px;padding:6px 10px;border-radius:10px;background:#1f2a44}.auth-box .primary:hover{background:#111827}.app-shell{margin-top:16px}.hero.slim-hero{margin-bottom:8px}.hero.slim-hero>div{padding:13px 16px;border:1px solid #dce5f2;border-radius:16px;box-shadow:0 8px 22px rgba(31,42,68,.04)}.hero.slim-hero .eyebrow{display:none}.hero.slim-hero h1{font-size:24px;color:#172033}.hero.slim-hero .hero-desc{margin-top:5px;color:#64748b}.hero-summary-text{font-size:12.5px;color:#475569}.stats-grid.slim-stats{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:10px}.summary-chip{min-height:32px;border-color:#dbe3ef;background:#fff;color:#334155;border-radius:999px;padding:5px 11px;box-shadow:0 4px 12px rgba(31,42,68,.035)}.summary-chip span{color:#64748b;font-weight:750}.summary-chip strong{color:#1f2a44;font-weight:850}.summary-chip:hover{border-color:#bfdbfe;background:#f8fbff}.summary-chip[data-stat-action="early"] strong,.summary-chip[data-stat-action="middle"] strong,.summary-chip[data-stat-action="late"] strong{color:#1d4ed8}.summary-chip[data-stat-action="submission"] strong{color:#b45309}.toolbar{padding:10px 12px;border-color:#dce5f2;border-radius:16px;box-shadow:0 8px 20px rgba(31,42,68,.04);margin-bottom:12px;align-items:flex-end}.toolbar label{font-size:11.5px;color:#64748b;font-weight:750}.toolbar input,.toolbar select{min-height:38px;border-color:#dbe3ef}.search-wrap{min-width:240px}.submission-filter-wrap{padding-top:0;gap:7px}.submit-filter-chip{min-height:36px;padding:0 12px;border-color:#d7e2ef;background:#fff;color:#475569;box-shadow:none}.submit-filter-chip.active{background:#eaf2ff;border-color:#93c5fd;color:#1d4ed8}.toolbar #detailFilterToggle{min-height:38px;background:#f8fbff;border-color:#dbe3ef;color:#334155}.toolbar .add-school-task{min-height:38px;background:#fff7ed;border-color:#fed7aa;color:#9a3412;font-weight:800}.detail-filters{background:#f8fbff;border:1px solid #e2eaf4;border-radius:14px;padding:12px!important;margin-top:8px!important}.selector-board{grid-template-columns:minmax(0,1.7fr) minmax(220px,.78fr);grid-template-areas:"role period" "role month";gap:12px;margin-bottom:16px}.selector-panel{background:#fff;border-color:#dce5f2;border-radius:16px;padding:14px;box-shadow:0 8px 20px rgba(31,42,68,.04)}.role-panel{grid-area:role}.period-panel{grid-area:period}.compact-month-panel{grid-area:month}.selector-head{margin-bottom:10px}.selector-head strong{font-size:13.5px;color:#172033}.selector-head small{color:#64748b}.selector-divider{margin:10px 0;background:#e3ebf5}.selector-total{min-height:32px}.selector-total span{font-size:13.5px}.selector-total.active span{color:#1d4ed8}.selector-total b{background:#edf4ff;color:#1d4ed8}.selector-options{gap:8px}.selector-panel.wide .selector-options{grid-template-columns:repeat(auto-fit,minmax(96px,1fr));gap:8px}.selector-panel.wide .select-pill.category-pill{min-height:48px;border-radius:14px;padding:8px 9px;background:#fff;border-color:#d8e3f1}.select-pill{box-shadow:none}.select-pill.active,.select-pill.category-pill.active,.select-pill.period-pill.active{background:#2563eb!important;border-color:#2563eb!important;color:#fff!important;box-shadow:0 8px 18px rgba(37,99,235,.2)!important}.select-pill.active b{color:#dbeafe!important}.period-options{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.period-pill{width:100%;min-height:44px;border-radius:13px}.month-calendar{grid-template-columns:repeat(4,minmax(0,1fr));gap:6px}.month-pill{min-height:42px;border-radius:11px;padding:6px 4px;border-color:#d8e3f1;box-shadow:none}.month-pill.active{background:#1f2a44;border-color:#1f2a44;box-shadow:0 8px 16px rgba(31,42,68,.18)}.section-head{margin:18px 0 10px}.section-head h2{font-size:22px;color:#172033}.period-group{border-color:#dce5f2;box-shadow:0 10px 24px rgba(31,42,68,.045)}.period-title.month-title{background:#f9fbff;border-bottom-color:#dbe3ef;min-height:48px}.period-title.month-title h3{color:#172033}.task-card{border-bottom-color:#edf2f7}.task-title{color:#172033;font-weight:850}.task-desc{color:#475569}.task-facts{color:#64748b}.chip{border-color:#dbe3ef}.action-detail{background:#f8fbff}.to-top-btn{background:#1f2a44!important}
 @media(max-width:980px){.selector-board{grid-template-columns:1fr;grid-template-areas:"role" "period" "month"}.period-options{grid-template-columns:repeat(4,minmax(0,1fr))}.topbar{align-items:center}.topnav{order:3;width:100%}.auth-box{margin-left:auto}.submission-filter-wrap{flex-basis:100%}}
 @media(max-width:640px){.topbar{padding:8px 12px}.brand strong{font-size:14px}.brand small{display:none}.app-shell{width:calc(100% - 20px);margin-top:10px}.hero-title-row{gap:5px}.hero.slim-hero h1{font-size:21px}.hero.slim-hero .hero-desc{font-size:12.5px}.toolbar{display:flex}.search-wrap{min-width:100%;margin-bottom:0}.toolbar #detailFilterToggle,.toolbar .add-school-task{width:100%}.stats-grid.slim-stats{gap:6px}.summary-chip{font-size:12px;padding:5px 8px}.selector-panel{padding:12px}.selector-panel.wide .selector-options{grid-template-columns:repeat(2,minmax(0,1fr))}.period-options{grid-template-columns:repeat(2,minmax(0,1fr))}.period-pill{min-height:40px}.compact-month-panel{display:none}.section-head h2{font-size:20px}}
+
+/* 2026-06-24 v2.1 디자인 시스템 정리 업데이트
+   목표: 업무딱지 컬러는 살리고, 나머지 UI는 하나의 업무판 톤으로 통일 */
+:root{
+  --bg:#f4f7fb;
+  --card:#ffffff;
+  --ink:#172033;
+  --muted:#64748b;
+  --line:#dbe4f0;
+  --soft:#f8fbff;
+  --primary:#2563eb;
+  --primary-dark:#1d4ed8;
+  --primary-soft:#eaf2ff;
+  --office-navy:#1f2a44;
+  --shadow:0 10px 28px rgba(31,42,68,.055);
+  --shadow-soft:0 6px 18px rgba(31,42,68,.04);
+  --radius:18px;
+  --radius-sm:14px;
+}
+body{
+  background:
+    radial-gradient(circle at 8% -4%, rgba(37,99,235,.055), transparent 28%),
+    linear-gradient(180deg,#fbfdff 0%,var(--bg) 42%,#f7f9fc 100%);
+  color:var(--ink);
+}
+.topbar{
+  background:rgba(255,255,255,.95)!important;
+  border-bottom:1px solid var(--line)!important;
+  box-shadow:0 6px 22px rgba(31,42,68,.045)!important;
+}
+.brand-icon{
+  width:36px;height:36px;display:inline-grid;place-items:center;border-radius:13px;
+  background:var(--primary-soft);border:1px solid #cfe0ff;font-size:20px!important;
+}
+.brand strong{color:var(--office-navy)!important;font-weight:900;letter-spacing:-.035em}.brand small{color:#64748b!important}
+button,.ghost,.primary,.nav-link,.submit-filter-chip,.select-pill,.selector-total,.month-pill,.icon-btn,.action-detail,.summary-chip{
+  font-weight:800;
+}
+.primary{background:var(--primary)!important;color:#fff!important;box-shadow:0 8px 18px rgba(37,99,235,.16)}
+.primary:hover{background:var(--primary-dark)!important}
+.ghost,.nav-link,.action-detail{
+  background:#fff!important;color:#334155!important;border:1px solid var(--line)!important;
+  box-shadow:0 2px 7px rgba(31,42,68,.025);
+}
+.ghost:hover,.nav-link:hover,.action-detail:hover{
+  background:var(--soft)!important;border-color:#c7d7ec!important;transform:translateY(-1px);
+}
+.hero.slim-hero{margin-bottom:12px!important}.hero.slim-hero>div{
+  background:linear-gradient(180deg,#fff 0%,#fbfdff 100%)!important;
+  border:1px solid var(--line)!important;border-radius:20px!important;
+  box-shadow:var(--shadow)!important;padding:18px 20px!important;position:relative;overflow:hidden;
+}
+.hero.slim-hero>div::before{
+  content:"";position:absolute;left:0;top:0;bottom:0;width:5px;background:var(--primary);
+}
+.hero.slim-hero h1{font-size:25px!important;color:var(--office-navy)!important;font-weight:950;letter-spacing:-.055em}.hero.slim-hero .hero-desc{color:#667085!important;font-weight:600}.hero-summary-text{color:#475569!important;font-weight:800}
+.stats-grid.slim-stats{gap:8px!important;margin-bottom:12px!important}.summary-chip{
+  min-height:34px!important;background:#fff!important;border:1px solid var(--line)!important;border-radius:999px!important;
+  box-shadow:var(--shadow-soft)!important;color:#334155!important;padding:6px 12px!important;
+}
+.summary-chip span{color:#64748b!important}.summary-chip strong{color:var(--office-navy)!important}.summary-chip:hover{background:var(--primary-soft)!important;border-color:#bfdbfe!important}
+.toolbar{
+  background:#fff!important;border:1px solid var(--line)!important;border-radius:20px!important;box-shadow:var(--shadow)!important;
+  padding:14px!important;margin-bottom:14px!important;align-items:end!important;
+}
+.toolbar label{color:#64748b!important;font-weight:800}.toolbar input,.toolbar select,.stack-form input,.stack-form select,.stack-form textarea{
+  border:1px solid var(--line)!important;background:#fbfdff!important;border-radius:13px!important;color:var(--ink)!important;
+}
+.toolbar input:focus,.toolbar select:focus,.stack-form input:focus,.stack-form select:focus,.stack-form textarea:focus{
+  outline:2px solid rgba(37,99,235,.18);border-color:#93c5fd!important;background:#fff!important;
+}
+.submission-filter-wrap{
+  display:flex;gap:7px;align-items:center;flex-wrap:wrap;padding:4px;background:#f8fbff;border:1px solid #e5edf7;border-radius:999px;
+}
+.submit-filter-chip{
+  min-height:34px!important;padding:0 13px!important;background:transparent!important;border:1px solid transparent!important;color:#64748b!important;box-shadow:none!important;
+}
+.submit-filter-chip.active{
+  background:var(--primary)!important;border-color:var(--primary)!important;color:#fff!important;box-shadow:0 7px 15px rgba(37,99,235,.17)!important;
+}
+.toolbar #detailFilterToggle,.toolbar .add-school-task{border-radius:13px!important}.toolbar .add-school-task{
+  background:#fff7ed!important;border-color:#fed7aa!important;color:#9a3412!important;
+}
+.detail-filters{
+  background:#f8fbff!important;border:1px solid #e2eaf4!important;border-radius:16px!important;box-shadow:inset 0 1px 0 rgba(255,255,255,.9);
+}
+.selector-board{gap:14px!important;margin-bottom:18px!important}.selector-panel{
+  background:#fff!important;border:1px solid var(--line)!important;border-radius:20px!important;box-shadow:var(--shadow)!important;padding:16px!important;
+}
+.selector-head strong{color:var(--office-navy)!important;font-size:14px!important;font-weight:950}.selector-head small{color:#64748b!important;font-weight:650}.selector-divider{background:#e6edf7!important}
+.selector-total,.select-pill,.month-pill{
+  background:#fbfdff!important;border:1px solid #dbe4f0!important;color:#334155!important;box-shadow:none!important;border-radius:14px!important;
+}
+.selector-total:hover,.select-pill:hover,.month-pill:hover{background:#f1f6ff!important;border-color:#c7d7ec!important;transform:translateY(-1px)}
+.selector-total.active,.select-pill.active,.select-pill.category-pill.active,.select-pill.period-pill.active,.month-pill.active{
+  background:var(--primary)!important;border-color:var(--primary)!important;color:#fff!important;box-shadow:0 10px 20px rgba(37,99,235,.2)!important;
+}
+.selector-total.active b,.select-pill.active b,.month-pill.active b{color:#dbeafe!important;background:rgba(255,255,255,.16)!important}
+.selector-total b,.select-pill b,.month-pill b{background:#edf4ff!important;color:#1d4ed8!important;border-radius:999px;padding:2px 7px}.selector-total span,.select-pill span,.month-pill span{font-weight:900}
+.select-pill.category-pill{position:relative;overflow:hidden}.select-pill.category-pill::before{
+  content:"";position:absolute;left:0;top:0;bottom:0;width:4px;background:#bfdbfe;opacity:.95;
+}
+.select-pill.category-pill.active::before{background:rgba(255,255,255,.88)}
+.month-pill.is-current:not(.active){background:#f8fbff!important;border-color:#bfdbfe!important;box-shadow:inset 0 0 0 1px rgba(37,99,235,.06)!important}
+.section-head{margin:20px 0 12px!important}.section-head h2{font-size:23px!important;color:var(--office-navy)!important;font-weight:950;letter-spacing:-.055em}.section-head p{font-weight:750;color:#64748b!important}
+.period-group{
+  background:#fff!important;border:1px solid var(--line)!important;border-radius:20px!important;box-shadow:var(--shadow)!important;overflow:hidden;
+}
+.period-title.month-title{
+  background:linear-gradient(180deg,#fbfdff,#f8fbff)!important;border-bottom:1px solid var(--line)!important;min-height:52px!important;padding:14px 18px!important;
+}
+.period-title.month-title h3{color:var(--office-navy)!important;font-size:17px!important;font-weight:950}.period-title.month-title .chip{background:#fff!important;border-color:#dbe4f0!important;color:#475569!important;font-weight:900}
+.task-card{
+  grid-template-columns:112px 108px minmax(0,1fr) auto!important;gap:12px!important;padding:16px 18px 16px 22px!important;
+  border-bottom:1px solid #edf2f8!important;background:#fff!important;position:relative;
+}
+.task-card:hover{background:#fbfdff!important}.task-card::before{width:5px!important;background:#cbd5e1!important}.task-when{display:flex;align-items:flex-start;gap:9px}.task-when strong{font-size:13px!important;color:#334155!important;font-weight:950}.task-category-col{display:flex;align-items:flex-start;gap:6px;flex-wrap:wrap}.task-main{padding-top:0!important}.task-title{font-size:16px!important;line-height:1.38!important;color:var(--office-navy)!important;font-weight:950!important;margin:0 0 6px!important;letter-spacing:-.035em}.task-desc{font-size:13px!important;line-height:1.5!important;color:#64748b!important;font-weight:600;white-space:normal!important}.task-facts{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px!important;color:#64748b!important}.task-facts span{display:inline-flex;align-items:center;min-height:24px;padding:3px 8px!important;border:1px solid #e2eaf4;border-radius:999px;background:#f8fbff;font-size:11.5px;font-weight:750}.card-memo{margin-top:9px!important;background:#fbfdff!important;border-color:#e2eaf4!important;border-radius:12px!important}.task-actions{gap:7px!important}.icon-btn{border-radius:12px!important;background:#fff!important;color:#64748b!important}.icon-btn.active{background:#eff6ff!important;border-color:#bfdbfe!important;color:#1d4ed8!important}.task-state-chips .chip{font-weight:900}.chip{border-radius:999px!important;font-weight:850;letter-spacing:-.01em}.chip.period{background:#f8fbff!important;color:#475569!important;border-color:#dbe4f0!important}.chip.status{background:#f8fbff!important;color:#64748b!important;border-color:#e2e8f0!important}.chip.done{background:#ecfdf3!important;color:#15803d!important;border-color:#bbf7d0!important}.chip.important{background:#fff7ed!important;color:#b45309!important;border-color:#fed7aa!important}.chip.skipped{background:#f1f5f9!important;color:#64748b!important;border-color:#cbd5e1!important}.task-check{accent-color:var(--primary)!important}
+/* 업무분장 컬러를 딱지, 선택 버튼, 카드 왼쪽 라인까지 연결 */
+.cat-budget{--cat-bg:#eef2ff;--cat-ink:#3730a3;--cat-line:#c7d2fe;--cat-accent:#6366f1}.cat-income{--cat-bg:#ecfeff;--cat-ink:#0e7490;--cat-line:#a5f3fc;--cat-accent:#06b6d4}.cat-expense{--cat-bg:#fff7ed;--cat-ink:#c2410c;--cat-line:#fed7aa;--cat-accent:#f97316}.cat-payroll{--cat-bg:#fdf2f8;--cat-ink:#be185d;--cat-line:#fbcfe8;--cat-accent:#ec4899}.cat-facility{--cat-bg:#f0fdf4;--cat-ink:#15803d;--cat-line:#bbf7d0;--cat-accent:#22c55e}.cat-contract{--cat-bg:#f5f3ff;--cat-ink:#6d28d9;--cat-line:#ddd6fe;--cat-accent:#8b5cf6}.cat-goods{--cat-bg:#f7fee7;--cat-ink:#4d7c0f;--cat-line:#d9f99d;--cat-accent:#84cc16}.cat-assets,.cat-property{--cat-bg:#fefce8;--cat-ink:#a16207;--cat-line:#fde68a;--cat-accent:#eab308}.cat-environment{--cat-bg:#ecfdf5;--cat-ink:#047857;--cat-line:#a7f3d0;--cat-accent:#10b981}.cat-hr{--cat-bg:#fdf4ff;--cat-ink:#a21caf;--cat-line:#f5d0fe;--cat-accent:#d946ef}.cat-records{--cat-bg:#eff6ff;--cat-ink:#1d4ed8;--cat-line:#bfdbfe;--cat-accent:#3b82f6}.cat-committee{--cat-bg:#fef2f2;--cat-ink:#b91c1c;--cat-line:#fecaca;--cat-accent:#ef4444}.cat-fund{--cat-bg:#fff1f2;--cat-ink:#be123c;--cat-line:#fecdd3;--cat-accent:#f43f5e}.cat-safety{--cat-bg:#fff7ed;--cat-ink:#ea580c;--cat-line:#fdba74;--cat-accent:#fb923c}.cat-civil{--cat-bg:#f1f5f9;--cat-ink:#475569;--cat-line:#cbd5e1;--cat-accent:#64748b}.cat-insurance{--cat-bg:#eef2ff;--cat-ink:#4338ca;--cat-line:#c7d2fe;--cat-accent:#6366f1}.cat-training{--cat-bg:#e0f2fe;--cat-ink:#0369a1;--cat-line:#bae6fd;--cat-accent:#0ea5e9}.cat-stats{--cat-bg:#f0f9ff;--cat-ink:#0369a1;--cat-line:#bae6fd;--cat-accent:#38bdf8}.cat-energy{--cat-bg:#fefce8;--cat-ink:#854d0e;--cat-line:#fde68a;--cat-accent:#facc15}.cat-security{--cat-bg:#f8fafc;--cat-ink:#334155;--cat-line:#cbd5e1;--cat-accent:#475569}.cat-etc,.cat-mixed{--cat-bg:#f8fafc;--cat-ink:#475569;--cat-line:#cbd5e1;--cat-accent:#94a3b8}
+.chip.category[class*="cat-"],.select-pill.category-pill[class*="cat-"]{
+  background:var(--cat-bg)!important;color:var(--cat-ink)!important;border-color:var(--cat-line)!important;
+}
+.select-pill.category-pill[class*="cat-"]::before{background:var(--cat-accent)!important}.select-pill.category-pill[class*="cat-"].active{background:var(--primary)!important;color:#fff!important;border-color:var(--primary)!important}.select-pill.category-pill[class*="cat-"].active b{background:rgba(255,255,255,.16)!important;color:#dbeafe!important}
+.task-card:has(.cat-budget)::before{background:#6366f1!important}.task-card:has(.cat-income)::before{background:#06b6d4!important}.task-card:has(.cat-expense)::before{background:#f97316!important}.task-card:has(.cat-payroll)::before{background:#ec4899!important}.task-card:has(.cat-facility)::before{background:#22c55e!important}.task-card:has(.cat-contract)::before{background:#8b5cf6!important}.task-card:has(.cat-goods)::before{background:#84cc16!important}.task-card:has(.cat-assets)::before,.task-card:has(.cat-property)::before{background:#eab308!important}.task-card:has(.cat-environment)::before{background:#10b981!important}.task-card:has(.cat-hr)::before{background:#d946ef!important}.task-card:has(.cat-records)::before{background:#3b82f6!important}.task-card:has(.cat-committee)::before{background:#ef4444!important}.task-card:has(.cat-fund)::before{background:#f43f5e!important}.task-card:has(.cat-safety)::before{background:#fb923c!important}.task-card:has(.cat-civil)::before{background:#64748b!important}.task-card:has(.cat-insurance)::before{background:#6366f1!important}.task-card:has(.cat-training)::before{background:#0ea5e9!important}.task-card:has(.cat-stats)::before{background:#38bdf8!important}.task-card:has(.cat-energy)::before{background:#facc15!important}.task-card:has(.cat-security)::before{background:#475569!important}
+.modal{border:1px solid var(--line)!important;border-radius:24px!important;box-shadow:0 24px 70px rgba(31,42,68,.18)!important}.modal h2{color:var(--office-navy);font-weight:950;letter-spacing:-.045em}.modal-close{background:#f8fbff!important;border:1px solid var(--line)!important;color:#64748b!important}.to-top-btn{background:var(--office-navy)!important;box-shadow:0 14px 28px rgba(31,42,68,.22)!important}
+@media(max-width:980px){
+  .task-card{grid-template-columns:96px 96px minmax(0,1fr)!important}.task-actions{grid-column:3!important;justify-content:flex-start!important}.selector-board{grid-template-columns:1fr!important;grid-template-areas:"role" "period" "month"!important}
+}
+@media(max-width:640px){
+  .topbar{gap:9px!important}.brand-icon{width:32px;height:32px;border-radius:12px}.submission-filter-wrap{width:100%;border-radius:18px}.submit-filter-chip{flex:1 1 auto}.hero.slim-hero>div{padding:16px!important}.toolbar{border-radius:18px!important}.selector-panel,.period-group{border-radius:18px!important}.task-card{grid-template-columns:1fr!important;padding:15px 16px 15px 20px!important}.task-when,.task-category-col,.task-main,.task-actions{grid-column:1!important}.task-actions{justify-content:flex-start!important}.task-category-col{order:-1}.task-when{align-items:center}.task-state-chips{order:-1;width:100%}.task-title{font-size:15.5px!important}
+}
+
+/* v2.2 업무 체크리스트 리디자인: 2.1 장식감 제거 + 실무형 밀도 회복 */
+:root{
+  --v22-bg:#f7f8fa;
+  --v22-panel:#ffffff;
+  --v22-line:#e5e7eb;
+  --v22-line-strong:#dbe3ee;
+  --v22-ink:#111827;
+  --v22-muted:#6b7280;
+  --v22-blue:#2563eb;
+  --v22-blue-soft:#eff6ff;
+  --v22-shadow:0 8px 22px rgba(17,24,39,.045);
+  --v22-radius:16px;
+}
+body{background:var(--v22-bg)!important;color:var(--v22-ink)!important;font-size:14px!important;line-height:1.5!important}
+.app-shell{width:min(1120px,calc(100% - 32px))!important;margin:18px auto 56px!important}
+.topbar{background:rgba(255,255,255,.95)!important;border-bottom:1px solid var(--v22-line)!important;box-shadow:none!important;padding:10px 20px!important}
+.brand-icon{font-size:22px!important}.brand strong{color:var(--v22-ink)!important;font-size:15px!important;font-weight:850!important}.brand small{color:var(--v22-muted)!important}
+button,.ghost,.primary{border-radius:10px!important;box-shadow:none!important}.primary{background:var(--v22-blue)!important}.ghost{background:#fff!important;border:1px solid var(--v22-line-strong)!important;color:#374151!important}
+.hero.slim-hero{display:block!important;margin-bottom:12px!important}.hero.slim-hero>div{background:var(--v22-panel)!important;border:1px solid var(--v22-line)!important;border-radius:var(--v22-radius)!important;box-shadow:var(--v22-shadow)!important;padding:18px 20px!important}.hero.slim-hero .hero-card{display:none!important}.hero.slim-hero h1{font-size:25px!important;line-height:1.2!important;color:var(--v22-ink)!important;font-weight:900!important}.hero.slim-hero .hero-desc{max-width:none!important;margin-top:6px!important;color:var(--v22-muted)!important;font-size:13.5px!important}
+.stats-grid.slim-stats{display:flex!important;gap:6px!important;margin:0 0 12px!important}.summary-chip{min-height:30px!important;padding:5px 10px!important;border:1px solid var(--v22-line)!important;background:#fff!important;color:#4b5563!important;border-radius:999px!important;box-shadow:none!important}.summary-chip strong{color:var(--v22-ink)!important}.summary-chip span{color:var(--v22-muted)!important}
+.toolbar{background:#fff!important;border:1px solid var(--v22-line)!important;border-radius:var(--v22-radius)!important;box-shadow:var(--v22-shadow)!important;padding:12px!important;margin-bottom:12px!important}.toolbar label{font-size:11.5px!important;color:var(--v22-muted)!important;font-weight:700!important}.toolbar input,.toolbar select{border:1px solid var(--v22-line-strong)!important;background:#fff!important;color:var(--v22-ink)!important;border-radius:10px!important;min-height:38px!important}.submit-filter-chip{min-height:34px!important;background:#fff!important;color:#4b5563!important;border:1px solid var(--v22-line-strong)!important;border-radius:999px!important}.submit-filter-chip.active{background:var(--v22-blue-soft)!important;border-color:#bfdbfe!important;color:#1d4ed8!important}.detail-filters{background:#fafafa!important;border:1px solid var(--v22-line)!important;border-radius:12px!important}
+.selector-board{display:grid!important;grid-template-columns:1.35fr .85fr!important;grid-template-areas:"role period" "role month"!important;gap:12px!important;margin-bottom:14px!important}.selector-panel{background:#fff!important;border:1px solid var(--v22-line)!important;border-radius:var(--v22-radius)!important;box-shadow:var(--v22-shadow)!important;padding:14px!important}.selector-head strong{font-size:13.5px!important;color:var(--v22-ink)!important;font-weight:850!important}.selector-head small{color:var(--v22-muted)!important;font-size:11.5px!important}.selector-divider{background:var(--v22-line)!important;margin:9px 0!important}
+.selector-total,.select-pill,.month-pill{background:#fff!important;border:1px solid var(--v22-line-strong)!important;color:#374151!important;border-radius:999px!important;box-shadow:none!important;min-height:34px!important;padding:7px 10px!important;transform:none!important}.selector-panel.wide .select-pill.category-pill{min-height:36px!important;border-radius:999px!important;padding:7px 10px!important;background:#fff!important}.select-pill.category-pill::before{display:none!important}.selector-options{gap:7px!important}.selector-panel.wide .selector-options{grid-template-columns:repeat(auto-fit,minmax(86px,1fr))!important;gap:7px!important}.period-options{gap:7px!important}.period-pill{min-height:36px!important}.month-calendar{gap:6px!important}.month-pill{min-height:34px!important}.selector-total span,.select-pill span,.month-pill span{font-weight:750!important}.selector-total b,.select-pill b,.month-pill b{font-size:11px!important;background:#f3f4f6!important;color:#6b7280!important}.selector-total.active,.select-pill.active,.select-pill.category-pill.active,.select-pill.period-pill.active,.month-pill.active{background:#111827!important;border-color:#111827!important;color:#fff!important;box-shadow:none!important}.selector-total.active b,.select-pill.active b,.month-pill.active b{background:rgba(255,255,255,.16)!important;color:#fff!important}
+.section-head{margin:20px 0 10px!important}.section-head h2{font-size:21px!important;line-height:1.2!important;color:var(--v22-ink)!important;font-weight:900!important}.section-head p{color:var(--v22-muted)!important;font-size:13px!important;font-weight:600!important}
+.period-group{background:#fff!important;border:1px solid var(--v22-line)!important;border-radius:var(--v22-radius)!important;box-shadow:var(--v22-shadow)!important;overflow:hidden!important}.period-title.month-title{min-height:46px!important;padding:12px 16px!important;background:#fafafa!important;border-bottom:1px solid var(--v22-line)!important}.period-title.month-title h3{font-size:16px!important;color:var(--v22-ink)!important;font-weight:850!important}.period-title.month-title .chip{background:#fff!important;border-color:var(--v22-line)!important;color:#4b5563!important}
+.task-card{display:grid!important;grid-template-columns:104px 132px minmax(0,1fr) auto!important;gap:10px!important;align-items:start!important;padding:13px 16px!important;background:#fff!important;border-bottom:1px solid #eef0f3!important;position:relative!important}.task-card::before{display:none!important}.task-card:hover{background:#fbfbfc!important}.task-card.done .task-title{text-decoration:line-through!important;color:#6b7280!important}.task-when{display:flex!important;align-items:center!important;gap:8px!important}.task-when strong{font-size:13px!important;color:#111827!important;font-weight:850!important}.task-check{width:18px!important;height:18px!important;margin:0!important;accent-color:var(--v22-blue)!important}.task-category-col{display:flex!important;align-items:center!important;gap:6px!important;flex-wrap:wrap!important}.task-main{padding:0!important;min-width:0!important}.task-title{margin:0!important;font-size:15px!important;line-height:1.38!important;color:#111827!important;font-weight:850!important;letter-spacing:-.025em!important}.task-desc{margin:4px 0 0!important;color:#4b5563!important;font-size:13px!important;line-height:1.45!important;font-weight:500!important;white-space:normal!important}.task-facts{display:flex!important;flex-wrap:wrap!important;gap:5px!important;margin-top:7px!important}.task-facts span{min-height:22px!important;padding:2px 7px!important;border:1px solid var(--v22-line)!important;background:#fafafa!important;border-radius:999px!important;color:#6b7280!important;font-size:11.5px!important;font-weight:650!important}.card-memo{margin-top:7px!important;min-height:34px!important;border:1px solid var(--v22-line)!important;background:#fafafa!important;border-radius:10px!important;color:#374151!important}.task-actions{display:flex!important;gap:6px!important;align-items:center!important}.icon-btn{width:34px!important;height:34px!important;border:1px solid var(--v22-line-strong)!important;border-radius:10px!important;background:#fff!important;color:#4b5563!important}.icon-btn.active{background:var(--v22-blue-soft)!important;border-color:#bfdbfe!important;color:#1d4ed8!important}.action-detail{min-height:34px!important;padding:6px 10px!important;border-radius:10px!important}.task-state-chips{gap:4px!important}.task-state-chips .chip{font-size:11px!important}
+.chip{display:inline-flex!important;align-items:center!important;min-height:26px!important;padding:4px 9px!important;border-radius:999px!important;font-size:12px!important;line-height:1!important;font-weight:800!important;letter-spacing:-.015em!important;box-shadow:none!important}.chip.period{background:#f9fafb!important;color:#4b5563!important;border-color:var(--v22-line-strong)!important}.chip.status{background:#f9fafb!important;color:#6b7280!important;border-color:var(--v22-line)!important}.chip.done{background:#ecfdf3!important;color:#15803d!important;border-color:#bbf7d0!important}.chip.important{background:#fff7ed!important;color:#c2410c!important;border-color:#fed7aa!important}.chip.skipped{background:#f3f4f6!important;color:#6b7280!important;border-color:#d1d5db!important}
+/* v2.2: 업무딱지 컬러는 딱지 안에서만 사용하고, 필터/카드 라인에는 번지지 않게 제한 */
+.chip.category[class*="cat-"]{font-weight:900!important;border-width:1px!important}.select-pill.category-pill[class*="cat-"]{background:#fff!important;color:#374151!important;border-color:var(--v22-line-strong)!important}.select-pill.category-pill[class*="cat-"].active{background:#111827!important;color:#fff!important;border-color:#111827!important}.task-card:has(.cat-budget)::before,.task-card:has(.cat-income)::before,.task-card:has(.cat-expense)::before,.task-card:has(.cat-payroll)::before,.task-card:has(.cat-facility)::before,.task-card:has(.cat-contract)::before,.task-card:has(.cat-goods)::before,.task-card:has(.cat-assets)::before,.task-card:has(.cat-property)::before,.task-card:has(.cat-environment)::before,.task-card:has(.cat-hr)::before,.task-card:has(.cat-records)::before,.task-card:has(.cat-committee)::before,.task-card:has(.cat-fund)::before,.task-card:has(.cat-safety)::before,.task-card:has(.cat-civil)::before,.task-card:has(.cat-insurance)::before,.task-card:has(.cat-training)::before,.task-card:has(.cat-stats)::before,.task-card:has(.cat-energy)::before,.task-card:has(.cat-security)::before{display:none!important}
+.modal{border-radius:18px!important;border:1px solid var(--v22-line)!important;box-shadow:0 18px 60px rgba(17,24,39,.16)!important}.to-top-btn{background:#111827!important}
+@media(max-width:980px){.selector-board{grid-template-columns:1fr!important;grid-template-areas:"role" "period" "month"!important}.task-card{grid-template-columns:92px 112px minmax(0,1fr)!important}.task-actions{grid-column:3!important;justify-content:flex-start!important}}
+@media(max-width:640px){.app-shell{width:min(100% - 20px,1120px)!important;margin-top:12px!important}.topbar{padding:9px 12px!important}.hero.slim-hero>div,.toolbar,.selector-panel,.period-group{border-radius:14px!important}.task-card{grid-template-columns:1fr!important;padding:13px 14px!important}.task-when,.task-category-col,.task-main,.task-actions{grid-column:1!important}.task-category-col{order:-1}.task-when{order:-2}.task-actions{justify-content:flex-start!important;flex-wrap:wrap!important}.task-title{font-size:14.5px!important}.task-desc{font-size:12.5px!important}.card-memo{display:none!important}}
+
+/* v2.2.1 업무 흐름 정리 + 필수업무 목록 버그 보정 */
+.period-group.month-group{overflow:hidden!important}.period-title.month-title{position:static!important;top:auto!important;z-index:auto!important;box-shadow:none!important}.task-card{grid-template-columns:132px 132px minmax(0,1fr) auto!important;align-items:start!important}.task-when{grid-column:1!important;display:flex!important;align-items:center!important;gap:10px!important}.task-category-col{grid-column:2!important;display:flex!important;align-items:center!important;gap:6px!important;min-width:0!important}.task-main{grid-column:3!important;display:block!important;min-width:0!important}.task-actions{grid-column:4!important}.task-title{display:block!important;visibility:visible!important;opacity:1!important;color:#111827!important}.task-desc{display:block!important}.task-facts{display:flex!important}.card-memo{display:block!important}.task-when strong{white-space:nowrap!important}.chip.category{white-space:nowrap!important}
+@media(max-width:980px){.task-card{grid-template-columns:118px 120px minmax(0,1fr)!important}.task-actions{grid-column:3!important}.task-main{grid-column:3!important}}
+@media(max-width:640px){.task-card{grid-template-columns:1fr!important}.task-when,.task-category-col,.task-main,.task-actions{grid-column:1!important}.task-when{order:1!important}.task-category-col{order:2!important}.task-main{order:3!important}.task-actions{order:4!important}.card-memo{display:none!important}}
+
+/* v2.2.3 기본보기/필터 흐름 정리 */
+#detailFilterToggle,
+#detailFilters{display:none!important}
+.submission-filter-wrap{background:#f8fafc!important;border:1px solid #e5e7eb!important;border-radius:999px!important;padding:4px!important;box-shadow:none!important}
+.submit-filter-chip{background:transparent!important;border:0!important;color:#4b5563!important;border-radius:999px!important;box-shadow:none!important;font-weight:750!important;min-height:34px!important;padding:0 12px!important}
+.submit-filter-chip.active{background:#eff6ff!important;border:1px solid #bfdbfe!important;color:#1d4ed8!important;box-shadow:none!important}
+.selector-board{display:grid!important;grid-template-columns:.86fr 1.14fr!important;grid-template-areas:"month role"!important;gap:12px!important;margin-bottom:16px!important}
+.month-panel{grid-area:month!important}.role-panel{grid-area:role!important}.period-panel{display:none!important}
+.selector-panel{background:#fff!important;border:1px solid #e5e7eb!important;border-radius:18px!important;box-shadow:0 8px 20px rgba(15,23,42,.035)!important;padding:16px!important}
+.selector-total,.select-pill,.month-pill{background:#fff!important;border:1px solid #dbe3ef!important;color:#374151!important;border-radius:999px!important;box-shadow:none!important;transform:none!important}
+.selector-total.active,.select-pill.active,.select-pill.category-pill.active,.month-pill.active{background:#eff6ff!important;border-color:#93c5fd!important;color:#1d4ed8!important;box-shadow:none!important}
+.selector-total.active b,.select-pill.active b,.month-pill.active b{background:#dbeafe!important;color:#1d4ed8!important}
+.selector-total b,.select-pill b,.month-pill b{background:#f3f4f6!important;color:#6b7280!important}
+.selector-panel.wide .select-pill.category-pill{background:#fff!important;border-color:#dbe3ef!important;color:#374151!important;border-radius:999px!important;min-height:38px!important}
+.selector-panel.wide .select-pill.category-pill.active{background:#eff6ff!important;border-color:#93c5fd!important;color:#1d4ed8!important}
+.month-calendar{grid-template-columns:repeat(4,minmax(0,1fr))!important}.month-pill{min-height:42px!important}
+.section-head{margin-top:18px!important}.section-head .eyebrow{display:none!important}.section-head h2{font-size:22px!important}
+.task-card{grid-template-columns:132px 132px minmax(0,1fr) auto!important;align-items:start!important}.task-when{grid-column:1!important}.task-category-col{grid-column:2!important}.task-main{grid-column:3!important}.task-actions{grid-column:4!important}
+.card-memo.memo-preview{display:inline-flex!important;width:auto!important;min-height:28px!important;margin-top:7px!important;padding:4px 8px!important;border:1px solid #e5e7eb!important;background:#fafafa!important;border-radius:9px!important;color:#6b7280!important;font-size:12px!important;text-align:left!important;box-shadow:none!important}.card-memo.memo-preview:hover{background:#f8fafc!important;color:#1d4ed8!important}.card-memo.memo-preview.muted{font-weight:600!important}
+.memo-login-hint{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:10px 0 0;padding:10px 12px;border:1px solid #dbeafe;background:#eff6ff;color:#1d4ed8;border-radius:12px;font-size:13px;font-weight:700}
+.memo-login-hint .ghost{min-height:30px;padding:4px 9px;background:#fff!important;color:#1d4ed8!important;border-color:#bfdbfe!important}
+@media(max-width:980px){.selector-board{grid-template-columns:1fr!important;grid-template-areas:"month" "role"!important}.task-card{grid-template-columns:112px 116px minmax(0,1fr)!important}.task-actions{grid-column:3!important;justify-content:flex-start!important}}
+@media(max-width:640px){.selector-board{grid-template-columns:1fr!important;grid-template-areas:"month" "role"!important}.task-card{grid-template-columns:1fr!important}.task-when,.task-category-col,.task-main,.task-actions{grid-column:1!important}.task-when{order:1!important}.task-category-col{order:2!important}.task-main{order:3!important}.task-actions{order:4!important}.submission-filter-wrap{width:100%!important}.submit-filter-chip{flex:1 1 auto!important}.month-calendar{grid-template-columns:repeat(3,minmax(0,1fr))!important}}
+
+/* v2.2.4 업무 구분/버튼 톤 정리 */
+.submission-filter-wrap{
+  background:#f8fafc!important;
+  border:1px solid #dbe3ef!important;
+  box-shadow:none!important;
+}
+.submit-filter-chip{
+  background:#fff!important;
+  border:1px solid transparent!important;
+  color:#374151!important;
+  font-weight:750!important;
+}
+.submit-filter-chip.active{
+  background:#eff6ff!important;
+  border-color:#bfdbfe!important;
+  color:#1d4ed8!important;
+  box-shadow:none!important;
+}
+.selector-total.active,
+.select-pill.active,
+.select-pill.category-pill.active,
+.month-pill.active{
+  background:#eff6ff!important;
+  border-color:#93c5fd!important;
+  color:#1d4ed8!important;
+  box-shadow:none!important;
+}
+.selector-total.active b,
+.select-pill.active b,
+.month-pill.active b{
+  background:#dbeafe!important;
+  color:#1d4ed8!important;
+}
+
+/* v2.2.5: 월 흐름 정렬 보정 + 업무표 짝수행 가독성 보정 */
+.task-list .period-group .task-card:nth-of-type(odd){
+  background:#fff!important;
+}
+.task-list .period-group .task-card:nth-of-type(even){
+  background:#fbfcfe!important;
+}
+.task-list .period-group .task-card:nth-of-type(even):hover,
+.task-list .period-group .task-card:hover{
+  background:#f6f9fd!important;
+}
+.task-card.done:nth-of-type(even),
+.task-card.skipped:nth-of-type(even){
+  background:#f8fafc!important;
+}
+@media(max-width:640px){
+  .task-list .period-group .task-card:nth-of-type(even){background:#fcfdff!important;}
+}
+
+/* v2.2.6: 목록에서는 메모가 있을 때만 작은 미리보기로 표시 */
+.memo-preview{
+  display:inline-flex!important;
+  max-width:100%!important;
+  margin-top:7px!important;
+  padding:5px 8px!important;
+  border:1px solid #e5e7eb!important;
+  background:#fafafa!important;
+  border-radius:9px!important;
+  color:#4b5563!important;
+  font-size:12px!important;
+  line-height:1.45!important;
+  font-weight:600!important;
+  overflow:hidden!important;
+  text-overflow:ellipsis!important;
+  white-space:nowrap!important;
+}
+.memo-preview::before{
+  content:"메모";
+  margin-right:6px;
+  color:#64748b;
+  font-weight:850;
+}
+@media(max-width:640px){
+  .memo-preview{white-space:normal!important;display:flex!important;}
+}
+
+/* v2.2.6: 목록에서는 메모가 있을 때만 작은 미리보기로 표시 */
+.memo-preview{
+  display:inline-flex!important;
+  max-width:100%!important;
+  margin-top:7px!important;
+  padding:5px 8px!important;
+  border:1px solid #e5e7eb!important;
+  background:#fafafa!important;
+  border-radius:9px!important;
+  color:#4b5563!important;
+  font-size:12px!important;
+  line-height:1.45!important;
+  font-weight:600!important;
+  overflow:hidden!important;
+  text-overflow:ellipsis!important;
+  white-space:nowrap!important;
+}
+.memo-preview::before{
+  content:"메모";
+  margin-right:6px;
+  color:#64748b;
+  font-weight:850;
+}
+@media(max-width:640px){
+  .memo-preview{white-space:normal!important;display:flex!important;}
+}
+
+
+/* v2.2.7: 화면 흐름/컴포넌트 통일 업데이트 */
+.hero.slim-hero .eyebrow{color:#64748b!important;letter-spacing:.06em!important;text-transform:none!important}
+.hero.slim-hero h1{font-size:27px!important;letter-spacing:-.05em!important}
+.hero-desc{color:#4b5563!important;font-weight:600!important}
+
+/* 업무표: 시기 칸 축소 + 업무딱지와 더 가까운 표형 정렬 */
+.task-card{
+  grid-template-columns:92px 112px minmax(0,1fr) auto!important;
+  column-gap:8px!important;
+  padding:13px 16px!important;
+}
+.task-when{gap:8px!important}
+.task-when strong{min-width:42px!important;letter-spacing:-.02em!important}
+.task-category-col{padding-left:0!important}
+.task-category-col .chip.category{min-width:0!important;max-width:104px!important;justify-content:center!important}
+.task-title{font-size:15.2px!important}
+.task-actions{gap:5px!important}
+
+/* 보기/월/업무분장 버튼: 알약형에서 둥근 사각형으로 정리 */
+.submission-filter-wrap{border-radius:14px!important;background:#f8fafc!important;padding:4px!important;border:1px solid #e5eaf0!important}
+.submit-filter-chip{border-radius:12px!important;min-height:36px!important;padding:0 13px!important;background:transparent!important;border:1px solid transparent!important;color:#374151!important;font-weight:800!important}
+.submit-filter-chip.active{border-radius:12px!important;background:#eff6ff!important;border-color:#bfdbfe!important;color:#1d4ed8!important}
+.selector-panel{border-radius:18px!important}
+.selector-total,
+.select-pill,
+.month-pill{
+  border-radius:14px!important;
+  min-height:42px!important;
+  padding:8px 12px!important;
+  background:#fff!important;
+  border-color:#dbe3ef!important;
+  color:#374151!important;
+}
+.selector-panel.wide .select-pill.category-pill{border-radius:14px!important;min-height:42px!important;padding:8px 10px!important}
+.selector-total.active,
+.select-pill.active,
+.select-pill.category-pill.active,
+.month-pill.active{
+  background:#eff6ff!important;
+  border-color:#93c5fd!important;
+  color:#1d4ed8!important;
+  box-shadow:none!important;
+}
+.selector-total b,
+.select-pill b,
+.month-pill b{border-radius:10px!important;background:#f1f5f9!important;color:#64748b!important}
+.selector-total.active b,
+.select-pill.active b,
+.month-pill.active b{background:#dbeafe!important;color:#1d4ed8!important}
+.selector-head small{color:#64748b!important;font-weight:600!important}
+
+/* 업무판 제목/메타 한 줄 톤 정리 */
+.section-head .eyebrow{display:none!important}
+#taskListMeta{max-width:720px!important;text-align:right!important;line-height:1.45!important}
+
+@media(max-width:980px){
+  .task-card{grid-template-columns:84px 104px minmax(0,1fr)!important;column-gap:7px!important}
+  .task-actions{grid-column:3!important;justify-content:flex-start!important;margin-top:6px!important}
+}
+@media(max-width:640px){
+  .task-card{grid-template-columns:1fr!important}
+  .task-when,.task-category-col,.task-main,.task-actions{grid-column:1!important}
+  .task-when{order:1!important}
+  .task-category-col{order:2!important;margin-top:2px!important}
+  .task-main{order:3!important}
+  .task-actions{order:4!important}
+  #taskListMeta{text-align:left!important}
+  .selector-total,.select-pill,.month-pill{border-radius:13px!important;min-height:40px!important}
+}

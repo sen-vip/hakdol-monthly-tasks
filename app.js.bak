@@ -262,35 +262,27 @@ function taskFlowBucket(task) {
 }
 
 function taskSortScore(task) {
-  const rawPeriod = String(task.period || task.periodGroup || "").replace(/\s+/g, "");
   const bucket = taskFlowBucket(task);
-  const day = extractPeriodDay(rawPeriod);
+  const period = String(task.period || task.periodGroup || "");
+  const day = extractPeriodDay(period);
+  // 사용자 흐름: 월초 → 월중/중순/20일경 → 월말 → 기타
+  let base = 400;
+  if (bucket === "월초" || period.includes("초순")) base = 0;
+  else if (bucket === "중순" || period.includes("중순")) base = 90;
+  else if (bucket === "월중" || period.includes("월중")) base = 100;
+  else if (period.includes("20일")) base = 130;
+  else if (period.includes("하순")) base = 160;
+  else if (bucket === "월말" || period.includes("말까지") || period.includes("월말")) base = 200;
+  else if (bucket === "수시") base = 300;
 
-  // 실제 월 흐름 기준 정렬값
-  // 1일경 → 월초 → 5일경 → 10일경 → 중순 → 월중 → 20일경 → 하순 → 월말 → 말까지
-  if (day !== null) {
-    // 구체 날짜가 있으면 숫자 날짜를 최우선으로 사용한다.
-    return day;
-  }
-
-  if (rawPeriod.includes("1일")) return 1;
-  if (rawPeriod.includes("월초")) return 3;
-  if (rawPeriod.includes("초순")) return 4;
-  if (rawPeriod.includes("10일")) return 10;
-  if (rawPeriod.includes("중순")) return 15;
-  if (rawPeriod.includes("월중")) return 16;
-  if (rawPeriod.includes("20일")) return 20;
-  if (rawPeriod.includes("하순")) return 23;
-  if (rawPeriod.includes("25일")) return 25;
-  if (rawPeriod.includes("월말")) return 28;
-  if (rawPeriod.includes("말까지") || rawPeriod.includes("말일")) return 29;
-
-  if (bucket === "월초") return 3;
-  if (bucket === "중순") return 15;
-  if (bucket === "월중") return 16;
-  if (bucket === "월말") return 28;
-  if (bucket === "수시") return 98;
-  return 99;
+  let offset = 50;
+  if (day !== null) offset = day;
+  else if (base === 0) offset = 3;
+  else if (base === 90) offset = 15;
+  else if (base === 100) offset = 16;
+  else if (base === 200) offset = 29;
+  else if (base === 300) offset = 0;
+  return base + offset;
 }
 
 function getFilteredTasks() {
@@ -379,9 +371,7 @@ function renderHeroAndStats() {
   const undoneValue = state.user ? `${undone}건` : "-";
   const undoneDesc = state.user ? "완료·해당없음 제외" : "로그인 후 확인";
 
-  const boardTitleBase = state.allMode ? "전체" : `${state.selectedMonth}월`;
-  const boardModeName = state.submissionFilter === "exclude" ? "챙길 업무" : (state.submissionFilter === "only" ? "제출 업무" : "업무판");
-  els.heroTitle.textContent = `${boardTitleBase} ${boardModeName}`;
+  els.heroTitle.textContent = state.allMode ? "전체 업무판" : `${state.selectedMonth}월 업무판`;
   if (els.heroMonthTitle) els.heroMonthTitle.textContent = state.allMode ? "전체업무 보기" : `${state.selectedMonth}월 필수업무`;
   els.heroSummary.textContent = state.allMode
     ? `조건에 맞는 업무 ${tasks.length}건 표시 중`
@@ -392,7 +382,7 @@ function renderHeroAndStats() {
     { key: "early", label: "월초", value: `${early}건`, desc: "월초 업무" },
     { key: "middle", label: "중순", value: `${middle}건`, desc: "중순 업무" },
     { key: "late", label: "월말", value: `${late}건`, desc: "월말 업무" },
-    { key: "submission", label: "제출 업무", value: `${submitCount}건`, desc: "공문 처리" },
+    { key: "submission", label: "제출업무", value: `${submitCount}건`, desc: "공문 처리" },
     { key: "undone", label: "미완료", value: undoneValue, desc: undoneDesc }
   ];
   els.statsGrid.innerHTML = cards.map(card => `<button type="button" class="summary-chip" data-stat-action="${card.key}" title="${escapeHtml(card.desc)}"><span>${card.label}</span><strong>${card.value}</strong></button>`).join("");
@@ -447,7 +437,7 @@ function renderSelectorBoard() {
     <article class="selector-panel month-panel compact-month-panel">
       <div class="selector-head">
         <strong>1. 월 선택</strong>
-        <small>보고 싶은 달을 먼저 고르기</small>
+        <small>연간 흐름에서 볼 월을 고르기</small>
       </div>
       <button type="button" class="selector-total ${state.allMode ? "active" : ""}" data-select-group="month" data-select-value="">
         <span>전체</span><b>${monthBase.length}</b>
@@ -464,7 +454,7 @@ function renderSelectorBoard() {
     <article class="selector-panel wide role-panel">
       <div class="selector-head">
         <strong>2. 어떤 업무분장인가요?</strong>
-        <small>내 담당 업무를 골라 보기</small>
+        <small>내 담당 업무만 빠르게 보기</small>
       </div>
       <button type="button" class="selector-total ${state.categories.length ? "" : "active"}" data-select-group="category" data-select-value="">
         <span>전체</span><b>${categoryTotal}</b>
@@ -538,21 +528,14 @@ function renderYearBoard() {
 
 function renderTaskList() {
   const tasks = getFilteredTasks();
-  const titleBase = state.allMode ? "전체" : `${state.selectedMonth}월`;
-  const modeLabel = state.submissionFilter === "exclude" ? "챙길 업무" : (state.submissionFilter === "only" ? "제출 업무" : "업무판");
-  const modeDesc = state.submissionFilter === "exclude"
-    ? "공문이 없어도 시기상 확인하면 좋은 업무예요."
-    : (state.submissionFilter === "only"
-      ? "공문이 오면 조사·신청·제출로 처리하는 업무예요."
-      : "이번 달 행정실 업무를 시기 순서로 확인해요.");
-  els.taskListTitle.textContent = `${titleBase} ${modeLabel}`;
-  els.taskListMeta.textContent = `표시 ${tasks.length}건 · ${modeDesc}`;
+  els.taskListTitle.textContent = state.allMode ? "전체 업무 조망" : `${state.selectedMonth}월 챙길 업무`;
+  els.taskListMeta.textContent = `표시 ${tasks.length}건`;
   if (!tasks.length) {
     els.taskList.innerHTML = `<div class="empty">조건에 맞는 업무가 없습니다.</div>`;
     return;
   }
   const groups = new Map();
-  tasks.sort((a,b) => (a.month - b.month) || (taskSortScore(a) - taskSortScore(b)));
+  tasks.sort((a,b) => (a.month - b.month) || (taskSortScore(a) - taskSortScore(b)) || a.title.localeCompare(b.title, "ko"));
   tasks.forEach(t => {
     const key = `${t.month}월`;
     if (!groups.has(key)) groups.set(key, []);
@@ -591,7 +574,7 @@ function taskCard(task) {
       <p class="task-title">${escapeHtml(task.title)}</p>
       ${task.description ? `<p class="task-desc">${escapeHtml(task.description)}</p>` : ""}
       ${facts ? `<div class="task-facts">${facts}</div>` : ""}
-      ${st.memo ? `<div class="memo-preview" aria-label="내 메모">${escapeHtml(st.memo)}</div>` : ""}
+      <input class="card-memo" data-memo type="text" value="${escapeHtml(st.memo || "")}" placeholder="로그인 후 내 메모 추가" ${state.user ? "" : "readonly aria-disabled=\"true\""} />
     </div>
     <div class="task-actions">
       <div class="chips task-state-chips">${statusChips}</div>

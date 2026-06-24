@@ -110,7 +110,7 @@
     month: today.getMonth() + 1,
     schools: [],
     selectedDate: formatIsoDate(today),
-    activeTab: 'recommend',
+    activeTab: 'all',
     timetableLoading: false,
     authUser: null,
     manualEvents: loadManualEvents()
@@ -991,20 +991,17 @@
     if (document.getElementById('neisExtensionPanel')) return;
     const panel = document.createElement('section');
     panel.id = 'neisExtensionPanel';
-    panel.className = 'neis-panel no-print neis-school-panel neis-compact-school-panel';
+    panel.className = 'neis-panel no-print neis-school-panel';
     panel.innerHTML = `
-      <div class="neis-head neis-compact-head">
+      <div class="neis-head">
         <div>
-          <h2>우리 학교 일정 확인</h2>
-          <p>학교별 일정 때문에 추가로 챙길 일이 있는지 확인해요.</p>
+          <p class="neis-eyebrow">School Calendar Check</p>
+          <h2>우리 학교 추가 확인</h2>
+          <p>기본 월별업무를 본 뒤, 우리 학교 학사일정 때문에 더 챙길 일이 있는지 확인해요.</p>
         </div>
-        <div class="neis-head-actions">
-          <div class="neis-saved" id="neisSavedSchool">학교 설정 전</div>
-          <button class="ghost" id="neisSettingsToggle" type="button" aria-expanded="false">학교 설정하기</button>
-          <button class="ghost" id="neisCalendarToggle" type="button" aria-expanded="false">통합달력 보기</button>
-        </div>
+        <div class="neis-saved" id="neisSavedSchool">학교 설정 전</div>
       </div>
-      <div class="neis-settings-card neis-collapsible" id="neisSettingsCard" hidden>
+      <div class="neis-settings-card">
         <div class="neis-grid">
           <label>시도교육청<select id="neisOfficeSelect"></select></label>
           <label>학교명<input id="neisSchoolName" type="text" placeholder="예: 한국초등학교"></label>
@@ -1012,28 +1009,29 @@
         </div>
         <div class="neis-actions">
           <button class="primary" id="neisSearchBtn" type="button">학교 찾기</button>
+
           <button class="ghost" id="neisClearBtn" type="button">설정 초기화</button>
         </div>
         <p class="neis-help"><span id="neisStorageHelp">학교 정보와 직접 추가 일정은 이 브라우저에만 저장됩니다. 로그인하면 다른 PC에서도 이어서 사용할 수 있어요.</span> 시간표 일정은 수업내용 키워드로 자동 감지한 참고 일정입니다.</p>
         <div id="neisSchoolResults" class="neis-results" hidden></div>
       </div>
-      <div class="neis-recommend-preview" id="neisRecommendPreview"></div>
-      <div class="neis-calendar-card neis-collapsible" id="neisCalendarCard" hidden>
+      <div class="neis-calendar-card">
         <div class="neis-calendar-top">
           <div>
-            <h3 id="neisCalendarTitle">우리 학교 통합 달력</h3>
-            <p id="neisCalendarMeta">학사일정과 시간표 감지 일정은 필요한 때 펼쳐서 확인해요.</p>
+            <h3 id="neisCalendarTitle">우리 학교 학사일정 달력</h3>
+            <p id="neisCalendarMeta">수련활동, 체험학습, 시험기간처럼 학교별로 다른 일정을 추가 확인해요.</p>
             <p id="neisCacheMeta" class="neis-cache-meta"></p>
           </div>
           <div class="neis-month-controls">
             <button class="ghost" id="neisPrevMonth" type="button">← 이전달</button>
-            <button class="primary" id="neisLoadSchedule" type="button">학사·시간표 불러오기</button>
+            <button class="primary" id="neisLoadSchedule" type="button">학사+시간표 불러오기</button>
             <button class="ghost" id="neisNextMonth" type="button">다음달 →</button>
           </div>
         </div>
         <div class="neis-tabs" role="tablist">
+          <button data-neis-tab="all" class="active" type="button">전체보기</button>
           <button data-neis-tab="calendar" type="button">통합 달력</button>
-          <button data-neis-tab="recommend" class="active" type="button">추천업무</button>
+          <button data-neis-tab="recommend" type="button">추천업무</button>
         </div>
         <div id="neisCalendarBody" class="neis-calendar-body"></div>
       </div>
@@ -1043,56 +1041,7 @@
     else shell.append(panel);
   }
 
-  function toggleNeisSettings(forceOpen) {
-    const card = document.getElementById('neisSettingsCard');
-    const btn = document.getElementById('neisSettingsToggle');
-    if (!card || !btn) return;
-    const open = typeof forceOpen === 'boolean' ? forceOpen : card.hidden;
-    card.hidden = !open;
-    btn.setAttribute('aria-expanded', String(open));
-    btn.textContent = open ? '학교 설정 접기' : '학교 설정하기';
-  }
-
-  function toggleNeisCalendar(forceOpen) {
-    const card = document.getElementById('neisCalendarCard');
-    const btn = document.getElementById('neisCalendarToggle');
-    if (!card || !btn) return;
-    const open = typeof forceOpen === 'boolean' ? forceOpen : card.hidden;
-    card.hidden = !open;
-    btn.setAttribute('aria-expanded', String(open));
-    btn.textContent = open ? '통합달력 접기' : '통합달력 보기';
-    if (open) {
-      state.activeTab = state.activeTab === 'calendar' ? 'calendar' : 'recommend';
-      renderCalendar();
-      card.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
-    }
-  }
-
-  function renderRecommendPreview() {
-    const host = document.getElementById('neisRecommendPreview');
-    if (!host) return;
-    const hasSchool = Boolean(state.settings.schoolCode && state.settings.officeCode);
-    const monthSchedules = getMonthSchedules();
-    const recs = recommendationsForSchedules(monthSchedules);
-    const cache = loadYearCache();
-    if (!hasSchool) {
-      host.innerHTML = `<div class="neis-preview-card is-empty"><div><strong>추천업무</strong><p>학교를 설정하면 시험기간·수련활동·방학식 등과 연결된 추천업무를 보여줘요.</p></div><button class="ghost" type="button" data-open-school-settings>학교 설정하기</button></div>`;
-    } else if (!cache) {
-      host.innerHTML = `<div class="neis-preview-card is-empty"><div><strong>추천업무 준비 전</strong><p>${esc(state.settings.schoolName || '우리 학교')} 학사일정을 불러오면 일정 기반 추천업무를 확인할 수 있어요.</p></div><button class="primary" id="neisPreviewLoadBtn" type="button">학사·시간표 불러오기</button></div>`;
-    } else if (!recs.length) {
-      host.innerHTML = `<div class="neis-preview-card"><div><strong>추천업무 0건</strong><p>현재 선택한 학교 일정에서 추가로 추천할 업무가 없어요.</p></div><button class="ghost" type="button" data-open-calendar>통합달력 보기</button></div>`;
-    } else {
-      host.innerHTML = `<div class="neis-preview-card"><div><strong>추천업무 ${recs.length}종</strong><p>${recs.slice(0, 3).map((r) => esc(r.title)).join(' · ')}${recs.length > 3 ? ' 외' : ''}</p></div><button class="ghost" type="button" data-open-calendar>자세히 보기</button></div>`;
-    }
-    host.querySelector('[data-open-school-settings]')?.addEventListener('click', () => toggleNeisSettings(true));
-    host.querySelector('[data-open-calendar]')?.addEventListener('click', () => toggleNeisCalendar(true));
-    host.querySelector('#neisPreviewLoadBtn')?.addEventListener('click', onLoadYearSchedule);
-  }
-
   function bindEvents() {
-    document.getElementById('neisSettingsToggle')?.addEventListener('click', () => toggleNeisSettings());
-    document.getElementById('neisCalendarToggle')?.addEventListener('click', () => toggleNeisCalendar());
-    document.getElementById('neisPreviewLoadBtn')?.addEventListener('click', onLoadYearSchedule);
     document.getElementById('neisSearchBtn')?.addEventListener('click', onSearchSchools);
     document.getElementById('neisSchoolName')?.addEventListener('keydown', (event) => {
       if (event.key === 'Enter') { event.preventDefault(); onSearchSchools(); }
@@ -1141,8 +1090,6 @@
   }
 
   function renderCalendar() {
-    renderRecommendPreview();
-    if (state.activeTab === 'all') state.activeTab = 'recommend';
     document.querySelectorAll('[data-neis-tab]').forEach((btn) => btn.classList.toggle('active', btn.dataset.neisTab === state.activeTab));
     const title = document.getElementById('neisCalendarTitle');
     const meta = document.getElementById('neisCalendarMeta');
@@ -1159,11 +1106,11 @@
     title.textContent = `${state.year}년 ${state.month}월 우리 학교 통합 일정 달력`;
     meta.textContent = `${school} · 이번 달 통합일정 ${monthSchedules.length}건 · 추천업무 ${recCount}종`;
     if (cacheMeta) cacheMeta.textContent = cacheStatusText(yearCache);
-    if (loadBtn) loadBtn.textContent = yearCache ? '학사+시간표 새로고침' : '학사·시간표 불러오기';
+    if (loadBtn) loadBtn.textContent = yearCache ? '학사+시간표 새로고침' : '학사+시간표 불러오기';
 
     const sections = [];
-    if (state.activeTab === 'calendar') sections.push(renderCalendarSection());
-    if (state.activeTab === 'recommend') sections.push(renderRecommendSection());
+    if (state.activeTab === 'all' || state.activeTab === 'calendar') sections.push(renderCalendarSection());
+    if (state.activeTab === 'all' || state.activeTab === 'recommend') sections.push(renderRecommendSection());
     body.innerHTML = sections.join('');
     bindCalendarDayEvents(body);
   }
@@ -1190,7 +1137,7 @@
     const cache = loadYearCache();
     const selectedSchedules = getSchedulesByDate(state.selectedDate);
     const selectedRules = recommendationsForSchedules(selectedSchedules);
-    const cacheNotice = cache ? '' : `<div class="neis-empty small neis-calendar-notice"><strong>나이스 일정은 아직 불러오지 않았어요.</strong><span>학교 설정 후 [학사·시간표 불러오기]를 누르거나, 아래 달력에서 우리 학교 일정을 직접 추가할 수 있어요.</span></div>`;
+    const cacheNotice = cache ? '' : `<div class="neis-empty small neis-calendar-notice"><strong>나이스 일정은 아직 불러오지 않았어요.</strong><span>학교 설정 후 [학사+시간표 불러오기]를 누르거나, 아래 달력에서 우리 학교 일정을 직접 추가할 수 있어요.</span></div>`;
     return `<div class="neis-section">
       <div class="neis-section-head"><h4>📅 우리 학교 통합 달력</h4><span>${esc(state.year)}년 ${esc(state.month)}월</span></div>
       <div class="neis-calendar-legend"><span class="neis-source-badge schedule">학사일정</span><span class="neis-source-badge timetable">시간표 감지</span><span class="neis-source-badge manual">직접추가</span><em>${esc(schoolLevelText())} 수업내용 감지 + 우리 학교 직접 일정</em></div>
@@ -1427,7 +1374,7 @@
     } catch (error) {
       toast(String(error.message || error || '나이스 API 호출에 실패했어요.'));
     } finally {
-      setBusy('neisLoadSchedule', false, loadYearCache() ? '학사+시간표 새로고침' : '학사·시간표 불러오기');
+      setBusy('neisLoadSchedule', false, loadYearCache() ? '학사+시간표 새로고침' : '학사+시간표 불러오기');
     }
   }
 

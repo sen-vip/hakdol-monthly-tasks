@@ -8,11 +8,11 @@
   <link rel="preconnect" href="https://cdn.jsdelivr.net" />
   <link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%20100%20100%22%3E%3Ctext%20y%3D%22.9em%22%20font-size%3D%2290%22%3E%F0%9F%93%85%3C/text%3E%3C/svg%3E" />
   <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%20100%20100%22%3E%3Ctext%20y%3D%22.9em%22%20font-size%3D%2290%22%3E%F0%9F%93%85%3C/text%3E%3C/svg%3E" />
-  <link rel="stylesheet" href="./styles.css?v=20260624-v22727-flow-components" />
+  <link rel="stylesheet" href="./styles.css?v=20260624-v223-flow" />
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="./supabase-config.js"></script>
-  <script src="./data/tasks.js?v=20260624-v227"></script>
-  <link rel="stylesheet" href="./neis-extension.css?v=20260624-v22727-flow-components">
+  <script src="./data/tasks.js?v=20260624-v2"></script>
+  <link rel="stylesheet" href="./neis-extension.css?v=20260624-v223-flow">
 </head>
 <body>
   <header class="topbar no-print">
@@ -41,12 +41,12 @@
       <div class="hero-main">
         <div class="hero-title-row">
           <div>
-            <p class="eyebrow">Monthly Work Board</p>
+            <p class="eyebrow">Monthly Task Board</p>
             <h1 id="heroTitle">이번 달 업무판</h1>
           </div>
           <p class="hero-summary-text" id="heroSummary">업무를 불러오는 중입니다.</p>
         </div>
-        <p class="hero-desc">이번 달 행정실 업무를 시기 순서로 확인해요.</p>
+        <p class="hero-desc">이번 달 학교 행정실 주요업무를 시기별로 확인해요.</p>
       </div>
     </section>
 
@@ -63,8 +63,8 @@
       </label>
       <div class="submission-filter-wrap" aria-label="제출업무 필터">
         <button type="button" class="submit-filter-chip active" data-submission-filter="">전체</button>
-        <button type="button" class="submit-filter-chip" data-submission-filter="exclude">챙길 업무</button>
-        <button type="button" class="submit-filter-chip" data-submission-filter="only">제출 업무</button>
+        <button type="button" class="submit-filter-chip" data-submission-filter="only">제출만 보기</button>
+        <button type="button" class="submit-filter-chip" data-submission-filter="exclude">제출 제외 보기</button>
       </div>
       <button class="ghost" id="detailFilterToggle" type="button" aria-expanded="false">상세 필터</button>
       <button class="ghost add-school-task" id="addTaskBtn">+ 우리 학교 업무 추가</button>
@@ -190,7 +190,7 @@
 
   <button type="button" class="to-top-btn no-print" id="toTopBtn" data-action="go-top" aria-label="맨 위로 올리기">↑</button>
   <div class="toast no-print" id="toast" role="status" aria-live="polite"></div>
-  <script src="./app.js?v=20260624-v22727-flow-components"></script>
-  <script src="./neis-extension.js?v=20260624-v22727-flow-components" defer></script>
+  <script src="./app.js?v=20260624-v221-flow"></script>
+  <script src="./neis-extension.js?v=20260624-v221-flow" defer></script>
 </body>
 </html>
