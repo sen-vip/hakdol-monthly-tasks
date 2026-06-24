@@ -154,6 +154,17 @@ function dispatchHakdolAuthChanged() {
   window.dispatchEvent(new CustomEvent('hakdol-auth-changed', { detail: { user: state.user } }));
 }
 
+function getAppBaseUrl() {
+  const path = window.location.pathname;
+  const repoBase = path.includes('/hakdol-monthly-tasks/') ? '/hakdol-monthly-tasks/' : './';
+  if (repoBase === './') return new URL('./', window.location.href).href;
+  return `${window.location.origin}${repoBase}`;
+}
+
+function getSignupCompleteUrl() {
+  return new URL('signup-complete.html', getAppBaseUrl()).href;
+}
+
 function normalizeText(value = "") {
   return String(value).toLowerCase().replace(/\s+/g, " ").trim();
 }
@@ -851,7 +862,7 @@ els.signupBtn.addEventListener("click", async () => {
   const { error } = await supabaseClient.auth.signUp({
     email,
     password,
-    options: { emailRedirectTo: 'https://sen-vip.github.io/hakdol-monthly-tasks/' }
+    options: { emailRedirectTo: getSignupCompleteUrl() }
   });
   if (error) { toast(error.message); return; }
   toast("회원가입 메일을 확인해주세요. 인증 후 앱으로 다시 돌아옵니다.");
