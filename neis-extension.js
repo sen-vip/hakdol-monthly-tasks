@@ -401,7 +401,7 @@
     const department = String(task.department || '').trim();
     if (!department) return false;
     const normalizedTitle = trimTrailingMeta(task.title).replace(/\s+/g, '');
-    return /(제출|신청|협조)$/.test(normalizedTitle);
+    return /(조사|신청|제출|협조)$/.test(normalizedTitle);
   }
 
 
@@ -1233,13 +1233,18 @@
     }
     const list = linked.length ? linked : monthTasks.slice(0, 6);
     const lead = linked.length ? '나이스 일정과 연결된 업무' : '이번 달 챙길 업무';
-    return `<div class="neis-section"><h4>🗂️ ${esc(lead)}</h4><div class="neis-monthly-list">${list.map((task) => `<article class="neis-monthly-card">
-      <span class="neis-chip">${esc(task.period || task.periodGroup || '월중')}</span>
-      <span class="neis-chip soft">${esc(task.category || '업무')}</span>
-      ${linked.includes(task) ? `<span class="neis-chip hot">이번 달 실제 일정 있음</span>` : ''}
-      <strong>${esc(task.title || '월별업무')}</strong>
-      <p>${esc(task.description || task.note || '상세 내용은 기존 월별업무 카드에서 확인하세요.')}</p>
-    </article>`).join('')}</div></div>`;
+    return `<div class="neis-section neis-monthly-section"><div class="neis-section-head compact"><h4>🗂️ ${esc(lead)}</h4><span>제출성 업무 제외</span></div><div class="neis-monthly-list">${list.map((task) => {
+      const desc = task.description || task.note || '';
+      return `<article class="neis-monthly-card">
+        <div class="neis-monthly-meta">
+          <span class="neis-chip">${esc(task.period || task.periodGroup || '월중')}</span>
+          <span class="neis-chip soft">${esc(task.category || '업무')}</span>
+          ${linked.includes(task) ? `<span class="neis-chip hot">실제 일정 있음</span>` : ''}
+        </div>
+        <strong>${esc(task.title || '월별업무')}</strong>
+        ${desc ? `<p>${esc(desc)}</p>` : ''}
+      </article>`;
+    }).join('')}</div></div>`;
   }
 
   async function onSearchSchools() {

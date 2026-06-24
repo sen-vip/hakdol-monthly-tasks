@@ -177,7 +177,7 @@ function isSubmissionTask(task) {
   const department = String(task.department || "").trim();
   if (!department) return false;
   const normalizedTitle = trimTrailingMeta(task.title).replace(/\s+/g, "");
-  return /(제출|신청|협조)$/.test(normalizedTitle);
+  return /(조사|신청|제출|협조)$/.test(normalizedTitle);
 }
 
 function getAllTasks() {

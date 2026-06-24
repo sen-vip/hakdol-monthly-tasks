@@ -7,3 +7,18 @@
 /* v2.5 직접 일정 추가 + 제출업무 제외 보정 */
 .neis-source-badge.manual{background:#fff7ed;border-color:#fed7aa;color:#c2410c}.neis-event-dot.is-manual{background:#fff7ed;border-color:#fed7aa;color:#c2410c}.neis-manual-form{margin:12px 0 0;padding:12px;border:1px solid #e5eaf0;border-radius:14px;background:#fff;display:flex;flex-direction:column;gap:8px}.neis-manual-form strong{font-size:13px}.neis-manual-row{display:flex;gap:8px}.neis-manual-form input{min-height:38px;border:1px solid #e5eaf0;border-radius:11px;padding:0 11px;font:inherit;min-width:0}.neis-manual-row input{flex:1}.neis-manual-row button{white-space:nowrap}.neis-manual-form small{color:#64748b;font-size:11.5px}.neis-delete-manual{margin-left:6px;border:1px solid #fed7aa;background:#fff7ed;color:#c2410c;border-radius:999px;font-size:11px;font-weight:800;padding:2px 7px;vertical-align:middle}.neis-calendar-notice{margin-bottom:10px;text-align:left}.neis-calendar-notice strong,.neis-calendar-notice span{display:block}.neis-calendar-notice span{margin-top:3px}
 @media(max-width:560px){.neis-manual-row{flex-direction:column}.neis-manual-row button{width:100%}}
+
+/* v2.0.1 이번 달 챙길 업무 가독성 보정 */
+.neis-monthly-section{background:#fff;border:1px solid #dbe3ef;border-radius:18px;padding:16px;box-shadow:0 10px 24px rgba(31,42,68,.045)}
+.neis-section-head.compact{margin-bottom:12px;border-bottom:1px solid #edf2f7;padding-bottom:10px}
+.neis-section-head.compact h4{margin:0;font-size:18px;letter-spacing:-.03em;color:#172033}
+.neis-section-head.compact span{background:#f8fbff;border-color:#dbe3ef;color:#475569;font-weight:750}
+.neis-monthly-list{display:grid!important;grid-template-columns:repeat(2,minmax(320px,1fr))!important;gap:12px!important}
+.neis-monthly-card{position:relative;display:flex;flex-direction:column;gap:8px;min-height:0!important;padding:16px 18px 16px 20px!important;border:1px solid #dce5f2!important;border-left:4px solid #2563eb!important;border-radius:16px!important;background:linear-gradient(180deg,#fff,#fbfdff)!important;box-shadow:0 6px 16px rgba(31,42,68,.035)}
+.neis-monthly-card strong{margin:0!important;font-size:17px!important;line-height:1.38!important;letter-spacing:-.035em;color:#172033!important;font-weight:900!important}
+.neis-monthly-card p{margin:0!important;color:#475569!important;font-size:14px!important;line-height:1.45!important}
+.neis-monthly-meta{display:flex;flex-wrap:wrap;gap:6px;align-items:center;order:-1}
+.neis-monthly-card .neis-chip{border-color:#dbe3ef;background:#f8fbff;color:#334155;font-size:12.5px;font-weight:750}
+.neis-monthly-card .neis-chip.soft{background:#edf4ff;border-color:#bfdbfe;color:#1d4ed8}
+.neis-monthly-card .neis-chip.hot{background:#fff7ed;border-color:#fed7aa;color:#9a3412}
+@media(max-width:900px){.neis-monthly-list{grid-template-columns:1fr!important}.neis-monthly-card{padding:14px 15px!important}.neis-monthly-card strong{font-size:16px!important}}
