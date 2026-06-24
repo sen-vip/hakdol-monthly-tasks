@@ -22,3 +22,28 @@
 .neis-monthly-card .neis-chip.soft{background:#edf4ff;border-color:#bfdbfe;color:#1d4ed8}
 .neis-monthly-card .neis-chip.hot{background:#fff7ed;border-color:#fed7aa;color:#9a3412}
 @media(max-width:900px){.neis-monthly-list{grid-template-columns:1fr!important}.neis-monthly-card{padding:14px 15px!important}.neis-monthly-card strong{font-size:16px!important}}
+/* v2.0.2: 이번 달 챙길 업무 - 업무딱지 컬러를 월별 필수업무 목록과 통일 */
+.neis-monthly-card .neis-chip.neis-category{font-weight:900;border-width:1px;box-shadow:0 1px 0 rgba(255,255,255,.75) inset}
+.neis-monthly-card .neis-chip.neis-category.cat-budget{background:#eef6ff;color:#1e40af;border-color:#bfdbfe}
+.neis-monthly-card .neis-chip.neis-category.cat-income{background:#ecfeff;color:#0e7490;border-color:#a5f3fc}
+.neis-monthly-card .neis-chip.neis-category.cat-expense{background:#fff7ed;color:#c2410c;border-color:#fed7aa}
+.neis-monthly-card .neis-chip.neis-category.cat-payroll{background:#fdf2f8;color:#be185d;border-color:#fbcfe8}
+.neis-monthly-card .neis-chip.neis-category.cat-facility{background:#f0fdf4;color:#15803d;border-color:#bbf7d0}
+.neis-monthly-card .neis-chip.neis-category.cat-contract{background:#f5f3ff;color:#6d28d9;border-color:#ddd6fe}
+.neis-monthly-card .neis-chip.neis-category.cat-goods{background:#f7fee7;color:#4d7c0f;border-color:#d9f99d}
+.neis-monthly-card .neis-chip.neis-category.cat-assets{background:#fefce8;color:#a16207;border-color:#fde68a}
+.neis-monthly-card .neis-chip.neis-category.cat-property{background:#fffbeb;color:#92400e;border-color:#fcd34d}
+.neis-monthly-card .neis-chip.neis-category.cat-environment{background:#ecfdf5;color:#047857;border-color:#a7f3d0}
+.neis-monthly-card .neis-chip.neis-category.cat-hr{background:#fff1f2;color:#be123c;border-color:#fecdd3}
+.neis-monthly-card .neis-chip.neis-category.cat-records{background:#eff6ff;color:#1d4ed8;border-color:#bfdbfe}
+.neis-monthly-card .neis-chip.neis-category.cat-committee{background:#fef2f2;color:#b91c1c;border-color:#fecaca}
+.neis-monthly-card .neis-chip.neis-category.cat-fund{background:#fff1f2;color:#be123c;border-color:#fecdd3}
+.neis-monthly-card .neis-chip.neis-category.cat-safety{background:#fff7ed;color:#ea580c;border-color:#fdba74}
+.neis-monthly-card .neis-chip.neis-category.cat-civil{background:#f1f5f9;color:#475569;border-color:#cbd5e1}
+.neis-monthly-card .neis-chip.neis-category.cat-insurance{background:#f0f9ff;color:#0369a1;border-color:#bae6fd}
+.neis-monthly-card .neis-chip.neis-category.cat-training{background:#f0f9ff;color:#0369a1;border-color:#bae6fd}
+.neis-monthly-card .neis-chip.neis-category.cat-stats{background:#f0fdfa;color:#0f766e;border-color:#99f6e4}
+.neis-monthly-card .neis-chip.neis-category.cat-energy{background:#fffbeb;color:#ca8a04;border-color:#fde68a}
+.neis-monthly-card .neis-chip.neis-category.cat-security{background:#f8fafc;color:#334155;border-color:#cbd5e1}
+.neis-monthly-card .neis-chip.neis-category.cat-mixed{background:linear-gradient(90deg,#eff6ff,#ecfdf5);color:#334155;border-color:#cbd5e1}
+.neis-monthly-card .neis-chip.neis-category.cat-etc{background:#f8fafc;color:#475467;border-color:#e2e8f0}

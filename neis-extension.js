@@ -1238,7 +1238,7 @@
       return `<article class="neis-monthly-card">
         <div class="neis-monthly-meta">
           <span class="neis-chip">${esc(task.period || task.periodGroup || '월중')}</span>
-          <span class="neis-chip soft">${esc(task.category || '업무')}</span>
+          <span class="neis-chip neis-category cat-${typeof categoryClass === 'function' ? categoryClass(task.category) : 'etc'}">${esc(task.category || '업무')}</span>
           ${linked.includes(task) ? `<span class="neis-chip hot">실제 일정 있음</span>` : ''}
         </div>
         <strong>${esc(task.title || '월별업무')}</strong>
