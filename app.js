@@ -305,7 +305,7 @@ function renderAuth() {
     els.authBox.innerHTML = `<span>계정 저장 중 · ${escapeHtml(email)}</span><button class="ghost" id="logoutBtn">로그아웃</button>`;
     $("logoutBtn").addEventListener("click", logout);
   } else {
-    els.authBox.innerHTML = `<span>로그인하면 학교·일정도 저장됩니다</span><button class="primary" id="loginOpenBtn">로그인</button>`;
+    els.authBox.innerHTML = `<span>로그인하면 완료 체크와 학교 설정이 저장돼요</span><button class="primary" id="loginOpenBtn">로그인</button>`;
     $("loginOpenBtn").addEventListener("click", () => openModal("loginModal"));
   }
 }
@@ -354,13 +354,15 @@ function renderHeroAndStats() {
   if (els.heroMonthTitle) els.heroMonthTitle.textContent = state.allMode ? "전체업무 보기" : `${state.selectedMonth}월 필수업무`;
   els.heroSummary.textContent = state.allMode
     ? `조건에 맞는 업무 ${tasks.length}건 표시 중`
-    : `제출성 업무는 기본 보기에서 제외됩니다 · 완료율 ${rate}%`;
+    : `표시 ${tasks.length}건 · 완료율 ${rate}%`;
 
   const cards = [
     { key: "all", label: "전체", value: `${base.length}건`, desc: state.allMode ? "등록 전체" : `${state.selectedMonth}월` },
-    { key: "submission", label: "제출", value: `${submitCount}건`, desc: "공문 처리" },
-    { key: "undone", label: "미완료", value: undoneValue, desc: undoneDesc },
-    { key: "flow", label: "흐름", value: `월초 ${early} · 월중 ${monthMiddle} · 중순 ${middle} · 월말 ${late}`, desc: "월 흐름" }
+    { key: "early", label: "월초", value: `${early}건`, desc: "월초 업무" },
+    { key: "middle", label: "중순", value: `${middle}건`, desc: "중순 업무" },
+    { key: "late", label: "월말", value: `${late}건`, desc: "월말 업무" },
+    { key: "submission", label: "제출업무", value: `${submitCount}건`, desc: "공문 처리" },
+    { key: "undone", label: "미완료", value: undoneValue, desc: undoneDesc }
   ];
   els.statsGrid.innerHTML = cards.map(card => `<button type="button" class="summary-chip" data-stat-action="${card.key}" title="${escapeHtml(card.desc)}"><span>${card.label}</span><strong>${card.value}</strong></button>`).join("");
 }
@@ -400,20 +402,54 @@ function renderSelectorBoard() {
     return true;
   });
 
+  const currentBase = state.allMode ? base : base.filter(t => t.month === state.selectedMonth);
+  const categoryCounts = new Map();
+  currentBase.forEach(t => categoryCounts.set(t.category || "기타", (categoryCounts.get(t.category || "기타") || 0) + 1));
+  const sortedCategories = [...categoryCounts.entries()].sort((a, b) => categorySortIndex(a[0]) - categorySortIndex(b[0]) || a[0].localeCompare(b[0], "ko"));
+  const categoryTotal = currentBase.length;
+
+  const categoryBase = state.categories.length ? currentBase.filter(t => state.categories.includes(t.category)) : currentBase;
+  const periodOptions = ["월초", "월중", "중순", "월말"];
+  const periodCounts = new Map();
+  categoryBase.forEach(t => {
+    const bucket = taskFlowBucket(t);
+    periodCounts.set(bucket, (periodCounts.get(bucket) || 0) + 1);
+  });
+
   const monthBase = state.categories.length ? base.filter(t => state.categories.includes(t.category)) : base;
   const monthCounts = new Map();
   monthBase.forEach(t => monthCounts.set(t.month, (monthCounts.get(t.month) || 0) + 1));
 
-  const categoryBase = state.allMode ? base : base.filter(t => t.month === state.selectedMonth);
-  const categoryCounts = new Map();
-  categoryBase.forEach(t => categoryCounts.set(t.category || "기타", (categoryCounts.get(t.category || "기타") || 0) + 1));
-  const sortedCategories = [...categoryCounts.entries()].sort((a, b) => categorySortIndex(a[0]) - categorySortIndex(b[0]) || a[0].localeCompare(b[0], "ko"));
-  const categoryTotal = categoryBase.length;
-
   els.selectorBoard.innerHTML = `
-    <article class="selector-panel month-panel">
+    <article class="selector-panel wide role-panel">
       <div class="selector-head">
-        <strong>1. 월 달력</strong>
+        <strong>1. 어떤 업무분장인가요?</strong>
+        <small>내 담당 업무부터 고르기</small>
+      </div>
+      <button type="button" class="selector-total ${state.categories.length ? "" : "active"}" data-select-group="category" data-select-value="">
+        <span>전체</span><b>${categoryTotal}</b>
+      </button>
+      <div class="selector-divider"></div>
+      <div class="selector-options">
+        ${sortedCategories.map(([name, count]) => `<button type="button" class="select-pill category-pill cat-${categoryClass(name)} ${state.categories.includes(name) ? "active" : ""}" data-select-group="category" data-select-value="${escapeHtml(name)}"><span>${escapeHtml(name)}</span><b>${count}</b></button>`).join("")}
+      </div>
+    </article>
+    <article class="selector-panel period-panel">
+      <div class="selector-head">
+        <strong>2. 언제 해야 하나요?</strong>
+        <small>월 흐름으로 좁히기</small>
+      </div>
+      <button type="button" class="selector-total ${state.period ? "" : "active"}" data-select-group="period" data-select-value="">
+        <span>전체</span><b>${categoryBase.length}</b>
+      </button>
+      <div class="selector-divider"></div>
+      <div class="selector-options period-options">
+        ${periodOptions.map(name => `<button type="button" class="select-pill period-pill period-${periodClass(name)} ${state.period === name ? "active" : ""}" data-select-group="period" data-select-value="${escapeHtml(name)}"><span>${escapeHtml(name)}</span><b>${periodCounts.get(name) || 0}</b></button>`).join("")}
+      </div>
+    </article>
+    <article class="selector-panel month-panel compact-month-panel">
+      <div class="selector-head">
+        <strong>월 선택</strong>
       </div>
       <button type="button" class="selector-total ${state.allMode ? "active" : ""}" data-select-group="month" data-select-value="">
         <span>전체</span><b>${monthBase.length}</b>
@@ -426,18 +462,6 @@ function renderSelectorBoard() {
           return `<button type="button" class="month-pill ${active ? "active" : ""} ${month === currentMonth ? "is-current" : ""}" data-select-group="month" data-select-value="${month}"><span>${month}월</span><b>${monthCounts.get(month) || 0}</b></button>`;
         }).join("")}
       </div>
-    </article>
-    <article class="selector-panel wide">
-      <div class="selector-head">
-        <strong>2. 어떤 업무분장?</strong>
-      </div>
-      <button type="button" class="selector-total ${state.categories.length ? "" : "active"}" data-select-group="category" data-select-value="">
-        <span>전체</span><b>${categoryTotal}</b>
-      </button>
-      <div class="selector-divider"></div>
-      <div class="selector-options">
-        ${sortedCategories.map(([name, count]) => `<button type="button" class="select-pill category-pill cat-${categoryClass(name)} ${state.categories.includes(name) ? "active" : ""}" data-select-group="category" data-select-value="${escapeHtml(name)}"><span>${escapeHtml(name)}</span><b>${count}</b></button>`).join("")}
-      </div>
     </article>`;
 
   els.selectorBoard.querySelectorAll("[data-select-group]").forEach(btn => {
@@ -448,8 +472,6 @@ function renderSelectorBoard() {
         state.allMode = !value;
         if (value) state.selectedMonth = Number(value);
         state.showYearBoard = false;
-        state.period = "";
-        state.whenType = "";
       }
       if (group === "category") {
         if (!value) {
@@ -460,11 +482,14 @@ function renderSelectorBoard() {
           state.categories = [...state.categories, value];
         }
       }
+      if (group === "period") {
+        state.period = state.period === value ? "" : value;
+        state.whenType = "";
+      }
       render();
     });
   });
 }
-
 function renderYearBoard() {
   if (!state.showYearBoard) {
     els.yearBoard.hidden = true;
@@ -680,6 +705,11 @@ document.addEventListener("click", (ev) => {
       state.submissionFilter = "";
       state.stateFilter = "";
       state.period = "";
+      state.whenType = "";
+    }
+    if (["early", "middle", "late"].includes(statAction)) {
+      state.period = statAction === "early" ? "월초" : statAction === "middle" ? "중순" : "월말";
+      state.stateFilter = "";
       state.whenType = "";
     }
     if (statAction === "submission") {

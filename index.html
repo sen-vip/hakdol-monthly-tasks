@@ -8,11 +8,11 @@
   <link rel="preconnect" href="https://cdn.jsdelivr.net" />
   <link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%20100%20100%22%3E%3Ctext%20y%3D%22.9em%22%20font-size%3D%2290%22%3E%F0%9F%93%85%3C/text%3E%3C/svg%3E" />
   <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%20100%20100%22%3E%3Ctext%20y%3D%22.9em%22%20font-size%3D%2290%22%3E%F0%9F%93%85%3C/text%3E%3C/svg%3E" />
-  <link rel="stylesheet" href="./styles.css?v=20260622-auth1" />
+  <link rel="stylesheet" href="./styles.css?v=20260624-v2" />
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="./supabase-config.js"></script>
-  <script src="./data/tasks.js?v=20260622-ver4-auth1"></script>
-  <link rel="stylesheet" href="./neis-extension.css?v=20260622-auth1">
+  <script src="./data/tasks.js?v=20260624-v2"></script>
+  <link rel="stylesheet" href="./neis-extension.css?v=20260624-v2">
 </head>
 <body>
   <header class="topbar no-print">
@@ -20,7 +20,7 @@
       <span class="brand-icon">📅</span>
       <div>
         <strong>학돌 월별필수업무</strong>
-        <small>학교 업무 생존 가이드</small>
+        <small>이번 달 주요업무 확인</small>
       </div>
     </div>
     <nav class="topnav" aria-label="주요 메뉴">
@@ -46,7 +46,7 @@
           </div>
           <p class="hero-summary-text" id="heroSummary">업무를 불러오는 중입니다.</p>
         </div>
-        <p class="hero-desc">월초·중순·월말 순서로 이번 달 업무를 확인하세요.</p>
+        <p class="hero-desc">이번 달 학교 행정실 주요업무를 시기별로 확인해요.</p>
       </div>
     </section>
 
@@ -66,8 +66,8 @@
         <button type="button" class="submit-filter-chip" data-submission-filter="only">제출만 보기</button>
         <button type="button" class="submit-filter-chip active" data-submission-filter="exclude">제출 제외 보기</button>
       </div>
-      <button class="ghost" id="detailFilterToggle" type="button" aria-expanded="false" hidden>상세 필터</button>
-      <button class="primary" id="addTaskBtn">+ 우리 학교 업무 추가</button>
+      <button class="ghost" id="detailFilterToggle" type="button" aria-expanded="false">상세 필터</button>
+      <button class="ghost add-school-task" id="addTaskBtn">+ 우리 학교 업무 추가</button>
       <div class="detail-filters" id="detailFilters" hidden>
         <label>
           <span>언제 해야 하나요?</span>
@@ -190,7 +190,7 @@
 
   <button type="button" class="to-top-btn no-print" id="toTopBtn" data-action="go-top" aria-label="맨 위로 올리기">↑</button>
   <div class="toast no-print" id="toast" role="status" aria-live="polite"></div>
-  <script src="./app.js?v=20260622-auth1"></script>
+  <script src="./app.js?v=20260624-v2"></script>
   <script src="./neis-extension.js?v=20260622-auth1" defer></script>
 </body>
 </html>
