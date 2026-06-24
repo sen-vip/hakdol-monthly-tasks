@@ -16,13 +16,15 @@ const categorySortOrder = [
   "예산", "급여", "세입", "지출", "계약",
   "물품", "물품재산", "시설", "환경위생",
   "기록물", "민방위", "보험", "발전기금",
-  "산업안전보건", "안전보건", "학운위", "인사",
-  "교직원교육", "법정교육", "교육통계",
+  "안전보건", "산업안전보건", "학운위", "인사",
+  "직원교육", "교직원교육", "법정교육", "교육통계",
   "에너지", "보안", "공유재산", "기타"
 ];
 
 function categorySortIndex(name = "") {
-  const normalized = String(name || "").replace(/\s+/g, "").trim();
+  let normalized = String(name || "").replace(/\s+/g, "").trim();
+  if (normalized === "산업안전보건") normalized = "안전보건";
+  if (normalized === "교직원교육") normalized = "직원교육";
   const index = categorySortOrder.findIndex(item => item.replace(/\s+/g, "") === normalized);
   return index === -1 ? 999 : index;
 }
@@ -62,6 +64,14 @@ function categoryClass(category = "") {
   if (normalized.includes(",")) return "mixed";
   if (normalized.includes("예산") && normalized.includes("학운위")) return "committee";
   return categoryColorMap[normalized] || "etc";
+}
+
+
+function categoryLabel(category = "") {
+  const text = String(category || "").trim();
+  if (text === "산업안전보건") return "안전보건";
+  if (text === "교직원교육") return "직원교육";
+  return text;
 }
 
 function periodClass(period = "") {
@@ -196,13 +206,19 @@ function getAllTasks() {
 }
 
 function getTaskState(taskId) {
-  return state.taskStates[taskId] || { done: false, important: false, skipped: false, memo: "" };
+  const saved = state.taskStates[taskId] || {};
+  return { done: saved.done === true, important: false, skipped: saved.skipped === true, memo: saved.memo || "" };
 }
 
 function loadLocalTaskStates() {
   try {
     const raw = localStorage.getItem(LOCAL_STATE_KEY);
-    return raw ? JSON.parse(raw) : {};
+    if (!raw) return {};
+    const parsed = JSON.parse(raw) || {};
+    Object.keys(parsed).forEach((key) => {
+      parsed[key] = { done: parsed[key]?.done === true, skipped: parsed[key]?.skipped === true, memo: parsed[key]?.memo || "" };
+    });
+    return parsed;
   } catch (_error) {
     return {};
   }
@@ -249,10 +265,12 @@ function matchesSearch(task, query = state.query) {
 function matchesStateFilter(task) {
   const st = getTaskState(task.id);
   if (state.stateFilter === "done") return Boolean(st.done);
-  if (state.stateFilter === "undone") return !(st.done || st.skipped);
-  if (state.stateFilter === "important") return Boolean(st.important);
-  if (state.stateFilter === "skipped") return Boolean(st.skipped);
+  if (state.stateFilter === "undone") return st.done !== true;
   return true;
+}
+
+function sanitizeStateFilter() {
+  if (!["", "done", "undone"].includes(state.stateFilter)) state.stateFilter = "";
 }
 
 function extractPeriodDay(period = "") {
@@ -321,7 +339,7 @@ function getFilteredTasks() {
 
 function completionFor(month) {
   const tasks = getMonthTasks(month);
-  const actionable = tasks.filter(t => !getTaskState(t.id).skipped);
+  const actionable = tasks;
   const done = actionable.filter(t => getTaskState(t.id).done).length;
   return { total: tasks.length, actionable: actionable.length, done, left: Math.max(actionable.length - done, 0), rate: actionable.length ? Math.round(done / actionable.length * 100) : 0 };
 }
@@ -351,6 +369,7 @@ function renderFilterOptions() {
   els.categoryFilter.innerHTML = `<option value="">전체</option>` + categories.map(c => `<option>${escapeHtml(c)}</option>`).join("");
   els.categoryFilter.value = state.categories[0] || "";
   els.periodFilter.value = state.period;
+  sanitizeStateFilter();
   els.stateFilter.value = state.stateFilter;
   els.customMonth.innerHTML = Array.from({ length: 12 }, (_, i) => `<option value="${i+1}">${i+1}월</option>`).join("");
   els.customMonth.value = state.selectedMonth;
@@ -373,7 +392,7 @@ function renderHeroAndStats() {
   const tasks = getFilteredTasks();
   const base = getDashboardBaseTasks();
   const visibleBase = base.filter(task => matchesSubmissionFilter(task));
-  const actionable = visibleBase.filter(t => !getTaskState(t.id).skipped);
+  const actionable = visibleBase;
   const undone = actionable.filter(t => !getTaskState(t.id).done).length;
   const done = actionable.filter(t => getTaskState(t.id).done).length;
   const rate = actionable.length ? Math.round(done / actionable.length * 100) : 0;
@@ -382,7 +401,7 @@ function renderHeroAndStats() {
   const middle = visibleBase.filter(t => taskFlowBucket(t) === "중순").length;
   const late = visibleBase.filter(t => taskFlowBucket(t) === "월말").length;
   const undoneValue = state.user ? `${undone}건` : "-";
-  const undoneDesc = state.user ? "완료·해당없음 제외" : "로그인 후 확인";
+  const undoneDesc = state.user ? "완료 전 업무" : "로그인 후 확인";
 
   const boardTitleBase = state.allMode ? "전체" : `${state.selectedMonth}월`;
   const boardModeName = state.submissionFilter === "exclude" ? "챙길 업무" : (state.submissionFilter === "only" ? "제출 업무" : "업무판");
@@ -467,7 +486,7 @@ function renderSelectorBoard() {
       </button>
       <div class="selector-divider"></div>
       <div class="selector-options">
-        ${sortedCategories.map(([name, count]) => `<button type="button" class="select-pill category-pill ${state.categories.includes(name) ? "active" : ""}" data-select-group="category" data-select-value="${escapeHtml(name)}"><span>${escapeHtml(name)}</span><b>${count}</b></button>`).join("")}
+        ${sortedCategories.map(([name, count]) => `<button type="button" class="select-pill category-pill ${state.categories.includes(name) ? "active" : ""}" data-select-group="category" data-select-value="${escapeHtml(name)}"><span>${escapeHtml(categoryLabel(name))}</span><b>${count}</b></button>`).join("")}
       </div>
     </article>`;
 
@@ -519,7 +538,7 @@ function renderYearBoard() {
     return `<button class="month-card${active}${hot ? " hot-month" : ""}" data-month="${month}">
       <h3>${month}월</h3>
       <p>업무 ${stats.total}건${state.user ? ` · 남은 ${stats.left}건` : ""}</p>
-      <div class="chips">${cats.map(c => `<span class="chip category cat-${categoryClass(c)}">${escapeHtml(c)}</span>`).join("")}${hot ? `<span class="chip hot">🔥 업무 집중월</span>` : ""}${doneChip}</div>
+      <div class="chips">${cats.map(c => `<span class="chip category cat-${categoryClass(c)}">${escapeHtml(categoryLabel(c))}</span>`).join("")}${hot ? `<span class="chip hot">🔥 업무 집중월</span>` : ""}${doneChip}</div>
     </button>`;
   }).join("");
   document.querySelectorAll(".month-card").forEach(btn => btn.addEventListener("click", () => {
@@ -580,7 +599,7 @@ function taskCard(task) {
       </div>
     </div>
     <div class="task-category-col">
-      <span class="chip category cat-${categoryClass(task.category)}">${escapeHtml(task.category)}</span>
+      <span class="chip category cat-${categoryClass(task.category)}">${escapeHtml(categoryLabel(task.category))}</span>
       ${sourceChip}
     </div>
     <div class="task-main">
@@ -591,8 +610,6 @@ function taskCard(task) {
     </div>
     <div class="task-actions">
       <div class="chips task-state-chips">${statusChips}</div>
-      <button class="icon-btn ${st.important ? "active" : ""}" data-toggle="important" title="중요 표시">☆</button>
-      <button class="icon-btn ${st.skipped ? "active" : ""}" data-toggle="skipped" title="해당없음">—</button>
       <button class="ghost action-detail" data-action="detail">상세</button>
     </div>
   </div>`;
@@ -604,7 +621,6 @@ function bindTaskButtons() {
     card.querySelectorAll("[data-toggle]").forEach(btn => {
       btn.addEventListener("click", (ev) => {
         const key = btn.dataset.toggle;
-        if (!state.user && key === "important") { ev.preventDefault(); requireLogin(); return; }
         toggleState(id, key, btn.checked);
       });
     });
@@ -619,11 +635,11 @@ function openDetail(taskId) {
   const st = getTaskState(task.id);
   els.detailBody.innerHTML = `<p class="eyebrow">${escapeHtml(task.source || "기본업무")}</p>
     <h2 id="detailTitle">${escapeHtml(task.title)}</h2>
-    <div class="chips"><span class="chip category cat-${categoryClass(task.category)}">${escapeHtml(task.category)}</span><span class="chip period period-${periodClass(taskFlowBucket(task))}">${escapeHtml(task.month)}월 · ${escapeHtml(task.period || task.periodGroup)}</span>${st.done ? `<span class="chip done">완료</span>` : ""}${st.important ? `<span class="chip important">중요</span>` : ""}${st.skipped ? `<span class="chip skipped">해당없음</span>` : ""}</div>
+    <div class="chips"><span class="chip category cat-${categoryClass(task.category)}">${escapeHtml(categoryLabel(task.category))}</span><span class="chip period period-${periodClass(taskFlowBucket(task))}">${escapeHtml(task.month)}월 · ${escapeHtml(task.period || task.periodGroup)}</span>${st.done ? `<span class="chip done">완료</span>` : ""}</div>
     <dl class="detail-grid">
       <dt>월</dt><dd>${escapeHtml(task.monthLabel || `${task.month}월`)}</dd>
       <dt>대략적 일정</dt><dd>${escapeHtml(task.period || "-")}</dd>
-      <dt>업무분류</dt><dd>${escapeHtml(task.category || "-")}</dd>
+      <dt>업무분류</dt><dd>${escapeHtml(categoryLabel(task.category) || "-")}</dd>
       <dt>안내부서</dt><dd>${escapeHtml(task.department || "-")}</dd>
       <dt>근거 법령</dt><dd>${escapeHtml(task.law || "-")}</dd>
       <dt>간략내용</dt><dd>${escapeHtml(task.description || "-")}</dd>
@@ -697,7 +713,6 @@ function applyQuickFilter(key) {
     state.stateFilter = state.stateFilter === key ? "" : key;
     state.period = "";
   }
-  if (["undone", "important"].includes(key) && !state.user) openModal("loginModal");
   render();
 }
 
@@ -730,7 +745,6 @@ document.addEventListener("click", (ev) => {
       state.stateFilter = "";
     }
     if (statAction === "undone") {
-      if (!state.user) { openModal("loginModal"); toast("로그인하면 미완료 업무를 확인할 수 있어요."); return; }
       state.stateFilter = "undone";
       state.submissionFilter = "";
     }
@@ -755,7 +769,7 @@ document.querySelectorAll("[data-submission-filter]").forEach(btn => btn.addEven
 els.monthFilter.addEventListener("change", e => { state.allMode = !e.target.value; if (e.target.value) state.selectedMonth = Number(e.target.value); render(); });
 els.categoryFilter.addEventListener("change", e => { state.categories = e.target.value ? [e.target.value] : []; render(); });
 els.periodFilter.addEventListener("change", e => { state.period = e.target.value; state.whenType = ""; render(); });
-els.stateFilter.addEventListener("change", e => { state.stateFilter = e.target.value; if (!state.user && e.target.value) openModal("loginModal"); render(); });
+els.stateFilter.addEventListener("change", e => { state.stateFilter = e.target.value; sanitizeStateFilter(); render(); });
 els.resetFiltersBtn.addEventListener("click", () => { state.allMode = false; state.showYearBoard = false; state.selectedMonth = currentMonth; resetSoftFilters(); render(); });
 els.detailFilterToggle.addEventListener("click", () => { state.detailFiltersOpen = !state.detailFiltersOpen; render(); });
 document.querySelectorAll("[data-quick]").forEach(btn => btn.addEventListener("click", () => applyQuickFilter(btn.dataset.quick)));
@@ -790,8 +804,8 @@ async function saveTaskState(taskId, data) {
     user_id: state.user.id,
     task_id: taskId,
     done: Boolean(data.done),
-    important: Boolean(data.important),
-    skipped: Boolean(data.skipped),
+    important: false,
+    skipped: data.skipped === true,
     memo: data.memo || "",
     updated_at: new Date().toISOString()
   };
@@ -808,7 +822,7 @@ async function loadUserData() {
   }
   const { data: states, error: stateError } = await supabaseClient.from("user_task_states").select("task_id,done,important,skipped,memo,updated_at").eq("user_id", state.user.id);
   if (stateError) toast(`개인 체크 불러오기 오류: ${stateError.message}`);
-  (states || []).forEach(row => { state.taskStates[row.task_id] = { done: row.done, important: row.important, skipped: row.skipped, memo: row.memo || "" }; });
+  (states || []).forEach(row => { state.taskStates[row.task_id] = { done: row.done === true, skipped: row.skipped === true, memo: row.memo || "" }; });
 
   const { data: customs, error: customError } = await supabaseClient.from("custom_tasks").select("*").eq("user_id", state.user.id).order("month", { ascending: true });
   if (customError) toast(`우리 학교 업무 불러오기 오류: ${customError.message}`);
@@ -910,6 +924,229 @@ async function deleteCustomTask(taskId) {
   closeModal("detailModal"); await loadUserData(); render(); toast("삭제했어요.");
 }
 
+
+
+/* v2.3: 학돌 업무판 대개편 - 필터 카드 다이어트, 시기별 업무판, 안정된 카운트 */
+function submissionLabel() {
+  if (state.submissionFilter === 'exclude') return '챙길 업무';
+  if (state.submissionFilter === 'only') return '제출 업무';
+  return '업무판';
+}
+
+function submissionDescription() {
+  if (state.submissionFilter === 'exclude') return '공문이 없어도 시기상 한 번쯤 확인할 업무예요.';
+  if (state.submissionFilter === 'only') return '공문이 오면 조사·신청·제출로 처리하는 업무예요.';
+  return '이번 달 행정실 업무를 시기 순서로 확인해요.';
+}
+
+function phaseLabelForTask(task) {
+  const raw = String(task.period || task.periodGroup || '').replace(/\s+/g, '');
+  const day = extractPeriodDay(raw);
+  if (raw.includes('월초') || raw.includes('초순') || (day !== null && day <= 10)) return '월초';
+  if (raw.includes('중순')) return '중순';
+  if (raw.includes('월중') || (day !== null && day <= 20)) return '월중';
+  if (raw.includes('월말') || raw.includes('말까지') || raw.includes('말일') || raw.includes('하순') || (day !== null && day > 20)) return '월말';
+  if (raw.includes('수시') || raw.includes('필요시') || raw.includes('연중')) return '수시';
+  return '기타';
+}
+
+function phaseSortIndex(label) {
+  return { '월초': 1, '중순': 2, '월중': 3, '월말': 4, '수시': 5, '기타': 6 }[label] || 99;
+}
+
+function renderHeroAndStats() {
+  const tasks = getFilteredTasks();
+  const base = getDashboardBaseTasks();
+  const visibleBase = base.filter(task => matchesSubmissionFilter(task));
+  const actionable = visibleBase;
+  const done = actionable.filter(t => getTaskState(t.id).done).length;
+  const rate = actionable.length ? Math.round(done / actionable.length * 100) : 0;
+  const allCount = base.length;
+  const submitCount = base.filter(isSubmissionTask).length;
+  const checkCount = Math.max(allCount - submitCount, 0);
+  const boardTitleBase = state.allMode ? '전체' : `${state.selectedMonth}월`;
+  const topbarContext = document.getElementById('topbarContext');
+  if (topbarContext) topbarContext.textContent = state.allMode ? '전체 업무' : `2026년 ${state.selectedMonth}월`;
+  els.heroTitle.textContent = `${boardTitleBase} ${submissionLabel()}`;
+  document.querySelector('.hero-desc').textContent = submissionDescription();
+  els.heroSummary.textContent = state.submissionFilter
+    ? `표시 ${tasks.length}건 · 전체 ${allCount}건 · 완료율 ${rate}%`
+    : `행정실 업무 ${allCount}건 · 챙길 업무 ${checkCount}건 · 제출 업무 ${submitCount}건 · 완료율 ${rate}%`;
+  if (els.statsGrid) {
+    els.statsGrid.innerHTML = '';
+    els.statsGrid.hidden = true;
+  }
+}
+
+function countByMonth(tasks) {
+  const map = new Map();
+  tasks.forEach(t => map.set(t.month, (map.get(t.month) || 0) + 1));
+  return map;
+}
+
+function renderSelectorBoard() {
+  if (!els.selectorBoard) return;
+
+  const currentBase = getAllTasks().filter(task => {
+    if (!state.allMode && task.month !== state.selectedMonth) return false;
+    if (!matchesSubmissionFilter(task)) return false;
+    if (!matchesSearch(task)) return false;
+    if (!matchesStateFilter(task)) return false;
+    return true;
+  });
+  const categoryCounts = new Map();
+  currentBase.forEach(t => categoryCounts.set(t.category || '기타', (categoryCounts.get(t.category || '기타') || 0) + 1));
+  const sortedCategories = [...categoryCounts.entries()].sort((a, b) => categorySortIndex(a[0]) - categorySortIndex(b[0]) || a[0].localeCompare(b[0], 'ko'));
+  const categoryTotal = currentBase.length;
+  const quickTotal = state.allMode ? getAllTasks().length : getAllTasks().filter(t => t.month === state.selectedMonth).length;
+
+  els.selectorBoard.innerHTML = `
+    <div class="view-summary-line">
+      <strong>${state.allMode ? '전체 업무' : `${state.selectedMonth}월 업무`} ${quickTotal}건</strong>
+      <span>필요한 업무분장만 골라서 봅니다.</span>
+    </div>
+    <div class="view-row role-row reflow-role-row">
+      <span class="view-label">업무분장</span>
+      <div class="view-chip-list">
+        <button type="button" class="view-chip ${state.categories.length ? '' : 'active'}" data-select-group="category" data-select-value=""><span>전체</span><b>${categoryTotal || 0}</b></button>
+        ${sortedCategories.map(([name, count]) => `<button type="button" class="view-chip role-mini ${state.categories.includes(name) ? 'active' : ''}" data-select-group="category" data-select-value="${escapeHtml(name)}"><span>${escapeHtml(categoryLabel(name))}</span><b>${count || 0}</b></button>`).join('')}
+      </div>
+    </div>`;
+
+  els.selectorBoard.querySelectorAll('[data-select-group]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const group = btn.dataset.selectGroup;
+      const value = btn.dataset.selectValue || '';
+      if (group === 'category') {
+        if (!value) state.categories = [];
+        else if (state.categories.includes(value)) state.categories = state.categories.filter(item => item !== value);
+        else state.categories = [...state.categories, value];
+      }
+      render();
+    });
+  });
+}
+
+window.HAKDOL_SET_MONTH = function(month, options = {}) {
+  const next = Number(month);
+  if (!next || next < 1 || next > 12) return;
+  const changed = state.selectedMonth !== next || state.allMode;
+  state.selectedMonth = next;
+  state.allMode = false;
+  state.period = '';
+  state.whenType = '';
+  state.showYearBoard = false;
+  if (els.monthFilter) els.monthFilter.value = String(next);
+  if (changed || !options.silent) render();
+};
+
+window.HAKDOL_FOCUS_TASK = function(taskId) {
+  const task = getAllTasks().find((item) => item.id === taskId);
+  if (!task) return false;
+
+  // 달력 상세에서 업무명을 눌렀을 때는 해당 업무가 반드시 보이도록
+  // 보기/분장/검색/상태 필터를 안전하게 초기화한 뒤 이동합니다.
+  state.selectedMonth = Number(task.month) || state.selectedMonth;
+  state.allMode = false;
+  state.period = '';
+  state.whenType = '';
+  state.categories = [];
+  state.query = '';
+  state.stateFilter = '';
+  state.submissionFilter = '';
+  state.showYearBoard = false;
+  if (els.monthFilter) els.monthFilter.value = String(state.selectedMonth);
+  if (els.searchInput) els.searchInput.value = '';
+
+  render();
+
+  setTimeout(() => {
+    const target = document.querySelector(`[data-task-id="${CSS.escape(taskId)}"]`);
+    if (!target) return;
+    target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    target.classList.add('task-row-highlight');
+    setTimeout(() => target.classList.remove('task-row-highlight'), 1800);
+  }, 80);
+  return true;
+};
+
+window.HAKDOL_RENDER = function() {
+  render();
+};
+
+function renderTaskList() {
+  const tasks = getFilteredTasks().slice().sort((a, b) => (a.month - b.month) || (taskSortScore(a) - taskSortScore(b)) || String(a.title).localeCompare(String(b.title), 'ko'));
+  const titleBase = state.allMode ? '전체' : `${state.selectedMonth}월`;
+  els.taskListTitle.textContent = `${titleBase} ${submissionLabel()}`;
+  els.taskListMeta.textContent = `표시 ${tasks.length}건 · ${submissionDescription()}`;
+  if (!tasks.length) {
+    els.taskList.innerHTML = `<div class="empty">조건에 맞는 업무가 없습니다.</div>`;
+    return;
+  }
+
+  if (state.allMode) {
+    const monthGroups = new Map();
+    tasks.forEach(t => {
+      const key = `${t.month}월`;
+      if (!monthGroups.has(key)) monthGroups.set(key, []);
+      monthGroups.get(key).push(t);
+    });
+    els.taskList.innerHTML = [...monthGroups.entries()].map(([group, list]) => `<article class="period-group month-group work-period-group">
+      <div class="period-title month-title"><h3>${escapeHtml(group)}</h3><span class="chip">${list.length}건</span></div>
+      ${renderPhaseGroups(list)}
+    </article>`).join('');
+  } else {
+    els.taskList.innerHTML = `<article class="period-group work-period-group">
+      ${renderPhaseGroups(tasks)}
+    </article>`;
+  }
+  bindTaskButtons();
+}
+
+function renderPhaseGroups(list) {
+  const phaseGroups = new Map();
+  list.forEach(task => {
+    const key = phaseLabelForTask(task);
+    if (!phaseGroups.has(key)) phaseGroups.set(key, []);
+    phaseGroups.get(key).push(task);
+  });
+  return [...phaseGroups.entries()]
+    .sort((a, b) => phaseSortIndex(a[0]) - phaseSortIndex(b[0]))
+    .map(([phase, tasks]) => `<section class="phase-section">
+      <div class="phase-title"><span>${escapeHtml(phase)}</span><b>${tasks.length}건</b></div>
+      ${tasks.map(taskCard).join('')}
+    </section>`).join('');
+}
+
+function taskCard(task) {
+  const st = getTaskState(task.id);
+  const cls = ['task-card', 'work-row', `period-${periodClass(taskFlowBucket(task))}`, st.done ? 'done' : '', st.skipped ? 'skipped' : ''].join(' ');
+  const sourceChip = task.isCustom ? `<span class="chip source-chip">우리 학교</span>` : '';
+  const facts = [
+    task.department ? `<span>${escapeHtml(task.department)}</span>` : '',
+    task.law ? `<span>${escapeHtml(task.law)}</span>` : '',
+    task.note ? `<span>참고: ${escapeHtml(task.note)}</span>` : ''
+  ].filter(Boolean).join('');
+  const submissionMark = isSubmissionTask(task) ? `<span class="chip submission-mark">제출</span>` : '';
+  const statusLabel = st.skipped ? '해당없음' : (st.done ? '완료' : '미완료');
+  const statusClass = st.skipped ? 'is-skipped' : (st.done ? 'is-done' : '');
+  return `<div class="${cls}" data-task-id="${task.id}">
+    <div class="task-check-cell"><input class="task-check" type="checkbox" data-toggle="done" ${st.done ? 'checked' : ''} ${st.skipped ? 'disabled' : ''} aria-label="완료 체크" /></div>
+    <div class="task-period-cell"><strong>${escapeHtml(task.period || task.periodGroup || `${task.month}월`)}</strong></div>
+    <div class="task-category-cell"><span class="chip category cat-${categoryClass(task.category)}">${escapeHtml(categoryLabel(task.category))}</span>${sourceChip}</div>
+    <div class="task-main">
+      <div class="task-title-line"><p class="task-title">${escapeHtml(task.title)}</p>${submissionMark}</div>
+      ${task.description ? `<p class="task-desc">${escapeHtml(task.description)}</p>` : ''}
+      ${facts ? `<div class="task-facts">${facts}</div>` : ''}
+      ${st.memo ? `<div class="memo-preview" aria-label="내 메모">${escapeHtml(st.memo)}</div>` : ''}
+    </div>
+    <div class="task-actions">
+      <button type="button" class="mini-status ${statusClass}" data-toggle="skipped" aria-label="업무 상태" aria-pressed="${st.skipped ? 'true' : 'false'}">${statusLabel}</button>
+      <button class="ghost action-detail" data-action="detail" ${st.skipped ? 'disabled' : ''}>상세</button>
+    </div>
+  </div>`;
+}
+
 function updateMainTaskListVisibility() {
   const hidden = Boolean(state.showYearBoard);
   const taskHead = document.getElementById("taskSectionHead");
@@ -919,6 +1156,7 @@ function updateMainTaskListVisibility() {
 }
 
 function render() {
+  sanitizeStateFilter();
   renderAuth();
   renderFilterOptions();
   renderHeroAndStats();

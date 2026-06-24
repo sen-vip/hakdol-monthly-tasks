@@ -110,7 +110,7 @@
     month: today.getMonth() + 1,
     schools: [],
     selectedDate: formatIsoDate(today),
-    activeTab: 'recommend',
+    activeTab: 'calendar',
     timetableLoading: false,
     authUser: null,
     manualEvents: loadManualEvents()
@@ -128,6 +128,24 @@
   function saveSettings(settings) {
     state.settings = { ...state.settings, ...settings };
     localStorage.setItem(SETTINGS_KEY, JSON.stringify(state.settings));
+    if (typeof updateTopbarSchoolName === 'function') updateTopbarSchoolName();
+  }
+
+  function getResolvedSchoolNameForTopbar() {
+    const inputName = document.getElementById('neisSchoolName')?.value?.trim() || '';
+    let savedName = '';
+    try {
+      const savedSettings = JSON.parse(localStorage.getItem(SETTINGS_KEY) || '{}') || {};
+      savedName = String(savedSettings.schoolName || savedSettings.school_name || '').trim();
+    } catch {}
+    return String(state.settings.schoolName || state.settings.school_name || inputName || savedName || '').trim();
+  }
+
+  function updateTopbarSchoolName() {
+    const topbarSchool = document.getElementById('topbarSchoolName');
+    if (!topbarSchool) return;
+    const resolved = getResolvedSchoolNameForTopbar();
+    topbarSchool.textContent = resolved || '학교 설정 전';
   }
 
 
@@ -404,6 +422,11 @@
     return /(조사|신청|제출|협조)$/.test(normalizedTitle);
   }
 
+  function taskCategoryLabel(category = '') {
+    const text = String(category || '').trim();
+    return text === '산업안전보건' ? '안전보건' : text;
+  }
+
   function taskCategoryClass(category = '') {
     const normalized = String(category || '').replace(/\s+/g, '').replace(/\?/g, '');
     if (normalized.includes(',')) return 'mixed';
@@ -430,7 +453,7 @@
     return `<article class="neis-monthly-card">
       <span class="neis-monthly-check" aria-hidden="true"></span>
       <span class="neis-chip neis-period">${esc(task.period || task.periodGroup || '월중')}</span>
-      <span class="neis-chip neis-category cat-${taskCategoryClass(task.category)}">${esc(task.category || '업무')}</span>
+      <span class="neis-chip neis-category cat-${taskCategoryClass(task.category)}">${esc(taskCategoryLabel(task.category) || '업무')}</span>
       <div class="neis-monthly-main">
         <strong>${esc(task.title || '월별업무')}</strong>
         ${desc ? `<p>${esc(desc)}</p>` : ''}
@@ -988,69 +1011,66 @@
 
   function injectPanel() {
     const shell = document.querySelector('.app-shell') || document.querySelector('main') || document.body;
+    const workBoard = document.querySelector('.work-board') || shell;
+    const hero = document.getElementById('hero');
+    const heroMain = hero?.querySelector('.hero-main') || hero;
+
+    if (!document.getElementById('neisTopSchoolBar')) {
+      const top = document.createElement('div');
+      top.id = 'neisTopSchoolBar';
+      top.className = 'neis-top-school hero-school-strip no-print';
+      top.innerHTML = `
+        <div class="neis-settings-card neis-top-settings neis-settings-inline" id="neisSettingsCard">
+          <div class="neis-grid">
+            <label>시도교육청<select id="neisOfficeSelect"></select></label>
+            <label>학교명<input id="neisSchoolName" type="text" placeholder="예: 이수중학교"></label>
+            <input id="neisApiKey" type="hidden" value="">
+          </div>
+          <div class="neis-actions">
+            <button class="primary" id="neisSearchBtn" type="button">학교 찾기</button>
+            <button class="ghost" id="neisClearBtn" type="button">설정 초기화</button>
+          </div>
+          <p class="neis-help"><span id="neisStorageHelp">학교 정보와 직접 추가 일정은 이 브라우저에 저장됩니다. 로그인하면 다른 PC에서도 이어서 사용할 수 있어요.</span></p>
+          <div id="neisSchoolResults" class="neis-results" hidden></div>
+        </div>
+      `;
+      if (heroMain) heroMain.append(top);
+      else workBoard.insertBefore(top, workBoard.firstChild);
+    }
+
     if (document.getElementById('neisExtensionPanel')) return;
     const panel = document.createElement('section');
     panel.id = 'neisExtensionPanel';
-    panel.className = 'neis-panel no-print neis-school-panel neis-compact-school-panel';
+    panel.className = 'neis-panel no-print neis-school-panel neis-reflow-calendar';
     panel.innerHTML = `
-      <div class="neis-head neis-compact-head">
-        <div>
-          <h2>우리 학교 일정 확인</h2>
-          <p>학교별 일정 때문에 추가로 챙길 일이 있는지 확인해요.</p>
-        </div>
-        <div class="neis-head-actions">
-          <div class="neis-saved" id="neisSavedSchool">학교 설정 전</div>
-          <button class="ghost" id="neisSettingsToggle" type="button" aria-expanded="false">학교 설정하기</button>
-          <button class="ghost" id="neisCalendarToggle" type="button" aria-expanded="false">통합달력 보기</button>
-        </div>
-      </div>
-      <div class="neis-settings-card neis-collapsible" id="neisSettingsCard" hidden>
-        <div class="neis-grid">
-          <label>시도교육청<select id="neisOfficeSelect"></select></label>
-          <label>학교명<input id="neisSchoolName" type="text" placeholder="예: 한국초등학교"></label>
-          <input id="neisApiKey" type="hidden" value="">
-        </div>
-        <div class="neis-actions">
-          <button class="primary" id="neisSearchBtn" type="button">학교 찾기</button>
-          <button class="ghost" id="neisClearBtn" type="button">설정 초기화</button>
-        </div>
-        <p class="neis-help"><span id="neisStorageHelp">학교 정보와 직접 추가 일정은 이 브라우저에만 저장됩니다. 로그인하면 다른 PC에서도 이어서 사용할 수 있어요.</span> 시간표 일정은 수업내용 키워드로 자동 감지한 참고 일정입니다.</p>
-        <div id="neisSchoolResults" class="neis-results" hidden></div>
-      </div>
-      <div class="neis-recommend-preview" id="neisRecommendPreview"></div>
-      <div class="neis-calendar-card neis-collapsible" id="neisCalendarCard" hidden>
-        <div class="neis-calendar-top">
-          <div>
-            <h3 id="neisCalendarTitle">우리 학교 통합 달력</h3>
-            <p id="neisCalendarMeta">학사일정과 시간표 감지 일정은 필요한 때 펼쳐서 확인해요.</p>
-            <p id="neisCacheMeta" class="neis-cache-meta"></p>
+      <div class="neis-calendar-card neis-collapsible" id="neisCalendarCard">
+        <div class="neis-calendar-top neis-month-center-head">
+          <div class="neis-calendar-info">
+            <p id="neisCalendarMeta">학교 일정과 월별업무를 한곳에서 확인해요.</p>
           </div>
-          <div class="neis-month-controls">
-            <button class="ghost" id="neisPrevMonth" type="button">← 이전달</button>
-            <button class="primary" id="neisLoadSchedule" type="button">학사·시간표 불러오기</button>
-            <button class="ghost" id="neisNextMonth" type="button">다음달 →</button>
+          <div class="neis-calendar-actions">
+            <button class="primary" id="neisLoadSchedule" type="button">일정 새로고침</button>
+            <button class="ghost neis-today-btn" id="neisGoToday" type="button">오늘</button>
           </div>
-        </div>
-        <div class="neis-tabs" role="tablist">
-          <button data-neis-tab="calendar" type="button">통합 달력</button>
-          <button data-neis-tab="recommend" class="active" type="button">추천업무</button>
+          <div class="neis-month-title-row" aria-label="월 이동과 월 선택">
+            <button class="ghost neis-month-arrow" id="neisPrevMonth" type="button" aria-label="이전달">‹</button>
+            <button class="ghost neis-month-picker-btn" id="neisMonthPickerBtn" type="button" aria-expanded="false">2026년 6월</button>
+            <button class="ghost neis-month-arrow" id="neisNextMonth" type="button" aria-label="다음달">›</button>
+          </div>
+          <p id="neisCacheMeta" class="neis-cache-meta"></p>
         </div>
         <div id="neisCalendarBody" class="neis-calendar-body"></div>
       </div>
     `;
-    const taskList = document.querySelector('#taskList');
-    if (taskList && taskList.parentNode) taskList.parentNode.insertBefore(panel, taskList.nextSibling);
+    const workView = document.querySelector('.work-view-panel');
+    if (workView && workView.parentNode) workView.parentNode.insertBefore(panel, workView);
     else shell.append(panel);
   }
 
   function toggleNeisSettings(forceOpen) {
     const card = document.getElementById('neisSettingsCard');
-    const btn = document.getElementById('neisSettingsToggle');
-    if (!card || !btn) return;
-    const open = typeof forceOpen === 'boolean' ? forceOpen : card.hidden;
-    card.hidden = !open;
-    btn.setAttribute('aria-expanded', String(open));
-    btn.textContent = open ? '학교 설정 접기' : '학교 설정하기';
+    if (!card) return;
+    card.hidden = false;
   }
 
   function toggleNeisCalendar(forceOpen) {
@@ -1060,9 +1080,9 @@
     const open = typeof forceOpen === 'boolean' ? forceOpen : card.hidden;
     card.hidden = !open;
     btn.setAttribute('aria-expanded', String(open));
-    btn.textContent = open ? '통합달력 접기' : '통합달력 보기';
+    btn.textContent = open ? '일정 접기' : '일정 보기';
     if (open) {
-      state.activeTab = state.activeTab === 'calendar' ? 'calendar' : 'recommend';
+      state.activeTab = 'calendar';
       renderCalendar();
       card.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
     }
@@ -1075,14 +1095,15 @@
     const monthSchedules = getMonthSchedules();
     const recs = recommendationsForSchedules(monthSchedules);
     const cache = loadYearCache();
+    const mainSchedules = monthSchedules.slice(0, 4).map((item) => `<li><b>${esc(dateTextFromIso(item.date))}</b><span>${esc(item.eventName || '일정')}</span></li>`).join('');
+    const scheduleList = mainSchedules ? `<div class="neis-mini-schedules"><strong>주요 일정</strong><ul>${mainSchedules}</ul></div>` : '';
     if (!hasSchool) {
-      host.innerHTML = `<div class="neis-preview-card is-empty"><div><strong>추천업무</strong><p>학교를 설정하면 시험기간·수련활동·방학식 등과 연결된 추천업무를 보여줘요.</p></div><button class="ghost" type="button" data-open-school-settings>학교 설정하기</button></div>`;
+      host.innerHTML = `<div class="neis-preview-card is-empty"><div><strong>학교 설정 전</strong><p>학교를 설정하면 학사일정과 연결된 추천업무, 주요 일정을 보여줘요.</p></div><button class="ghost" type="button" data-open-school-settings>학교 설정하기</button></div>`;
     } else if (!cache) {
-      host.innerHTML = `<div class="neis-preview-card is-empty"><div><strong>추천업무 준비 전</strong><p>${esc(state.settings.schoolName || '우리 학교')} 학사일정을 불러오면 일정 기반 추천업무를 확인할 수 있어요.</p></div><button class="primary" id="neisPreviewLoadBtn" type="button">학사·시간표 불러오기</button></div>`;
-    } else if (!recs.length) {
-      host.innerHTML = `<div class="neis-preview-card"><div><strong>추천업무 0건</strong><p>현재 선택한 학교 일정에서 추가로 추천할 업무가 없어요.</p></div><button class="ghost" type="button" data-open-calendar>통합달력 보기</button></div>`;
+      host.innerHTML = `<div class="neis-preview-card is-empty"><div><strong>${esc(state.settings.schoolName || '우리 학교')} 일정 준비 전</strong><p>학사일정을 불러오면 일정 기반 추천업무와 주요 일정을 확인할 수 있어요.</p></div><button class="primary" id="neisPreviewLoadBtn" type="button">학사·시간표 불러오기</button></div>`;
     } else {
-      host.innerHTML = `<div class="neis-preview-card"><div><strong>추천업무 ${recs.length}종</strong><p>${recs.slice(0, 3).map((r) => esc(r.title)).join(' · ')}${recs.length > 3 ? ' 외' : ''}</p></div><button class="ghost" type="button" data-open-calendar>자세히 보기</button></div>`;
+      const recText = recs.length ? recs.slice(0, 3).map((r) => esc(r.title)).join(' · ') + (recs.length > 3 ? ' 외' : '') : '현재 선택한 학교 일정에서 추가로 추천할 업무가 없어요.';
+      host.innerHTML = `<div class="neis-preview-card neis-summary-card"><div><strong>${esc(state.settings.schoolName || '우리 학교')} · 학교 일정 확인</strong><p>제출업무와 챙길업무가 몰리는 시기를 함께 확인해요.</p>${scheduleList}</div><button class="ghost" type="button" data-open-calendar>일정 펼치기</button></div>`;
     }
     host.querySelector('[data-open-school-settings]')?.addEventListener('click', () => toggleNeisSettings(true));
     host.querySelector('[data-open-calendar]')?.addEventListener('click', () => toggleNeisCalendar(true));
@@ -1100,8 +1121,11 @@
     document.getElementById('neisSaveKeyBtn')?.addEventListener('click', onSaveKey);
     document.getElementById('neisClearBtn')?.addEventListener('click', () => clearSettings());
     document.getElementById('neisLoadSchedule')?.addEventListener('click', onLoadYearSchedule);
+    document.getElementById('neisTopLoadSchedule')?.addEventListener('click', onLoadYearSchedule);
+    document.getElementById('neisGoToday')?.addEventListener('click', goToTodayDate);
     document.getElementById('neisPrevMonth')?.addEventListener('click', () => changeMonth(-1));
     document.getElementById('neisNextMonth')?.addEventListener('click', () => changeMonth(1));
+    document.getElementById('neisMonthPickerBtn')?.addEventListener('click', () => toggleMonthPicker());
     document.querySelectorAll('[data-neis-tab]').forEach((btn) => {
       btn.addEventListener('click', () => {
         state.activeTab = btn.dataset.neisTab;
@@ -1133,50 +1157,53 @@
     }
     const saved = document.getElementById('neisSavedSchool');
     if (!saved) return;
-    if (state.settings.schoolCode) {
-      saved.innerHTML = `<strong>${esc(state.settings.schoolName)}</strong><span>${esc(state.settings.officeName || getOfficeName(state.settings.officeCode))} · ${esc(state.settings.schoolCode)}</span>`;
-    } else {
-      saved.textContent = '학교 설정 전';
-    }
+    saved.innerHTML = '';
+    saved.hidden = true;
+    updateTopbarSchoolName();
   }
 
   function renderCalendar() {
-    renderRecommendPreview();
-    if (state.activeTab === 'all') state.activeTab = 'recommend';
-    document.querySelectorAll('[data-neis-tab]').forEach((btn) => btn.classList.toggle('active', btn.dataset.neisTab === state.activeTab));
-    const title = document.getElementById('neisCalendarTitle');
+    if (state.activeTab === 'all' || state.activeTab === 'recommend') state.activeTab = 'calendar';
     const meta = document.getElementById('neisCalendarMeta');
     const cacheMeta = document.getElementById('neisCacheMeta');
     const body = document.getElementById('neisCalendarBody');
     const loadBtn = document.getElementById('neisLoadSchedule');
-    if (!body || !title || !meta) return;
+    if (!body) return;
 
     const monthSchedules = getMonthSchedules();
     const yearCache = loadYearCache();
-    const recCount = recommendationsForSchedules(monthSchedules).length;
-    const school = state.settings.schoolName ? `${state.settings.officeName || getOfficeName(state.settings.officeCode)} · ${state.settings.schoolName}` : '학교 설정 전';
+    const calendarTaskCount = getHakdolMonthTasksForCalendar().filter((task) => calendarIsoForTask(task)).length;
+    const schoolName = state.settings.schoolName || '학교 설정 전';
+    const officeName = state.settings.officeName || getOfficeName(state.settings.officeCode) || '';
 
-    title.textContent = `${state.year}년 ${state.month}월 우리 학교 통합 일정 달력`;
-    meta.textContent = `${school} · 이번 달 통합일정 ${monthSchedules.length}건 · 추천업무 ${recCount}종`;
+    if (meta) meta.textContent = state.settings.schoolCode ? '학교 일정과 월별업무를 한곳에서 확인해요.' : '우리 학교를 먼저 설정해주세요.';
     if (cacheMeta) cacheMeta.textContent = cacheStatusText(yearCache);
-    if (loadBtn) loadBtn.textContent = yearCache ? '학사+시간표 새로고침' : '학사·시간표 불러오기';
+    if (loadBtn) loadBtn.textContent = yearCache ? '일정 새로고침' : '일정 불러오기';
+    const monthBtn = document.getElementById('neisMonthPickerBtn');
+    if (monthBtn) monthBtn.innerHTML = `<span>${state.year}년</span><strong>${state.month}월</strong>`;
 
-    const sections = [];
-    if (state.activeTab === 'calendar') sections.push(renderCalendarSection());
-    if (state.activeTab === 'recommend') sections.push(renderRecommendSection());
+    const sections = [renderCalendarSection()];
     body.innerHTML = sections.join('');
     bindCalendarDayEvents(body);
+    syncHakdolMonth(state.month);
   }
 
   function cacheStatusText(cache) {
     if (!state.settings.schoolCode) return '우리 학교를 먼저 설정해주세요.';
     const timetableCache = loadTimetableCache(state.year, state.month);
     const timetableText = state.timetableLoading
-      ? '시간표 감지 일정 불러오는 중'
-      : (timetableCache ? `시간표 감지 ${timetableCache.events?.length || 0}건` : '시간표 감지 일정 미저장');
-    const manualText = `직접추가 ${getManualMonthEvents(state.year, state.month).length}건`;
-    if (!cache) return `${state.year}년 학사일정 미저장 · ${manualText} · 직접 추가 일정은 바로 사용할 수 있어요.`;
-    return `${cache.year}년 학사일정 ${cache.schedules?.length || 0}건 · ${timetableText} · ${manualText} · 마지막 업데이트 ${formatDateTime(cache.fetchedAt)}`;
+      ? '시간표 불러오는 중'
+      : (timetableCache ? `시간표 ${timetableCache.events?.length || 0}` : '시간표 미저장');
+    const manualText = `직접 ${getManualMonthEvents(state.year, state.month).length}`;
+    if (!cache) return `학교 일정 미저장 · ${manualText}`;
+    return `학사 ${cache.schedules?.length || 0} · ${timetableText} · ${manualText} · 업데이트 ${formatTimeOnly(cache.fetchedAt)}`;
+  }
+
+  function formatTimeOnly(iso) {
+    if (!iso) return '-';
+    const d = new Date(iso);
+    if (Number.isNaN(d.getTime())) return '-';
+    return `${d.getHours()}:${String(d.getMinutes()).padStart(2, '0')}`;
   }
 
   function formatDateTime(iso) {
@@ -1186,18 +1213,113 @@
     return `${d.getFullYear()}. ${d.getMonth() + 1}. ${d.getDate()}. ${pad2(d.getHours())}:${pad2(d.getMinutes())}`;
   }
 
+
+
+  // v2.4.1: 월별 필수업무를 달력 위에 “제출 n / 챙김 n”으로 얹기
+  function getHakdolMonthTasksForCalendar() {
+    const source = Array.isArray(window.HAKDOL_TASKS) ? window.HAKDOL_TASKS : [];
+    return source.filter((task) => Number(task.month) === Number(state.month));
+  }
+
+  function extractTaskPeriodDay(task) {
+    const text = `${task?.period || ''} ${task?.periodGroup || ''}`;
+    const match = String(text).match(/(\d{1,2})\s*일?/);
+    return match ? Number(match[1]) : null;
+  }
+
+  function calendarDayForTask(task) {
+    const lastDay = new Date(state.year, state.month, 0).getDate();
+    const text = `${task?.period || ''} ${task?.periodGroup || ''}`.replace(/\s+/g, '');
+    const explicitDay = extractTaskPeriodDay(task);
+    if (explicitDay !== null) return Math.min(Math.max(explicitDay, 1), lastDay);
+    if (/(1일|월초|초순|초경|초까지)/.test(text)) return Math.min(3, lastDay);
+    if (/(중순|15일|중경|중까지)/.test(text)) return Math.min(15, lastDay);
+    if (/(월중)/.test(text)) return Math.min(16, lastDay);
+    if (/(20일)/.test(text)) return Math.min(20, lastDay);
+    if (/(하순)/.test(text)) return Math.min(23, lastDay);
+    if (/(25일)/.test(text)) return Math.min(25, lastDay);
+    if (/(월말)/.test(text)) return Math.min(28, lastDay);
+    if (/(말일|말까지|말경)/.test(text)) return lastDay;
+    return null;
+  }
+
+  function calendarIsoForTask(task) {
+    const day = calendarDayForTask(task);
+    if (!day) return '';
+    return `${state.year}-${pad2(state.month)}-${pad2(day)}`;
+  }
+
+  function calendarTasksByDate() {
+    const map = new Map();
+    getHakdolMonthTasksForCalendar().forEach((task) => {
+      const iso = calendarIsoForTask(task);
+      if (!iso) return;
+      if (!map.has(iso)) map.set(iso, []);
+      map.get(iso).push(task);
+    });
+    return map;
+  }
+
+  function summarizeCalendarTasks(tasks = []) {
+    const submission = tasks.filter(isSubmissionTask);
+    const checklist = tasks.filter((task) => !isSubmissionTask(task));
+    return { submission, checklist };
+  }
+
+  function renderCalendarTaskBadges(tasks = []) {
+    if (!tasks.length) return '';
+    const { submission, checklist } = summarizeCalendarTasks(tasks);
+    const parts = [];
+    if (submission.length) parts.push(`<span class="neis-task-badge is-submit">제출 ${submission.length}</span>`);
+    if (checklist.length) parts.push(`<span class="neis-task-badge is-check">챙김 ${checklist.length}</span>`);
+    return `<span class="neis-day-task-badges">${parts.join('')}</span>`;
+  }
+
+  function renderDateTaskList(tasks = []) {
+    if (!tasks.length) return '';
+    const { submission, checklist } = summarizeCalendarTasks(tasks);
+    const groupHtml = (title, list, kind) => list.length ? `<div class="neis-detail-task-group ${kind}">
+      <strong>${title} ${list.length}건</strong>
+      <ul>${list.map((task) => `<li><span class="neis-source-badge task-category cat-${taskCategoryClass(task.category)}">${esc(taskCategoryLabel(task.category) || '업무')}</span><button type="button" class="neis-detail-task-link" data-focus-task="${esc(task.id || '')}">${esc(task.title || '월별업무')}</button>${task.department ? `<p>${esc(task.department)}</p>` : ''}</li>`).join('')}</ul>
+    </div>` : '';
+    return `<div class="neis-detail-block neis-calendar-task-block">
+      <strong>이 날짜에 걸어둔 월별업무</strong>
+      ${groupHtml('제출업무', submission, 'submit')}${groupHtml('챙길업무', checklist, 'check')}
+    </div>`;
+  }
+
+
   function renderCalendarSection() {
     const cache = loadYearCache();
     const selectedSchedules = getSchedulesByDate(state.selectedDate);
     const selectedRules = recommendationsForSchedules(selectedSchedules);
-    const cacheNotice = cache ? '' : `<div class="neis-empty small neis-calendar-notice"><strong>나이스 일정은 아직 불러오지 않았어요.</strong><span>학교 설정 후 [학사·시간표 불러오기]를 누르거나, 아래 달력에서 우리 학교 일정을 직접 추가할 수 있어요.</span></div>`;
+    const selectedTasks = calendarTasksByDate().get(state.selectedDate) || [];
+    const cacheNotice = cache ? '' : `<div class="neis-empty small neis-calendar-notice"><strong>학교 일정을 아직 불러오지 않았어요.</strong><span>학교 설정 후 [일정 불러오기]를 누르거나, 아래에서 직접 추가할 수 있어요.</span></div>`;
     return `<div class="neis-section">
-      <div class="neis-section-head"><h4>📅 우리 학교 통합 달력</h4><span>${esc(state.year)}년 ${esc(state.month)}월</span></div>
-      <div class="neis-calendar-legend"><span class="neis-source-badge schedule">학사일정</span><span class="neis-source-badge timetable">시간표 감지</span><span class="neis-source-badge manual">직접추가</span><em>${esc(schoolLevelText())} 수업내용 감지 + 우리 학교 직접 일정</em></div>
+      <div class="neis-calendar-legend"><div class="neis-legend-badges"><span class="neis-source-badge schedule">학사일정</span><span class="neis-source-badge timetable">시간표 감지</span><span class="neis-source-badge manual">직접추가</span><span class="neis-source-badge task-submit">제출업무</span><span class="neis-source-badge task-check">챙김업무</span></div><em>학교 일정과 월별업무를 한곳에서 확인해요.</em></div>
       ${cacheNotice}
       ${renderMonthGrid()}
-      ${renderSelectedDatePanel(selectedSchedules, selectedRules)}
+      ${renderSelectedDatePanel(selectedSchedules, selectedRules, selectedTasks)}
     </div>`;
+  }
+
+  function isSaturdayOffSchedule(item) {
+    const text = `${item?.eventName || ''} ${item?.eventContent || ''}`.replace(/\s+/g, '');
+    return text.includes('토요휴업일');
+  }
+
+  function eventDotClass(item) {
+    if (isSaturdayOffSchedule(item)) return 'is-saturday-off';
+    if (item.sourceType === 'timetable') return 'is-timetable';
+    if (item.sourceType === 'manual') return 'is-manual';
+    return 'is-schedule';
+  }
+
+  function sourceBadgeClass(item) {
+    if (isSaturdayOffSchedule(item)) return 'saturday-off';
+    if (item.sourceType === 'timetable') return 'timetable';
+    if (item.sourceType === 'manual') return 'manual';
+    return 'schedule';
   }
 
   function renderMonthGrid() {
@@ -1207,6 +1329,7 @@
     const totalDays = last.getDate();
     const totalCells = Math.ceil((startOffset + totalDays) / 7) * 7;
     const monthSchedules = getMonthSchedules();
+    const taskByDate = calendarTasksByDate();
     const byDate = new Map();
     monthSchedules.forEach((item) => {
       if (!byDate.has(item.date)) byDate.set(item.date, []);
@@ -1222,21 +1345,20 @@
       }
       const iso = `${state.year}-${pad2(state.month)}-${pad2(day)}`;
       const schedules = byDate.get(iso) || [];
-      const rules = recommendationsForSchedules(schedules);
-      const taskCount = uniqueTasks(rules).length;
+      const calendarTasks = taskByDate.get(iso) || [];
+      const taskBadges = renderCalendarTaskBadges(calendarTasks);
       const isToday = iso === formatIsoDate(new Date());
       const isSelected = iso === state.selectedDate;
-      const events = schedules.slice(0, 2).map((s) => `<span class="neis-event-dot ${s.sourceType === 'timetable' ? 'is-timetable' : (s.sourceType === 'manual' ? 'is-manual' : 'is-schedule')}">${esc(s.eventName || '일정')}</span>`).join('');
+      const events = schedules.slice(0, 2).map((s) => `<span class="neis-event-dot ${eventDotClass(s)}">${esc(s.eventName || '일정')}</span>`).join('');
       const more = schedules.length > 2 ? `<span class="neis-more">+${schedules.length - 2}개 더</span>` : '';
-      const recBadge = taskCount ? `<span class="neis-rec-badge">추천 ${taskCount}</span>` : '';
-      cells.push(`<button class="neis-day ${isToday ? 'is-today' : ''} ${isSelected ? 'is-selected' : ''} ${schedules.length ? 'has-event' : ''}" type="button" data-date="${esc(iso)}">
+      cells.push(`<button class="neis-day ${isToday ? 'is-today' : ''} ${isSelected ? 'is-selected' : ''} ${schedules.length ? 'has-event' : ''} ${calendarTasks.length ? 'has-calendar-task' : ''}" type="button" data-date="${esc(iso)}">
         <span class="neis-day-number">${day}</span>
         <span class="neis-day-events">${events}${more}</span>
-        ${recBadge}
+        ${taskBadges}
       </button>`);
     }
 
-    return `<div class="neis-calendar-grid" aria-label="${state.year}년 ${state.month}월 학사일정 달력">
+    return `<div class="neis-calendar-grid" aria-label="${state.year}년 ${state.month}월 일정">
       ${['일', '월', '화', '수', '목', '금', '토'].map((d) => `<div class="neis-weekday">${d}</div>`).join('')}
       ${cells.join('')}
     </div>`;
@@ -1245,7 +1367,7 @@
 
 
   function renderScheduleListItem(item) {
-    const badgeClass = item.sourceType === 'timetable' ? 'timetable' : (item.sourceType === 'manual' ? 'manual' : 'schedule');
+    const badgeClass = sourceBadgeClass(item);
     const deleteButton = item.sourceType === 'manual' && item.id ? `<button type="button" class="neis-delete-manual" data-delete-manual="${esc(item.id)}" title="직접 추가 일정 삭제">삭제</button>` : '';
     return `<li><span class="neis-source-badge ${badgeClass}">${esc(item.source || '학사일정')}</span> ${esc(item.eventName || '일정')}${deleteButton}${item.eventContent ? `<p>${esc(item.eventContent)}</p>` : ''}${item.gradeText && item.sourceType !== 'timetable' ? `<span>${esc(item.gradeText)}</span>` : ''}${item.sourceType === 'timetable' && item.classes?.length ? `<p>${esc(item.classes.slice(0, 12).join(', '))}${item.classes.length > 12 ? ` 외 ${item.classes.length - 12}개 반` : ''}</p>` : ''}</li>`;
   }
@@ -1262,37 +1384,44 @@
     </form>`;
   }
 
-  function renderSelectedDatePanel(schedules, rules) {
+  function renderSelectedDatePanel(schedules, rules, calendarTasks = []) {
     const taskList = uniqueTasks(rules);
     const tools = uniqueTools(rules);
     const dateLabel = `${dateTextFromIso(state.selectedDate)} ${weekdayText(state.selectedDate)}요일`;
-    if (!schedules.length) {
+    if (!schedules.length && !calendarTasks.length) {
       return `<aside class="neis-detail-panel">
         <h4>${esc(dateLabel)}</h4>
-        <div class="neis-empty small"><strong>선택한 날짜에 등록된 일정이 없어요.</strong><span>아래에서 우리 학교 일정을 직접 추가할 수 있어요.</span></div>
+        <div class="neis-empty small"><strong>선택한 날짜에 등록된 일정이나 월별업무가 없어요.</strong><span>아래에서 우리 학교 일정을 직접 추가할 수 있어요.</span></div>
         ${renderManualEventForm()}
       </aside>`;
     }
     return `<aside class="neis-detail-panel">
       <h4>${esc(dateLabel)}</h4>
-      <div class="neis-detail-block">
-        <strong>나이스 통합 일정</strong>
+      ${schedules.length ? `<div class="neis-detail-block">
+        <strong>학교 일정</strong>
         <ul>${schedules.map(renderScheduleListItem).join('')}</ul>
-      </div>
+      </div>` : ''}
+      ${renderDateTaskList(calendarTasks)}
       ${renderManualEventForm()}
-      <div class="neis-detail-block">
-        <strong>추천 확인</strong>
-        ${taskList.length ? `<ul>${taskList.map((task) => `<li>${esc(task)}</li>`).join('')}</ul>` : '<p>자동 추천된 업무가 없어요.</p>'}
-      </div>
-      ${tools.length ? `<div class="neis-detail-block"><strong>연결 도구</strong><div class="neis-tool-row">${tools.map((tool) => `<a href="${esc(tool.url)}" target="_blank" rel="noopener noreferrer">${esc(tool.name)}</a>`).join('')}</div></div>` : ''}
     </aside>`;
   }
 
   function bindCalendarDayEvents(scope) {
     scope.querySelectorAll('[data-date]').forEach((btn) => {
       btn.addEventListener('click', () => {
+        // 날짜칸이나 제출/챙김 숫자 배지는 화면 이동 없이 날짜 상세만 갱신합니다.
         state.selectedDate = btn.dataset.date;
         renderCalendar();
+      });
+    });
+    scope.querySelectorAll('[data-focus-task]').forEach((btn) => {
+      btn.addEventListener('click', (event) => {
+        event.preventDefault();
+        event.stopPropagation();
+        const taskId = btn.dataset.focusTask;
+        if (taskId && typeof window.HAKDOL_FOCUS_TASK === 'function') {
+          window.HAKDOL_FOCUS_TASK(taskId);
+        }
       });
     });
     scope.querySelectorAll('[data-manual-form]').forEach((form) => {
@@ -1391,8 +1520,10 @@
     await saveSettingsToSupabase(state.settings);
     const results = document.getElementById('neisSchoolResults');
     if (results) results.hidden = true;
+    toggleNeisSettings(false);
     renderAll();
-    toast(state.authUser ? `${school.schoolName}을 계정에 저장했어요.` : `${school.schoolName}을 이 브라우저에 저장했어요.`);
+    toast(state.authUser ? `${school.schoolName}을 계정에 저장했어요. 학사일정을 불러올게요.` : `${school.schoolName}을 이 브라우저에 저장했어요. 학사일정을 불러올게요.`);
+    setTimeout(() => onLoadYearSchedule(), 80);
   }
 
   function onSaveKey() {
@@ -1427,8 +1558,95 @@
     } catch (error) {
       toast(String(error.message || error || '나이스 API 호출에 실패했어요.'));
     } finally {
-      setBusy('neisLoadSchedule', false, loadYearCache() ? '학사+시간표 새로고침' : '학사·시간표 불러오기');
+      setBusy('neisLoadSchedule', false, loadYearCache() ? '학사·시간표 새로고침' : '학사·시간표 불러오기');
     }
+  }
+
+
+  function closeMonthPicker() {
+    const pop = document.getElementById('neisMonthPickerPopover');
+    const btn = document.getElementById('neisMonthPickerBtn');
+    if (pop) pop.remove();
+    if (btn) btn.setAttribute('aria-expanded', 'false');
+    document.removeEventListener('click', onMonthPickerOutside, true);
+  }
+
+  function onMonthPickerOutside(event) {
+    const pop = document.getElementById('neisMonthPickerPopover');
+    const btn = document.getElementById('neisMonthPickerBtn');
+    if (!pop || !btn) return;
+    if (pop.contains(event.target) || btn.contains(event.target)) return;
+    closeMonthPicker();
+  }
+
+  function toggleMonthPicker() {
+    const btn = document.getElementById('neisMonthPickerBtn');
+    if (!btn) return;
+    const existing = document.getElementById('neisMonthPickerPopover');
+    if (existing) { closeMonthPicker(); return; }
+    const pop = document.createElement('div');
+    pop.id = 'neisMonthPickerPopover';
+    pop.className = 'neis-month-picker-popover';
+    pop.innerHTML = renderMonthPickerHtml();
+    btn.insertAdjacentElement('afterend', pop);
+    btn.setAttribute('aria-expanded', 'true');
+    pop.querySelector('[data-year-delta="-1"]')?.addEventListener('click', () => changeMonthYear(-1));
+    pop.querySelector('[data-year-delta="1"]')?.addEventListener('click', () => changeMonthYear(1));
+    pop.querySelectorAll('[data-pick-month]').forEach((monthBtn) => {
+      monthBtn.addEventListener('click', () => pickMonth(Number(monthBtn.dataset.pickMonth)));
+    });
+    setTimeout(() => document.addEventListener('click', onMonthPickerOutside, true), 0);
+  }
+
+  function renderMonthPickerHtml() {
+    const months = Array.from({ length: 12 }, (_, index) => {
+      const month = index + 1;
+      const active = Number(state.month) === month ? ' active' : '';
+      return `<button type="button" class="neis-month-option${active}" data-pick-month="${month}">${month}</button>`;
+    }).join('');
+    return `<div class="neis-month-picker-card" role="dialog" aria-label="월 선택">
+      <div class="neis-month-picker-head">
+        <button type="button" class="ghost" data-year-delta="-1" aria-label="이전 연도">‹</button>
+        <strong>${esc(state.year)}년</strong>
+        <button type="button" class="ghost" data-year-delta="1" aria-label="다음 연도">›</button>
+      </div>
+      <div class="neis-month-grid">${months}</div>
+    </div>`;
+  }
+
+  function changeMonthYear(delta) {
+    state.year += delta;
+    state.selectedDate = `${state.year}-${pad2(state.month)}-01`;
+    const pop = document.getElementById('neisMonthPickerPopover');
+    if (pop) {
+      pop.innerHTML = renderMonthPickerHtml();
+      pop.querySelector('[data-year-delta="-1"]')?.addEventListener('click', () => changeMonthYear(-1));
+      pop.querySelector('[data-year-delta="1"]')?.addEventListener('click', () => changeMonthYear(1));
+      pop.querySelectorAll('[data-pick-month]').forEach((monthBtn) => {
+        monthBtn.addEventListener('click', () => pickMonth(Number(monthBtn.dataset.pickMonth)));
+      });
+    }
+    renderCalendar();
+    if (loadYearCache()) ensureTimetableMonthLoaded();
+  }
+
+  function pickMonth(month) {
+    if (!month || month < 1 || month > 12) return;
+    state.month = month;
+    state.selectedDate = `${state.year}-${pad2(state.month)}-01`;
+    closeMonthPicker();
+    renderCalendar();
+    if (loadYearCache()) ensureTimetableMonthLoaded();
+  }
+
+  function goToTodayDate() {
+    const now = new Date();
+    state.year = now.getFullYear();
+    state.month = now.getMonth() + 1;
+    state.selectedDate = formatIsoDate(now);
+    renderCalendar();
+    const card = document.getElementById('neisCalendarCard');
+    if (card) card.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }
 
   function changeMonth(delta) {
@@ -1440,11 +1658,21 @@
     if (loadYearCache()) ensureTimetableMonthLoaded();
   }
 
+  function syncHakdolMonth(month) {
+    if (typeof window.HAKDOL_SET_MONTH === 'function') {
+      window.HAKDOL_SET_MONTH(month, { silent: true });
+    }
+  }
+
   function setBusy(id, busy, text) {
-    const btn = document.getElementById(id);
-    if (!btn) return;
-    btn.disabled = busy;
-    btn.textContent = text;
+    const ids = id === 'neisLoadSchedule' ? ['neisLoadSchedule', 'neisTopLoadSchedule'] : [id];
+    ids.forEach((buttonId) => {
+      const btn = document.getElementById(buttonId);
+      if (!btn) return;
+      btn.disabled = busy;
+      if (buttonId === 'neisTopLoadSchedule') btn.textContent = busy ? '일정 불러오는 중' : (loadYearCache() ? '일정 새로고침' : '일정 불러오기');
+      else btn.textContent = text;
+    });
   }
 
   function toast(message) {
