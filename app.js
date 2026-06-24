@@ -233,45 +233,59 @@ function matchesSubmissionFilter(task) {
   return true;
 }
 
+function taskSearchText(task) {
+  return normalizeText([
+    task.title, task.category, task.department, task.law, task.description,
+    task.note, task.period, task.periodGroup, task.monthLabel, task.source
+  ].filter(Boolean).join(" "));
+}
+
+function matchesSearch(task, query = state.query) {
+  const q = normalizeText(query);
+  if (!q) return true;
+  return taskSearchText(task).includes(q);
+}
+
+function matchesStateFilter(task) {
+  const st = getTaskState(task.id);
+  if (state.stateFilter === "done") return Boolean(st.done);
+  if (state.stateFilter === "undone") return !(st.done || st.skipped);
+  if (state.stateFilter === "important") return Boolean(st.important);
+  if (state.stateFilter === "skipped") return Boolean(st.skipped);
+  return true;
+}
+
 function extractPeriodDay(period = "") {
   const match = String(period).match(/(\d{1,2})\s*일?/);
   return match ? Number(match[1]) : null;
 }
 
 function taskFlowBucket(task) {
-  let group = String(task.periodGroup || "").trim();
-  const period = String(task.period || "").trim();
-  if (period.includes("월중")) return "월중";
-  if (period.includes("월초")) return "월초";
-  if (period.includes("중순")) return "중순";
-  if (period.includes("월말") || period === "말일" || period.includes("말까지")) return "월말";
-  if (!period && (group === "수시/학교별" || group === "")) group = "월중";
-  if (group === "수시/학교별") group = "수시";
-  if (group === "날짜지정") {
-    const day = extractPeriodDay(period);
-    if (day !== null) {
-      if (day <= 10) return "월초";
-      if (day <= 20) return "중순";
-      return "월말";
-    }
-    if (period.includes("초")) return "월초";
-    if (period.includes("중")) return "중순";
+  const raw = String(task.period || task.periodGroup || "").replace(/\s+/g, "");
+  const group = String(task.periodGroup || "").replace(/\s+/g, "");
+  const text = `${raw} ${group}`;
+  const day = extractPeriodDay(text);
+
+  // 카운트와 필터가 반드시 같은 기준을 쓰도록 3개 시기 그룹으로 통일한다.
+  if (day !== null) {
+    if (day <= 10) return "월초";
+    if (day <= 20) return "중순";
     return "월말";
   }
-  return group || "기타";
+  if (/(1일|월초|초순|초경|초까지)/.test(text)) return "월초";
+  if (/(중순|월중|15일|20일|중경|중까지)/.test(text)) return "중순";
+  if (/(하순|25일|월말|말일|말까지|말경)/.test(text)) return "월말";
+  if (/(수시|필요시|연중|학교별)/.test(text)) return "기타";
+  return "기타";
 }
 
 function taskSortScore(task) {
   const rawPeriod = String(task.period || task.periodGroup || "").replace(/\s+/g, "");
-  const bucket = taskFlowBucket(task);
   const day = extractPeriodDay(rawPeriod);
 
   // 실제 월 흐름 기준 정렬값
   // 1일경 → 월초 → 5일경 → 10일경 → 중순 → 월중 → 20일경 → 하순 → 월말 → 말까지
-  if (day !== null) {
-    // 구체 날짜가 있으면 숫자 날짜를 최우선으로 사용한다.
-    return day;
-  }
+  if (day !== null) return day;
 
   if (rawPeriod.includes("1일")) return 1;
   if (rawPeriod.includes("월초")) return 3;
@@ -285,31 +299,22 @@ function taskSortScore(task) {
   if (rawPeriod.includes("월말")) return 28;
   if (rawPeriod.includes("말까지") || rawPeriod.includes("말일")) return 29;
 
+  const bucket = taskFlowBucket(task);
   if (bucket === "월초") return 3;
-  if (bucket === "중순") return 15;
-  if (bucket === "월중") return 16;
+  if (bucket === "중순") return 16;
   if (bucket === "월말") return 28;
-  if (bucket === "수시") return 98;
   return 99;
 }
 
 function getFilteredTasks() {
-  const q = normalizeText(state.query);
   return getAllTasks().filter(task => {
     if (!state.allMode && task.month !== state.selectedMonth) return false;
     if (state.whenType && getWhenType(task) !== state.whenType) return false;
     if (state.categories.length && !state.categories.includes(task.category)) return false;
     if (state.period && taskFlowBucket(task) !== state.period) return false;
     if (!matchesSubmissionFilter(task)) return false;
-    if (q) {
-      const hay = normalizeText([task.title, task.category, task.department, task.law, task.description, task.note, task.period].join(" "));
-      if (!hay.includes(q)) return false;
-    }
-    const st = getTaskState(task.id);
-    if (state.stateFilter === "done" && !st.done) return false;
-    if (state.stateFilter === "undone" && (st.done || st.skipped)) return false;
-    if (state.stateFilter === "important" && !st.important) return false;
-    if (state.stateFilter === "skipped" && !st.skipped) return false;
+    if (!matchesSearch(task)) return false;
+    if (!matchesStateFilter(task)) return false;
     return true;
   });
 }
@@ -352,15 +357,16 @@ function renderFilterOptions() {
 }
 
 function getDashboardBaseTasks() {
-  const q = normalizeText(state.query);
   return (state.allMode ? getAllTasks() : getMonthTasks(state.selectedMonth)).filter(task => {
     if (state.categories.length && !state.categories.includes(task.category)) return false;
-    if (q) {
-      const hay = normalizeText([task.title, task.category, task.department, task.law, task.description, task.note, task.period].join(" "));
-      if (!hay.includes(q)) return false;
-    }
+    if (!matchesSearch(task)) return false;
+    if (!matchesStateFilter(task)) return false;
     return true;
   });
+}
+
+function getViewBaseTasks() {
+  return getDashboardBaseTasks().filter(task => matchesSubmissionFilter(task));
 }
 
 function renderHeroAndStats() {
@@ -372,23 +378,28 @@ function renderHeroAndStats() {
   const done = actionable.filter(t => getTaskState(t.id).done).length;
   const rate = actionable.length ? Math.round(done / actionable.length * 100) : 0;
   const submitCount = base.filter(isSubmissionTask).length;
-  const early = base.filter(t => taskFlowBucket(t) === "월초").length;
-  const monthMiddle = base.filter(t => taskFlowBucket(t) === "월중").length;
-  const middle = base.filter(t => taskFlowBucket(t) === "중순").length;
-  const late = base.filter(t => taskFlowBucket(t) === "월말").length;
+  const early = visibleBase.filter(t => taskFlowBucket(t) === "월초").length;
+  const middle = visibleBase.filter(t => taskFlowBucket(t) === "중순").length;
+  const late = visibleBase.filter(t => taskFlowBucket(t) === "월말").length;
   const undoneValue = state.user ? `${undone}건` : "-";
   const undoneDesc = state.user ? "완료·해당없음 제외" : "로그인 후 확인";
 
   const boardTitleBase = state.allMode ? "전체" : `${state.selectedMonth}월`;
   const boardModeName = state.submissionFilter === "exclude" ? "챙길 업무" : (state.submissionFilter === "only" ? "제출 업무" : "업무판");
+  const boardDesc = state.submissionFilter === "exclude"
+    ? "공문이 없어도 시기상 한 번쯤 확인할 업무예요."
+    : (state.submissionFilter === "only"
+      ? "공문이 오면 조사·신청·제출로 처리하는 업무예요."
+      : "이번 달 행정실 업무를 시기 순서로 확인해요.");
   els.heroTitle.textContent = `${boardTitleBase} ${boardModeName}`;
+  document.querySelector(".hero-desc").textContent = boardDesc;
   if (els.heroMonthTitle) els.heroMonthTitle.textContent = state.allMode ? "전체업무 보기" : `${state.selectedMonth}월 필수업무`;
   els.heroSummary.textContent = state.allMode
-    ? `조건에 맞는 업무 ${tasks.length}건 표시 중`
+    ? `표시 ${tasks.length}건${state.user ? ` · 완료율 ${rate}%` : ""}`
     : `표시 ${tasks.length}건 · 완료율 ${rate}%`;
 
   const cards = [
-    { key: "all", label: "전체", value: `${base.length}건`, desc: state.allMode ? "등록 전체" : `${state.selectedMonth}월` },
+    { key: "all", label: "전체", value: `${visibleBase.length}건`, desc: state.allMode ? "현재 보기 전체" : `${state.selectedMonth}월 현재 보기` },
     { key: "early", label: "월초", value: `${early}건`, desc: "월초 업무" },
     { key: "middle", label: "중순", value: `${middle}건`, desc: "중순 업무" },
     { key: "late", label: "월말", value: `${late}건`, desc: "월말 업무" },
@@ -399,18 +410,11 @@ function renderHeroAndStats() {
 }
 
 function getSelectorBaseTasks() {
-  const q = normalizeText(state.query);
   return getAllTasks().filter(task => {
     if (!state.allMode && task.month !== state.selectedMonth) return false;
-    if (q) {
-      const hay = normalizeText([task.title, task.category, task.department, task.law, task.description, task.note, task.period].join(" "));
-      if (!hay.includes(q)) return false;
-    }
-    const st = getTaskState(task.id);
-    if (state.stateFilter === "done" && !st.done) return false;
-    if (state.stateFilter === "undone" && (st.done || st.skipped)) return false;
-    if (state.stateFilter === "important" && !st.important) return false;
-    if (state.stateFilter === "skipped" && !st.skipped) return false;
+    if (!matchesSearch(task)) return false;
+    if (!matchesStateFilter(task)) return false;
+    if (!matchesSubmissionFilter(task)) return false;
     return true;
   });
 }
@@ -418,18 +422,10 @@ function getSelectorBaseTasks() {
 function renderSelectorBoard() {
   if (!els.selectorBoard) return;
 
-  const q = normalizeText(state.query);
   const base = getAllTasks().filter(task => {
     if (!matchesSubmissionFilter(task)) return false;
-    if (q) {
-      const hay = normalizeText([task.title, task.category, task.department, task.law, task.description, task.note, task.period].join(" "));
-      if (!hay.includes(q)) return false;
-    }
-    const st = getTaskState(task.id);
-    if (state.stateFilter === "done" && !st.done) return false;
-    if (state.stateFilter === "undone" && (st.done || st.skipped)) return false;
-    if (state.stateFilter === "important" && !st.important) return false;
-    if (state.stateFilter === "skipped" && !st.skipped) return false;
+    if (!matchesSearch(task)) return false;
+    if (!matchesStateFilter(task)) return false;
     return true;
   });
 
@@ -719,7 +715,7 @@ document.addEventListener("click", (ev) => {
   const statAction = ev.target?.closest?.("[data-stat-action]")?.dataset?.statAction;
   if (statAction) {
     if (statAction === "all") {
-      state.submissionFilter = "";
+      // 현재 보기(전체/챙길/제출)는 유지하고 시기·상태 필터만 초기화한다.
       state.stateFilter = "";
       state.period = "";
       state.whenType = "";
