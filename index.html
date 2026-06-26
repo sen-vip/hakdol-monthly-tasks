@@ -3,202 +3,156 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>학돌 월별필수업무</title>
-  <meta name="description" content="초보 행정실 담당자를 위한 학교 월별 필수업무 생존 가이드" />
-  <link rel="preconnect" href="https://cdn.jsdelivr.net" />
+  <title>학돌 월별업무판 v2.5</title>
+  <meta name="description" content="우리 학교 이번 달 행정실 업무를 캘린더와 업무분장으로 확인하는 월간 업무판" />
   <link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%20100%20100%22%3E%3Ctext%20y%3D%22.9em%22%20font-size%3D%2290%22%3E%F0%9F%93%85%3C/text%3E%3C/svg%3E" />
-  <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%20100%20100%22%3E%3Ctext%20y%3D%22.9em%22%20font-size%3D%2290%22%3E%F0%9F%93%85%3C/text%3E%3C/svg%3E" />
-  <link rel="stylesheet" href="./styles.css?v=20260624-v245-fix13" />
+  <link rel="stylesheet" href="./styles.css?v=20260626-v25-clean-rebuild" />
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="./supabase-config.js"></script>
-  <script src="./data/tasks.js?v=20260624-v24"></script>
-  <link rel="stylesheet" href="./neis-extension.css?v=20260624-v245-fix13">
+  <script src="./data/tasks.js?v=20260626-ver5"></script>
 </head>
 <body>
-  <header class="topbar app-topbar no-print">
-    <div class="topbar-inner">
-      <div class="brand" role="button" tabindex="0" data-action="go-today">
-        <span class="brand-icon">📅</span>
-        <div>
+  <header class="app-header no-print">
+    <div class="app-header__inner">
+      <button class="brand" id="goTodayBtn" type="button" aria-label="이번 달로 이동">
+        <span class="brand__icon">📅</span>
+        <span class="brand__text">
           <strong>학돌 업무판</strong>
-          <small id="topbarSchoolName">학교 설정 전</small>
-        </div>
-      </div>
-      <div class="topbar-context" id="topbarContext">이번 달</div>
-      <nav class="topnav topnav-simple" aria-label="주요 메뉴">
-        <button class="ghost" data-action="help" type="button">도움말</button>
-      </nav>
-      <div class="auth-box" id="authBox">
-        <span id="authHint">로그인 없이도 볼 수 있어요</span>
-        <button class="primary" id="loginOpenBtn">로그인</button>
+          <small id="headerSchoolName">학교 설정 전</small>
+        </span>
+      </button>
+      <div class="header-actions">
+        <button class="month-pill" id="headerMonthBtn" type="button">이번 달</button>
+        <button class="ghost-btn" id="helpBtn" type="button">도움말</button>
+        <button class="primary-btn small" id="loginBtn" type="button">로그인</button>
       </div>
     </div>
   </header>
 
-  <main class="app-shell">
-    <section class="work-board" aria-label="학돌 업무판">
-      <section class="hero slim-hero work-header" id="hero">
-        <div class="hero-main">
-          <div class="hero-title-row">
-            <div>
-              <p class="eyebrow">학돌 업무판</p>
-              <h1 id="heroTitle">이번 달 업무판</h1>
-            </div>
-            <p class="hero-summary-text" id="heroSummary">업무를 불러오는 중입니다.</p>
-          </div>
-          <p class="hero-desc">학교 행정실 월별 업무 흐름을 한눈에 확인해요.</p>
+  <main class="app-main">
+    <section class="month-summary" aria-label="월 요약">
+      <div>
+        <p class="eyebrow">이번 달 우리 학교 업무 흐름</p>
+        <h1 id="summaryTitle">6월 업무판</h1>
+        <p id="summaryDesc">학교 행정실 월별 업무를 달력에서 먼저 확인하고, 필요한 업무만 골라 봐요.</p>
+      </div>
+      <div class="summary-metrics" id="summaryMetrics"></div>
+    </section>
+
+    <section class="school-panel no-print" aria-label="학교 설정">
+      <div class="school-panel__summary">
+        <div>
+          <strong id="schoolSummaryTitle">학교 설정 전</strong>
+          <p id="schoolSummaryDesc">학교를 선택하면 학사일정과 행정업무를 함께 확인할 수 있어요.</p>
         </div>
-      </section>
-
-      <section class="stats-grid slim-stats" id="statsGrid" aria-label="요약 통계"></section>
-
-      <section class="notice no-print" id="configNotice" hidden>
-        <span>로그인 저장 설정 전입니다. 업무 목록은 그대로 볼 수 있고, 로그인 저장을 쓰려면 <code>supabase-config.js</code>를 설정하세요.</span>
-      </section>
-
-      <section class="work-view-panel no-print" aria-label="업무 보기 설정">
-        <div class="work-view-head">
-          <strong>업무 보기</strong>
-          <span>월·업무분장·보기 방식을 한곳에서 고릅니다.</span>
-        </div>
-        <section class="selector-board" id="selectorBoard" aria-label="월과 업무분장 선택"></section>
-        <section class="view-filter-board" aria-label="업무 보기 필터">
-          <div class="view-filter-label">보기</div>
-          <div class="submission-filter-wrap" aria-label="업무 보기 필터">
-            <button type="button" class="submit-filter-chip active" data-submission-filter="">전체업무</button>
-            <button type="button" class="submit-filter-chip" data-submission-filter="exclude">챙길업무</button>
-            <button type="button" class="submit-filter-chip" data-submission-filter="only">제출업무</button>
-          </div>
-        </section>
-        <section class="toolbar" aria-label="검색과 보기 필터">
-          <label class="search-wrap">
-            <span>검색</span>
-            <input id="searchInput" type="search" placeholder="업무명, 분류, 근거, 안내부서 검색" />
+        <button class="ghost-btn" id="schoolToggleBtn" type="button" aria-expanded="false">학교 변경</button>
+      </div>
+      <div class="school-panel__body" id="schoolPanelBody" hidden>
+        <div class="school-form">
+          <label>시도교육청
+            <select id="officeSelect"></select>
           </label>
-          <button class="ghost compact-only" id="detailFilterToggle" type="button" aria-expanded="false">상태 필터</button>
-          <button class="ghost add-school-task" id="addTaskBtn">+ 우리 학교 업무 추가</button>
-          <div class="detail-filters" id="detailFilters" hidden>
-            <label class="visually-compact">
-              <span>월</span>
-              <select id="monthFilter"></select>
-            </label>
-            <label class="visually-compact">
-              <span>업무분장</span>
-              <select id="categoryFilter"></select>
-            </label>
-            <label>
-              <span>업무 시기</span>
-              <select id="periodFilter">
-                <option value="">전체</option>
-                <option>월초</option>
-                <option>중순</option>
-                <option>월말</option>
-                <option>날짜지정</option>
-                <option>월중</option>
-                <option>기타</option>
-              </select>
-            </label>
-            <label>
-              <span>상태</span>
-              <select id="stateFilter">
-                <option value="">전체</option>
-                <option value="undone">미완료</option>
-                <option value="done">완료</option>
-                
-              </select>
-            </label>
-            <button class="ghost" id="resetFiltersBtn" type="button">초기화</button>
-          </div>
-        </section>
-      </section>
+          <label>학교명
+            <input id="schoolNameInput" type="search" placeholder="예: 학돌중학교" autocomplete="off" />
+          </label>
+          <button class="primary-btn" id="schoolSearchBtn" type="button">학교 찾기</button>
+          <button class="ghost-btn" id="schoolClearBtn" type="button">설정 초기화</button>
+        </div>
+        <p class="panel-help">학교 검색 영역은 달력 위를 덮지 않고, 선택 후 자동으로 접혀요.</p>
+        <div class="school-results" id="schoolResults" hidden></div>
+      </div>
+    </section>
 
-      <section class="year-board" id="yearBoard" aria-label="연간보기"></section>
+    <section class="calendar-section" aria-label="이번 달 캘린더">
+      <div class="section-title-row">
+        <div>
+          <p class="eyebrow">Monthly Calendar</p>
+          <h2>이번 달 캘린더</h2>
+        </div>
+        <div class="calendar-controls no-print">
+          <button class="ghost-btn" id="prevMonthBtn" type="button" aria-label="이전 달">‹</button>
+          <button class="month-select-btn" id="calendarMonthBtn" type="button">2026년 6월</button>
+          <button class="ghost-btn" id="nextMonthBtn" type="button" aria-label="다음 달">›</button>
+          <button class="ghost-btn" id="loadScheduleBtn" type="button">일정 새로고침</button>
+          <button class="ghost-btn" id="todayBtn" type="button">오늘</button>
+        </div>
+      </div>
+      <p class="calendar-meta" id="calendarMeta">날짜를 누르면 그날의 업무와 학교 일정을 아래에서 확인할 수 있어요.</p>
+      <div class="calendar-grid" id="calendarGrid"></div>
+    </section>
 
-      <section class="section-head" id="taskSectionHead">
+    <section class="selected-day-panel" id="selectedDayPanel" aria-live="polite"></section>
+
+    <section class="task-filter-panel no-print" aria-label="업무 보기 필터">
+      <div class="filter-row">
+        <div class="filter-label">업무 보기</div>
+        <div class="filter-chips" id="viewFilterChips">
+          <button class="chip active" data-view="all" type="button">전체업무</button>
+          <button class="chip" data-view="check" type="button">챙길업무</button>
+          <button class="chip" data-view="submit" type="button">제출업무</button>
+        </div>
+      </div>
+      <div class="filter-row">
+        <div class="filter-label">업무분장</div>
+        <div class="filter-chips" id="categoryChips"></div>
+      </div>
+      <div class="filter-row filter-row--search">
+        <div class="filter-label">검색</div>
+        <div class="search-actions">
+          <input id="taskSearchInput" type="search" placeholder="업무명, 분류, 근거, 안내부서 검색" />
+          <button class="ghost-btn" id="addCustomTaskBtn" type="button">+ 우리 학교 업무 추가</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="task-board" aria-label="업무 목록">
+      <div class="section-title-row task-board__head">
         <div>
           <p class="eyebrow">Work Board</p>
-          <h2 id="taskListTitle">월별 필수업무</h2>
+          <h2 id="taskBoardTitle">6월 업무 목록</h2>
         </div>
-        <p id="taskListMeta"></p>
-      </section>
-
-      <section class="task-list" id="taskList" aria-live="polite"></section>
+        <p id="taskBoardMeta"></p>
+      </div>
+      <div class="task-list" id="taskList"></div>
     </section>
   </main>
 
-  <div class="modal-backdrop no-print" id="detailModal" hidden>
+  <div class="modal-backdrop" id="detailModal" hidden>
     <article class="modal" role="dialog" aria-modal="true" aria-labelledby="detailTitle">
-      <button class="modal-close" data-close="detailModal" aria-label="닫기">×</button>
-      <div id="detailBody"></div>
+      <button class="modal-close" data-close="detailModal" type="button" aria-label="닫기">×</button>
+      <div id="detailModalBody"></div>
     </article>
   </div>
 
-  <div class="modal-backdrop no-print" id="helpModal" hidden>
-    <article class="modal help-modal" role="dialog" aria-modal="true" aria-labelledby="helpTitle">
-      <button class="modal-close" data-close="helpModal" aria-label="닫기">×</button>
-      <h2 id="helpTitle">학돌 월별필수업무 도움말</h2>
-      <div class="help-list">
-        <section>
-          <h3>1. 월별업무 보는 법</h3>
-          <p>월초·월중·중순·월말 순서로 해당 월의 주요 업무를 확인할 수 있습니다.</p>
-        </section>
-        <section>
-          <h3>2. 제출업무 필터</h3>
-          <p>공문이 오면 처리하는 제출성 업무는 기본 보기에서 제외됩니다. 필요한 경우 제출업무만 보기 또는 전체 보기로 전환할 수 있습니다.</p>
-        </section>
-        <section>
-          <h3>3. 학교 학사일정 연결</h3>
-          <p>학교를 선택하면 학교 학사일정과 시간표 기반 감지 일정을 함께 확인할 수 있습니다.</p>
-        </section>
-        <section>
-          <h3>4. 우리 학교 일정 직접 추가</h3>
-          <p>학교 일정에 입력되지 않은 수련활동, 현장체험학습, 진로체험 등은 달력에서 날짜를 선택해 직접 추가할 수 있습니다.</p>
-        </section>
-        <section>
-          <h3>5. 저장 안내</h3>
-          <p>비로그인 상태에서는 현재 브라우저에 저장되고, 로그인하면 학교 설정과 직접 추가 일정이 계정에 저장됩니다.</p>
-        </section>
+  <div class="modal-backdrop" id="customModal" hidden>
+    <article class="modal" role="dialog" aria-modal="true" aria-labelledby="customTitle">
+      <button class="modal-close" data-close="customModal" type="button" aria-label="닫기">×</button>
+      <h2 id="customTitle">우리 학교 업무 추가</h2>
+      <form class="custom-form" id="customForm">
+        <label>월<select id="customMonth"></select></label>
+        <label>일정<input id="customPeriod" required placeholder="예: 20일경"></label>
+        <label>업무분장<input id="customCategory" required placeholder="예: 인사"></label>
+        <label>업무명<input id="customTaskTitle" required placeholder="예: 우리학교 자체 점검"></label>
+        <label>안내부서<input id="customDepartment" placeholder="예: 행정실"></label>
+        <label>간략내용<textarea id="customDesc" rows="3" placeholder="필요하면 메모를 적어주세요."></textarea></label>
+        <button class="primary-btn" type="submit">추가하기</button>
+      </form>
+    </article>
+  </div>
+
+  <div class="modal-backdrop" id="helpModal" hidden>
+    <article class="modal" role="dialog" aria-modal="true" aria-labelledby="helpTitle">
+      <button class="modal-close" data-close="helpModal" type="button" aria-label="닫기">×</button>
+      <h2 id="helpTitle">학돌 업무판 도움말</h2>
+      <div class="help-copy">
+        <p><strong>첫 화면은 이번 달 캘린더</strong>입니다. 날짜를 누르면 그날 챙길 업무와 학교 일정을 확인할 수 있어요.</p>
+        <p><strong>업무 보기</strong>에서 전체업무, 챙길업무, 제출업무를 전환하고, <strong>업무분장</strong>에서 내 업무만 골라 볼 수 있어요.</p>
+        <p><strong>완료</strong>와 <strong>해당없음</strong>은 브라우저에 저장됩니다. 해당없음은 완료율 계산에서 제외돼요.</p>
       </div>
-      <p class="help-footer">제작/소스 보기: <a href="https://github.com/sen-vip/hakdol-monthly-tasks" target="_blank" rel="noopener noreferrer">GitHub</a></p>
     </article>
   </div>
 
-  <div class="modal-backdrop no-print" id="loginModal" hidden>
-    <article class="modal small" role="dialog" aria-modal="true" aria-labelledby="loginTitle">
-      <button class="modal-close" data-close="loginModal" aria-label="닫기">×</button>
-      <h2 id="loginTitle">로그인</h2>
-      <p class="muted">로그인하면 완료 체크, 메모, 학교 설정과 직접 추가 일정을 다른 PC·휴대폰에서도 이어볼 수 있습니다.</p>
-      <form id="loginForm" class="stack-form">
-        <label>이메일<input type="email" id="emailInput" required placeholder="name@example.com" /></label>
-        <label>비밀번호<input type="password" id="passwordInput" required minlength="6" placeholder="6자 이상" /></label>
-        <div class="button-row">
-          <button type="submit" class="primary">로그인</button>
-          <button type="button" class="ghost" id="signupBtn">회원가입</button>
-        </div>
-      </form>
-      <p class="safety-note">학생·교직원 개인정보, 급여 세부자료, 계좌번호, 민원 내용 등 민감정보는 입력하지 마세요.</p>
-    </article>
-  </div>
-
-  <div class="modal-backdrop no-print" id="customTaskModal" hidden>
-    <article class="modal" role="dialog" aria-modal="true" aria-labelledby="customTaskTitle">
-      <button class="modal-close" data-close="customTaskModal" aria-label="닫기">×</button>
-      <h2 id="customTaskTitle">우리 학교 업무 추가</h2>
-      <form id="customTaskForm" class="stack-form grid-form">
-        <label>몇 월 업무인가요?<select id="customMonth" required></select></label>
-        <label>언제쯤 하나요?<input id="customPeriod" placeholder="예: 월초, 중순, 월말, 25일까지" /></label>
-        <label>업무 분류<input id="customCategory" required placeholder="예: 예산, 시설, 자체업무" /></label>
-        <label class="wide">업무 이름<input id="customTitle" required placeholder="우리 학교만의 업무명" /></label>
-        <label class="wide">업무 설명<textarea id="customDesc" rows="4" placeholder="필요한 준비사항이나 설명"></textarea></label>
-        <label class="wide">우리 학교 메모<textarea id="customMemo" rows="3" placeholder="민감정보는 입력하지 마세요"></textarea></label>
-        <div class="button-row wide"><button class="primary" type="submit">저장</button></div>
-      </form>
-    </article>
-  </div>
-
-  <button type="button" class="to-top-btn no-print" id="toTopBtn" data-action="go-top" aria-label="맨 위로 올리기">↑</button>
-  <div class="toast no-print" id="toast" role="status" aria-live="polite"></div>
-  <script src="./app.js?v=20260624-v245-fix13"></script>
-  <script src="./neis-extension.js?v=20260624-v245-fix13" defer></script>
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <script src="./app.js?v=20260626-v25-clean-rebuild"></script>
 </body>
 </html>
