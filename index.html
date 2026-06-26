@@ -6,7 +6,7 @@
   <title>학돌 월별업무판 v2.5</title>
   <meta name="description" content="우리 학교 이번 달 행정실 업무를 캘린더와 업무분장으로 확인하는 월간 업무판" />
   <link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%20100%20100%22%3E%3Ctext%20y%3D%22.9em%22%20font-size%3D%2290%22%3E%F0%9F%93%85%3C/text%3E%3C/svg%3E" />
-  <link rel="stylesheet" href="./styles.css?v=20260626-v25-clean-rebuild" />
+  <link rel="stylesheet" href="./styles.css?v=20260626-v254-manual-events" />
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="./supabase-config.js"></script>
   <script src="./data/tasks.js?v=20260626-ver5"></script>
@@ -100,7 +100,7 @@
         <div class="filter-label">검색</div>
         <div class="search-actions">
           <input id="taskSearchInput" type="search" placeholder="업무명, 분류, 근거, 안내부서 검색" />
-          <button class="ghost-btn" id="addCustomTaskBtn" type="button">+ 우리 학교 업무 추가</button>
+          <button class="ghost-btn" id="addCustomTaskBtn" type="button">+ 우리 학교 일정 추가</button>
         </div>
       </div>
     </section>
@@ -127,15 +127,17 @@
   <div class="modal-backdrop" id="customModal" hidden>
     <article class="modal" role="dialog" aria-modal="true" aria-labelledby="customTitle">
       <button class="modal-close" data-close="customModal" type="button" aria-label="닫기">×</button>
-      <h2 id="customTitle">우리 학교 업무 추가</h2>
+      <h2 id="customTitle">우리 학교 일정 추가</h2>
       <form class="custom-form" id="customForm">
-        <label>월<select id="customMonth"></select></label>
-        <label>일정<input id="customPeriod" required placeholder="예: 20일경"></label>
-        <label>업무분장<input id="customCategory" required placeholder="예: 인사"></label>
-        <label>업무명<input id="customTaskTitle" required placeholder="예: 우리학교 자체 점검"></label>
-        <label>안내부서<input id="customDepartment" placeholder="예: 행정실"></label>
-        <label>간략내용<textarea id="customDesc" rows="3" placeholder="필요하면 메모를 적어주세요."></textarea></label>
-        <button class="primary-btn" type="submit">추가하기</button>
+        <label>날짜<input id="manualDate" type="date" required></label>
+        <label>일정명<input id="manualTitle" required placeholder="예: 교직원 연수, 체험학습, 학교운영위원회"></label>
+        <label>분류<select id="manualCategory">
+          <option value="학사">학사</option>
+          <option value="행정">행정</option>
+          <option value="메모">메모</option>
+        </select></label>
+        <label>메모<textarea id="manualMemo" rows="3" placeholder="예: 강당 사용 확인, 공문 확인 필요"></textarea></label>
+        <button class="primary-btn" type="submit">일정 추가</button>
       </form>
     </article>
   </div>
@@ -148,11 +150,12 @@
         <p><strong>첫 화면은 이번 달 캘린더</strong>입니다. 날짜를 누르면 그날 챙길 업무와 학교 일정을 확인할 수 있어요.</p>
         <p><strong>업무 보기</strong>에서 전체업무, 챙길업무, 제출업무를 전환하고, <strong>업무분장</strong>에서 내 업무만 골라 볼 수 있어요.</p>
         <p><strong>완료</strong>와 <strong>해당없음</strong>은 브라우저에 저장됩니다. 해당없음은 완료율 계산에서 제외돼요.</p>
+        <p><strong>우리 학교 일정 추가</strong>로 체험학습, 연수, 학교행사 같은 참고 일정을 달력에 직접 표시할 수 있어요.</p>
       </div>
     </article>
   </div>
 
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
-  <script src="./app.js?v=20260626-v25-clean-rebuild"></script>
+  <script src="./app.js?v=20260626-v254-manual-events"></script>
 </body>
 </html>
