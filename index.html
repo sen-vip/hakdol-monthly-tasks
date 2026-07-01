@@ -3,13 +3,14 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>학돌 월별업무판 v2.5.5</title>
+  <title>학돌 월별업무판 v2.6.1 필터정리</title>
   <meta name="description" content="우리 학교 이번 달 행정실 업무를 캘린더와 업무분장으로 확인하는 월간 업무판" />
   <link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%20100%20100%22%3E%3Ctext%20y%3D%22.9em%22%20font-size%3D%2290%22%3E%F0%9F%93%85%3C/text%3E%3C/svg%3E" />
-  <link rel="stylesheet" href="./styles.css?v=20260626-v255-status-visual" />
+  <link rel="stylesheet" href="./styles.css?v=20260701-filter-top" />
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="./supabase-config.js"></script>
   <script src="./data/tasks.js?v=20260626-ver5"></script>
+  <script src="./data/routines.js?v=20260701-routine-count"></script>
 </head>
 <body>
   <header class="app-header no-print">
@@ -63,6 +64,42 @@
       </div>
     </section>
 
+    <section class="task-filter-panel no-print" id="taskFilterPanel" aria-label="캘린더·업무 필터">
+      <div class="filter-panel__head">
+        <div>
+          <p class="eyebrow">Filter</p>
+          <h2>캘린더·업무 필터</h2>
+          <p>선택한 조건에 따라 캘린더와 업무목록이 함께 바뀝니다.</p>
+        </div>
+        <div class="filter-panel__actions">
+          <button class="ghost-btn filter-reset-btn" id="filterResetBtn" type="button">초기화</button>
+          <button class="ghost-btn filter-toggle-btn" id="filterToggleBtn" type="button" aria-expanded="false">필터 열기</button>
+        </div>
+      </div>
+      <div class="filter-summary" id="currentFilterSummary">현재 보기: 전체업무 · 전체분장 · 검색어 없음</div>
+      <div class="filter-panel__body" id="filterPanelBody">
+        <div class="filter-row">
+          <div class="filter-label">업무 보기</div>
+          <div class="filter-chips" id="viewFilterChips">
+            <button class="chip active" data-view="all" type="button">전체업무</button>
+            <button class="chip" data-view="check" type="button">챙길업무</button>
+            <button class="chip" data-view="submit" type="button">제출업무</button>
+            <button class="chip" data-view="routine" type="button">루틴업무</button>
+          </div>
+        </div>
+        <div class="filter-row">
+          <div class="filter-label">업무분장</div>
+          <div class="filter-chips" id="categoryChips"></div>
+        </div>
+        <div class="filter-row filter-row--search">
+          <div class="filter-label">검색</div>
+          <div class="search-actions search-actions--single">
+            <input id="taskSearchInput" type="search" placeholder="업무명, 분류, 근거, 안내부서 검색" />
+          </div>
+        </div>
+      </div>
+    </section>
+
     <section class="calendar-section" aria-label="이번 달 캘린더">
       <div class="section-title-row">
         <div>
@@ -78,32 +115,11 @@
           <button class="ghost-btn" id="todayBtn" type="button">오늘</button>
         </div>
       </div>
-      <p class="calendar-meta" id="calendarMeta">날짜를 누르면 그날의 업무와 학교 일정을 아래에서 확인할 수 있어요.</p>
+      <p class="calendar-meta" id="calendarMeta">위 필터를 적용한 결과가 캘린더와 아래 업무목록에 함께 반영돼요.</p>
       <div class="calendar-grid" id="calendarGrid"></div>
     </section>
 
     <section class="selected-day-panel" id="selectedDayPanel" aria-live="polite"></section>
-
-    <section class="task-filter-panel no-print" aria-label="업무 보기 필터">
-      <div class="filter-row">
-        <div class="filter-label">업무 보기</div>
-        <div class="filter-chips" id="viewFilterChips">
-          <button class="chip active" data-view="all" type="button">전체업무</button>
-          <button class="chip" data-view="check" type="button">챙길업무</button>
-          <button class="chip" data-view="submit" type="button">제출업무</button>
-        </div>
-      </div>
-      <div class="filter-row">
-        <div class="filter-label">업무분장</div>
-        <div class="filter-chips" id="categoryChips"></div>
-      </div>
-      <div class="filter-row filter-row--search">
-        <div class="filter-label">검색</div>
-        <div class="search-actions search-actions--single">
-          <input id="taskSearchInput" type="search" placeholder="업무명, 분류, 근거, 안내부서 검색" />
-        </div>
-      </div>
-    </section>
 
     <section class="task-board" aria-label="업무 목록">
       <div class="section-title-row task-board__head">
@@ -147,8 +163,9 @@
       <button class="modal-close" data-close="helpModal" type="button" aria-label="닫기">×</button>
       <h2 id="helpTitle">학돌 업무판 도움말</h2>
       <div class="help-copy">
-        <p><strong>첫 화면은 이번 달 캘린더</strong>입니다. 날짜를 누르면 그날 챙길 업무와 학교 일정을 확인할 수 있어요.</p>
-        <p><strong>업무 보기</strong>에서 전체업무, 챙길업무, 제출업무를 전환하고, <strong>업무분장</strong>에서 내 업무만 골라 볼 수 있어요.</p>
+        <p><strong>첫 화면은 이번 달 캘린더</strong>입니다. 날짜칸의 <strong>루틴 N개</strong>를 보고 매월 반복업무를 가볍게 확인할 수 있어요.</p>
+        <p><strong>날짜를 클릭</strong>하면 아래에서 해당 날짜의 반복 루틴, 행정업무, 학교일정을 함께 확인할 수 있어요.</p>
+        <p><strong>업무 보기</strong>에서 전체업무, 챙길업무, 제출업무, 루틴업무를 전환하고, <strong>업무분장</strong>에서 내 업무만 골라 볼 수 있어요.</p>
         <p><strong>완료</strong>와 <strong>해당없음</strong>은 브라우저에 저장됩니다. 해당없음은 완료율 계산에서 제외돼요.</p>
         <p><strong>우리 학교 일정 추가</strong>로 체험학습, 연수, 학교행사 같은 참고 일정을 달력에 직접 표시할 수 있어요.</p>
       </div>
@@ -156,6 +173,6 @@
   </div>
 
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
-  <script src="./app.js?v=20260626-v255-status-visual"></script>
+  <script src="./app.js?v=20260701-filter-top"></script>
 </body>
 </html>

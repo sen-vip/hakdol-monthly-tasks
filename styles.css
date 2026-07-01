@@ -161,3 +161,212 @@ input[type="checkbox"].task-check:focus-visible{outline:3px solid rgba(37,99,235
 @media(max-width:900px){:root{--header-h:62px}.app-header__inner{padding:0 14px}.brand small{max-width:120px}.header-actions{gap:6px}.header-actions .ghost-btn{display:none}.month-summary{grid-template-columns:1fr;padding:20px}.summary-metrics{min-width:0;grid-template-columns:repeat(2,1fr)}.school-form{grid-template-columns:1fr}.section-title-row{flex-direction:column}.calendar-controls{justify-content:flex-start}.calendar-grid{gap:6px}.day-cell{min-height:96px;padding:8px}.task-row{grid-template-columns:26px 70px 82px minmax(0,1fr);gap:12px;padding:14px}.task-status,.task-row .detail-btn{grid-column:auto}.task-row{position:relative}.task-row .detail-btn{justify-self:start}.task-sub{white-space:normal}.filter-row{grid-template-columns:1fr;gap:6px}.filter-label{height:auto}.search-actions{grid-template-columns:1fr}.selected-card{grid-template-columns:1fr}.selected-actions{justify-content:flex-start}}
 @media(max-width:640px){body{font-size:14px}.app-main{padding:16px 12px 50px}.brand__icon{width:34px;height:34px}.month-pill{display:none}.primary-btn.small{padding:0 10px}.calendar-grid{display:block}.weekday{display:none}.day-cell{min-height:auto;margin-bottom:8px}.day-cell.is-empty{display:none}.day-badges{flex-direction:row;flex-wrap:wrap}.task-row{display:grid;grid-template-columns:28px 1fr;gap:10px;border-radius:18px;margin:10px 12px;border:1px solid var(--line-soft);padding:14px}.task-list{background:#f8fafc;padding:2px 0 12px}.period-chip,.category-chip{justify-content:flex-start;width:max-content}.task-main{grid-column:2}.task-status,.detail-btn{grid-column:2;justify-self:start}.detail-grid{grid-template-columns:1fr}.summary-metrics{grid-template-columns:1fr}.school-panel__summary{align-items:flex-start;flex-direction:column}.calendar-section,.selected-day-panel,.task-filter-panel{padding:16px}}
 @media print{.no-print,.app-header,.modal-backdrop,.toast{display:none!important}body{padding-top:0;background:#fff}.app-main{max-width:none;padding:0}.month-summary,.calendar-section,.selected-day-panel,.task-filter-panel,.task-board{box-shadow:none;border-color:#ddd}}
+
+/* v2.6 반복업무 루틴 캘린더 */
+.day-badge.routine{
+  background:#f1f5f9;
+  border:1px solid #e2e8f0;
+  color:#475569;
+  font-weight:900;
+}
+.routine-card{
+  border-color:#e2e8f0;
+  background:#fbfdff;
+}
+.routine-card > div{
+  width:100%;
+}
+.routine-card h3{
+  margin-bottom:12px;
+}
+.routine-groups{
+  display:grid;
+  gap:12px;
+}
+.routine-group{
+  background:#fff;
+  border:1px solid var(--line-soft);
+  border-radius:16px;
+  padding:12px;
+}
+.routine-group h3{
+  margin:0 0 8px;
+  font-size:13px;
+}
+.routine-group ul{
+  list-style:none;
+  margin:0;
+  padding:0;
+  display:grid;
+  gap:9px;
+}
+.routine-group li{
+  padding:9px 0;
+  border-top:1px solid #f1f5f9;
+}
+.routine-group li:first-child{
+  border-top:0;
+  padding-top:0;
+}
+.routine-item-title{
+  display:flex;
+  align-items:flex-start;
+  gap:8px;
+  flex-wrap:wrap;
+}
+.routine-item-title strong{
+  font-size:14px;
+  line-height:1.45;
+  letter-spacing:-.02em;
+}
+.routine-schedule{
+  height:24px;
+  display:inline-flex;
+  align-items:center;
+  border-radius:999px;
+  background:#f1f5f9;
+  color:#475569;
+  padding:0 8px;
+  font-size:11px;
+  font-weight:900;
+  flex:0 0 auto;
+}
+.routine-group p{
+  margin:5px 0 0;
+  color:var(--muted);
+  font-size:12.5px;
+  white-space:pre-line;
+}
+.routine-details{
+  margin-top:6px;
+}
+.routine-details summary{
+  color:#475569;
+  font-size:12px;
+  font-weight:900;
+  cursor:pointer;
+}
+.routine-details p{
+  background:#f8fafc;
+  border-radius:12px;
+  padding:8px;
+}
+@media(max-width:640px){
+  .day-badge.routine{font-size:12px;}
+  .routine-item-title{gap:6px;}
+}
+
+.task-row.routine-row{
+  grid-template-columns:54px 100px 96px minmax(0,1fr);
+}
+.routine-list-mark{
+  height:28px;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  border-radius:999px;
+  background:#f1f5f9;
+  color:#475569;
+  font-size:11px;
+  font-weight:900;
+}
+@media(max-width:900px){
+  .task-row.routine-row{grid-template-columns:54px 92px 82px minmax(0,1fr);}
+}
+@media(max-width:640px){
+  .task-row.routine-row{grid-template-columns:28px 1fr;}
+  .routine-list-mark{grid-column:1; width:48px; transform:translateX(-10px);}
+  .task-row.routine-row .period-chip,
+  .task-row.routine-row .category-chip,
+  .task-row.routine-row .task-main{grid-column:2;}
+}
+
+/* v2.6.1 필터 UX 정리: 캘린더 위 상단 컨트롤 패널 */
+.task-filter-panel{
+  padding:18px 20px;
+  gap:12px;
+}
+.filter-panel__head{
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  gap:14px;
+  padding-bottom:10px;
+  border-bottom:1px solid var(--line-soft);
+}
+.filter-panel__head h2{
+  margin:0;
+  font-size:20px;
+  letter-spacing:-.03em;
+}
+.filter-panel__head p:not(.eyebrow){
+  margin:4px 0 0;
+  color:var(--muted);
+  font-size:13px;
+}
+.filter-panel__actions{
+  display:flex;
+  gap:8px;
+  flex:0 0 auto;
+}
+.filter-toggle-btn{
+  display:none;
+}
+.filter-summary{
+  border:1px solid #dbeafe;
+  background:#f8fbff;
+  color:#334155;
+  border-radius:14px;
+  padding:10px 12px;
+  font-size:13px;
+  font-weight:800;
+}
+.filter-panel__body{
+  display:grid;
+  gap:10px;
+}
+.task-filter-panel .filter-row{
+  grid-template-columns:92px minmax(0,1fr);
+  gap:10px;
+}
+.task-filter-panel .filter-label{
+  height:36px;
+  font-size:14px;
+}
+.task-filter-panel .chip{
+  height:36px;
+  min-height:36px;
+  border-radius:13px;
+  padding:0 12px;
+  font-size:14px;
+}
+.task-filter-panel .search-actions input{
+  height:38px;
+  border:1px solid var(--line);
+  border-radius:14px;
+  padding:0 12px;
+  color:var(--text);
+  background:#fff;
+}
+.calendar-section{
+  margin-top:0;
+}
+@media(max-width:900px){
+  .filter-panel__head{flex-direction:column;}
+  .filter-panel__actions{width:100%;justify-content:flex-start;}
+  .task-filter-panel .filter-row{grid-template-columns:1fr;gap:6px;}
+  .task-filter-panel .filter-label{height:auto;}
+}
+@media(max-width:640px){
+  .task-filter-panel{padding:15px;gap:10px;}
+  .filter-panel__head{gap:10px;}
+  .filter-panel__head h2{font-size:18px;}
+  .filter-panel__head p:not(.eyebrow){font-size:12.5px;}
+  .filter-panel__actions{justify-content:space-between;}
+  .filter-panel__actions .ghost-btn{min-height:36px;height:36px;padding:0 11px;font-size:13px;}
+  .filter-toggle-btn{display:inline-flex;}
+  .task-filter-panel:not(.is-open) .filter-panel__body{display:none;}
+  .task-filter-panel.is-open .filter-panel__body{display:grid;}
+  .filter-summary{font-size:12.5px;padding:9px 10px;}
+  .task-filter-panel .chip{height:34px;min-height:34px;font-size:13px;padding:0 10px;}
+}

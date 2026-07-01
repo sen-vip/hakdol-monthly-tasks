@@ -2,6 +2,7 @@
   'use strict';
 
   const TASKS = (window.HAKDOL_TASKS || []).map((task) => ({ ...task, isCustom: false }));
+  const MONTHLY_ROUTINES = (window.HAKDOL_MONTHLY_ROUTINES || []);
   const CONFIG = window.HAKDOL_SUPABASE_CONFIG || { url: '', anonKey: '' };
   const HAS_SUPABASE = Boolean(CONFIG.url && CONFIG.anonKey && window.supabase);
   const supabaseClient = HAS_SUPABASE ? window.supabase.createClient(CONFIG.url, CONFIG.anonKey) : null;
@@ -48,7 +49,7 @@
     schoolToggleBtn: $('schoolToggleBtn'), schoolPanelBody: $('schoolPanelBody'), schoolSummaryTitle: $('schoolSummaryTitle'), schoolSummaryDesc: $('schoolSummaryDesc'),
     officeSelect: $('officeSelect'), schoolNameInput: $('schoolNameInput'), schoolSearchBtn: $('schoolSearchBtn'), schoolClearBtn: $('schoolClearBtn'), schoolResults: $('schoolResults'),
     prevMonthBtn: $('prevMonthBtn'), nextMonthBtn: $('nextMonthBtn'), calendarMonthBtn: $('calendarMonthBtn'), loadScheduleBtn: $('loadScheduleBtn'), todayBtn: $('todayBtn'), calendarMeta: $('calendarMeta'), calendarGrid: $('calendarGrid'),
-    selectedDayPanel: $('selectedDayPanel'), viewFilterChips: $('viewFilterChips'), categoryChips: $('categoryChips'), taskSearchInput: $('taskSearchInput'), addCustomTaskBtn: $('addCustomTaskBtn'),
+    selectedDayPanel: $('selectedDayPanel'), taskFilterPanel: $('taskFilterPanel'), filterToggleBtn: $('filterToggleBtn'), filterResetBtn: $('filterResetBtn'), currentFilterSummary: $('currentFilterSummary'), viewFilterChips: $('viewFilterChips'), categoryChips: $('categoryChips'), taskSearchInput: $('taskSearchInput'), addCustomTaskBtn: $('addCustomTaskBtn'),
     taskBoardTitle: $('taskBoardTitle'), taskBoardMeta: $('taskBoardMeta'), taskList: $('taskList'),
     detailModal: $('detailModal'), detailModalBody: $('detailModalBody'), customModal: $('customModal'), customForm: $('customForm'),
     manualDate: $('manualDate'), manualTitle: $('manualTitle'), manualCategory: $('manualCategory'), manualMemo: $('manualMemo'),
@@ -63,6 +64,7 @@
   function monthLabel() { return `${state.year}년 ${state.month}월`; }
   function sameMonth(dateString) { return String(dateString || '').startsWith(`${state.year}-${pad2(state.month)}-`); }
   function dateForDay(day) { return `${state.year}-${pad2(state.month)}-${pad2(day)}`; }
+  function lastDayOfMonth() { return new Date(state.year, state.month, 0).getDate(); }
   function normalize(value='') { return String(value || '').toLowerCase().replace(/\s+/g, ' ').trim(); }
   function categoryLabel(category='') { return String(category).trim().replace('산업안전보건','안전보건').replace('교직원교육','직원교육'); }
   function catClass(category='') { return CATEGORY_CLASS[categoryLabel(category)] || CATEGORY_CLASS[String(category).trim()] || 'etc'; }
@@ -74,6 +76,28 @@
   function setTaskState(id, status) { state.taskStates[id] = { status, updatedAt: new Date().toISOString() }; saveJson(STATE_KEY, state.taskStates); render(); }
   function isSubmissionTask(task) { const text = `${task.title || ''} ${task.description || ''} ${task.note || ''}`.replace(/\s+/g, ''); return /(제출|신청|조사|보고|등록|입력|자료제출|명단제출|결과제출)/.test(text) || /제출$|신청$|조사$|보고$/.test(text); }
   function taskText(task) { return normalize([task.title, task.category, task.department, task.law, task.description, task.note, task.period, task.review].join(' ')); }
+  function routineDay(routine) { return routine.day === 'last' ? lastDayOfMonth() : Number(routine.day); }
+  function routineText(routine) { return normalize([routine.schedule, routine.displaySchedule, routine.category, routine.title, routine.summary, routine.department, routine.law, routine.memo].join(' ')); }
+  function viewIncludesTasks() { return state.view !== 'routine'; }
+  function viewIncludesRoutines() { return state.view === 'all' || state.view === 'routine'; }
+  function filteredRoutines() {
+    if (!viewIncludesRoutines()) return [];
+    return MONTHLY_ROUTINES.filter(routine => {
+      if (state.category && categoryLabel(routine.category) !== state.category) return false;
+      if (state.query && !routineText(routine).includes(normalize(state.query))) return false;
+      return true;
+    }).sort((a,b) => (routineDay(a) - routineDay(b)) || categorySort(categoryLabel(a.category), categoryLabel(b.category)) || String(a.title).localeCompare(String(b.title), 'ko'));
+  }
+  function routinesForDay(day) { return filteredRoutines().filter(routine => routineDay(routine) === Number(day)); }
+  function routinesForDate(iso) { const date = new Date(`${iso}T00:00:00`); return routinesForDay(date.getDate()); }
+  function groupRoutinesByCategory(routines) {
+    return routines.reduce((groups, routine) => {
+      const cat = categoryLabel(routine.category || '기타');
+      if (!groups[cat]) groups[cat] = [];
+      groups[cat].push(routine);
+      return groups;
+    }, {});
+  }
   function extractDay(period='') { const match = String(period).match(/(\d{1,2})\s*일?/); return match ? Math.max(1, Math.min(28, Number(match[1]))) : null; }
   function representativeDay(task) {
     const day = extractDay(task.period); if (day) return day;
@@ -85,7 +109,10 @@
   }
   function sortScore(task) { return representativeDay(task) * 1000 + (CATEGORY_ORDER.indexOf(categoryLabel(task.category)) < 0 ? 999 : CATEGORY_ORDER.indexOf(categoryLabel(task.category))); }
   function monthTasks() { return allTasks().filter(t => Number(t.month) === state.month).sort((a,b) => sortScore(a) - sortScore(b) || String(a.title).localeCompare(String(b.title),'ko')); }
-  function viewFiltered(tasks) { return tasks.filter((task) => state.view === 'all' || (state.view === 'submit' ? isSubmissionTask(task) : !isSubmissionTask(task))); }
+  function viewFiltered(tasks) {
+    if (!viewIncludesTasks()) return [];
+    return tasks.filter((task) => state.view === 'all' || (state.view === 'submit' ? isSubmissionTask(task) : !isSubmissionTask(task)));
+  }
   function filteredTasks() {
     return viewFiltered(monthTasks()).filter(task => {
       if (state.category && categoryLabel(task.category) !== state.category) return false;
@@ -97,6 +124,18 @@
   function scheduleForDate(iso) { return (state.schedules[`${state.year}`] || []).filter(s => s.date === iso); }
   function manualEventsForDate(iso) { return state.manualEvents.filter(event => event.date === iso); }
   function manualCategoryClass(category='') { return category === '학사' ? 'manual-academic' : category === '행정' ? 'manual-admin' : 'manual-memo'; }
+  function viewLabel() { return state.view === 'routine' ? '루틴업무' : state.view === 'submit' ? '제출업무' : state.view === 'check' ? '챙길업무' : '전체업무'; }
+  function filterSummaryText() {
+    const parts = [viewLabel(), state.category || '전체분장', state.query ? `검색어 “${state.query}”` : '검색어 없음'];
+    return `현재 보기: ${parts.join(' · ')}`;
+  }
+  function selectedRoutineTitle(date, count) {
+    const base = `${date.getMonth()+1}월 ${date.getDate()}일`;
+    if (!count) return `${base} 루틴업무`;
+    if (state.query) return `${base} 검색된 루틴 ${count}`;
+    if (state.category) return `${base} ${state.category} 루틴 ${count}`;
+    return `${base} 루틴업무 ${count}`;
+  }
   function saveManualEvents() { saveJson(MANUAL_KEY, state.manualEvents); }
   function completionStats(tasks=monthTasks()) {
     const filtered = viewFiltered(tasks);
@@ -105,13 +144,13 @@
     const target = Math.max(total - na, 0);
     const done = filtered.filter(t => taskState(t.id).status === 'done').length;
     const rate = target ? Math.round(done / target * 100) : 0;
-    return { total, na, target, done, rate, submit: tasks.filter(isSubmissionTask).length, check: tasks.filter(t => !isSubmissionTask(t)).length };
+    return { total, na, target, done, rate, submit: filtered.filter(isSubmissionTask).length, check: filtered.filter(t => !isSubmissionTask(t)).length };
   }
 
   function renderSummary() {
     const stats = completionStats();
     els.summaryTitle.textContent = `${state.month}월 업무판`;
-    els.summaryDesc.textContent = '이번 달 행정실 업무를 캘린더에서 먼저 확인하고, 날짜별 상세와 업무분장 필터로 내 업무만 골라 봐요.';
+    els.summaryDesc.textContent = '이번 달 행정실 업무와 매월 반복 루틴을 캘린더에서 먼저 확인하고, 날짜별 상세와 업무분장 필터로 내 업무만 골라 봐요.';
     els.headerMonthBtn.textContent = monthLabel();
     els.calendarMonthBtn.textContent = monthLabel();
     const schoolName = state.school.schoolName || '학교 설정 전';
@@ -119,7 +158,7 @@
     els.schoolSummaryTitle.textContent = state.school.schoolName ? `${state.school.schoolName} 기준` : '학교 설정 전';
     els.schoolSummaryDesc.textContent = state.school.schoolName ? `${state.school.officeName || ''} · 학사일정과 행정업무를 함께 확인해요.` : '학교를 선택하면 학사일정과 행정업무를 함께 확인할 수 있어요.';
     els.summaryMetrics.innerHTML = [
-      ['업무', `${stats.total}건`], ['제출', `${stats.submit}건`], ['챙길', `${stats.check}건`], ['완료율', `${stats.rate}%`]
+      ['업무', `${stats.total}건`], ['루틴', `${filteredRoutines().length}건`], ['제출', `${stats.submit}건`], ['완료율', `${stats.rate}%`]
     ].map(([label,value]) => `<div class="metric"><span>${label}</span><strong>${value}</strong></div>`).join('');
   }
 
@@ -176,7 +215,7 @@
   }
 
   function renderCalendar() {
-    els.calendarMeta.textContent = state.school.schoolName ? `${state.school.schoolName} · 날짜를 누르면 업무와 학교 일정이 아래에 표시됩니다.` : '학교 설정 전이어도 월별 행정업무는 확인할 수 있어요.';
+    els.calendarMeta.textContent = state.school.schoolName ? `${state.school.schoolName} · 날짜를 누르면 업무, 반복 루틴, 학교 일정이 아래에 표시됩니다.` : '학교 설정 전이어도 월별 행정업무와 반복 루틴은 확인할 수 있어요.';
     const first = new Date(state.year, state.month - 1, 1);
     const last = new Date(state.year, state.month, 0);
     const startBlank = first.getDay();
@@ -189,13 +228,13 @@
       const dayTasks = viewFiltered(dayTasksAll).filter(task => !state.category || categoryLabel(task.category) === state.category).filter(task => !state.query || taskText(task).includes(normalize(state.query)));
       const schedules = scheduleForDate(iso);
       const manualEvents = manualEventsForDate(iso);
+      const routines = routinesForDay(day);
       const submit = dayTasks.filter(isSubmissionTask).length;
       const check = dayTasks.length - submit;
-      const cats = [...new Set(dayTasks.slice(0, 3).map(t => categoryLabel(t.category)))];
       const badgeHtml = [
-        submit ? `<span class="day-badge submit">제출 ${submit}</span>` : '',
         check ? `<span class="day-badge check">챙김 ${check}</span>` : '',
-        ...cats.map(c => `<span class="day-badge cat">${esc(c)} ${dayTasks.filter(t => categoryLabel(t.category) === c).length}</span>`)
+        submit ? `<span class="day-badge submit">제출 ${submit}</span>` : '',
+        routines.length ? `<span class="day-badge routine">루틴 ${routines.length}</span>` : ''
       ].filter(Boolean).join('');
       const visibleSchedules = schedules.slice(0, 2);
       const hiddenSchedules = Math.max(schedules.length - visibleSchedules.length, 0);
@@ -215,31 +254,64 @@
     const tasks = tasksForDate(state.selectedDate);
     const schedules = scheduleForDate(state.selectedDate);
     const manualEvents = manualEventsForDate(state.selectedDate);
+    const routines = routinesForDate(state.selectedDate);
     const items = [];
+    if (routines.length) {
+      const grouped = groupRoutinesByCategory(routines);
+      const routineSections = Object.keys(grouped).sort(categorySort).map(cat => {
+        const rows = grouped[cat].map(routine => {
+          const summary = [routine.summary, routine.department ? `안내: ${routine.department}` : '', routine.memo ? `메모: ${routine.memo}` : ''].filter(Boolean).join(' · ');
+          const law = routine.law ? `<details class="routine-details"><summary>관련법령</summary><p>${esc(routine.law)}</p></details>` : '';
+          return `<li><div class="routine-item-title"><span class="routine-schedule">${esc(routine.displaySchedule || routine.schedule)}</span><strong>${esc(routine.title)}</strong></div>${summary ? `<p>${esc(summary)}</p>` : ''}${law}</li>`;
+        }).join('');
+        return `<section class="routine-group"><h3><span class="category-chip cat-${catClass(cat)}">${esc(cat)}</span></h3><ul>${rows}</ul></section>`;
+      }).join('');
+      items.push(`<article class="selected-card routine-card"><div><div class="selected-card__meta"><span class="day-badge routine">루틴 ${routines.length}</span></div><h3>${esc(selectedRoutineTitle(date, routines.length))}</h3><div class="routine-groups">${routineSections}</div></div></article>`);
+    }
     tasks.forEach(task => {
       const status = taskState(task.id).status || 'todo';
       items.push(`<article class="selected-card ${status === 'done' ? 'is-done' : ''} ${status === 'notApplicable' ? 'is-na' : ''}"><div><div class="selected-card__meta"><span class="kind-chip ${isSubmissionTask(task) ? 'submit' : 'check'}">${isSubmissionTask(task) ? '제출' : '챙김'}</span><span class="category-chip cat-${catClass(task.category)}">${esc(categoryLabel(task.category))}</span></div><h3>${esc(task.title)}</h3><p>${esc(task.department || task.description || '상세를 눌러 내용을 확인해요.')}</p></div><div class="selected-actions"><button class="state-btn ${status === 'done' ? 'done' : ''}" data-status="done" data-id="${esc(task.id)}" type="button">완료</button><button class="state-btn ${status === 'notApplicable' ? 'na' : ''}" data-status="notApplicable" data-id="${esc(task.id)}" type="button">해당없음</button><button class="detail-btn" data-detail="${esc(task.id)}" type="button">상세</button></div></article>`);
     });
     schedules.forEach(s => items.push(`<article class="selected-card"><div><div class="selected-card__meta"><span class="day-badge schedule">학사일정</span></div><h3>${esc(s.eventName || '학교 일정')}</h3><p>${esc(s.eventContent || s.gradeText || '학교 학사일정입니다.')}</p></div></article>`));
     manualEvents.forEach(event => items.push(`<article class="selected-card manual"><div><div class="selected-card__meta"><span class="day-badge cat">직접추가</span><span class="manual-event ${manualCategoryClass(event.category)}">${esc(event.category || '메모')}</span></div><h3>${esc(event.title || '직접 일정')}</h3><p>${esc([event.category, event.memo].filter(Boolean).join(' · ') || '직접 추가한 일정입니다.')}</p></div><div class="selected-actions"><button class="manual-delete-btn" data-delete-manual="${esc(event.id)}" type="button">삭제</button></div></article>`));
-    els.selectedDayPanel.innerHTML = `<div class="selected-head"><div><h2>${dayLabel}</h2><p>행정업무 ${tasks.length}건 · 학교일정 ${schedules.length}건 · 직접일정 ${manualEvents.length}건</p></div><button class="ghost-btn" id="selectedTodayBtn" type="button">오늘 보기</button></div><div class="selected-list">${items.join('') || '<div class="empty-state">이 날짜에 표시할 업무나 학교 일정이 없어요.</div>'}</div>`;
+    els.selectedDayPanel.innerHTML = `<div class="selected-head"><div><h2>${dayLabel}</h2><p>${esc(filterSummaryText())} · 루틴 ${routines.length}건 · 행정업무 ${tasks.length}건 · 학교일정 ${schedules.length}건 · 직접일정 ${manualEvents.length}건</p></div><button class="ghost-btn" id="selectedTodayBtn" type="button">오늘 보기</button></div><div class="selected-list">${items.join('') || '<div class="empty-state">이 날짜에 표시할 루틴, 업무, 학교 일정이 없어요.</div>'}</div>`;
     els.selectedDayPanel.querySelector('#selectedTodayBtn')?.addEventListener('click', () => { state.selectedDate = isoDate(today); state.year = today.getFullYear(); state.month = today.getMonth() + 1; render(); });
     bindTaskActions(els.selectedDayPanel);
     bindManualActions(els.selectedDayPanel);
   }
 
   function renderFilters() {
+    els.currentFilterSummary.textContent = `${filterSummaryText()} · 업무 ${filteredTasks().length}건 · 루틴 ${filteredRoutines().length}건`;
+    if (els.taskSearchInput.value !== state.query) els.taskSearchInput.value = state.query;
     els.viewFilterChips.querySelectorAll('[data-view]').forEach(btn => btn.classList.toggle('active', btn.dataset.view === state.view));
-    const categories = [...new Set(monthTasks().map(t => categoryLabel(t.category)).filter(Boolean))].sort(categorySort);
-    const total = viewFiltered(monthTasks()).length;
+    const taskCategorySource = viewIncludesTasks() ? viewFiltered(monthTasks()).map(t => categoryLabel(t.category)) : [];
+    const routineCategorySource = viewIncludesRoutines() ? MONTHLY_ROUTINES.map(r => categoryLabel(r.category)) : [];
+    const categories = [...new Set([...taskCategorySource, ...routineCategorySource].filter(Boolean))].sort(categorySort);
+    const total = viewFiltered(monthTasks()).length + filteredRoutines().length;
     els.categoryChips.innerHTML = `<button class="chip ${state.category === '' ? 'active' : ''}" data-category="" type="button">전체 <span class="count">${total}</span></button>` + categories.map(cat => {
-      const count = viewFiltered(monthTasks()).filter(t => categoryLabel(t.category) === cat).length;
+      const taskCount = viewFiltered(monthTasks()).filter(t => categoryLabel(t.category) === cat).length;
+      const routineCount = viewIncludesRoutines() ? MONTHLY_ROUTINES.filter(r => categoryLabel(r.category) === cat && (!state.query || routineText(r).includes(normalize(state.query)))).length : 0;
+      const count = taskCount + routineCount;
       return `<button class="chip ${state.category === cat ? 'active' : ''}" data-category="${esc(cat)}" type="button">${esc(cat)} <span class="count">${count}</span></button>`;
     }).join('');
     els.categoryChips.querySelectorAll('[data-category]').forEach(btn => btn.addEventListener('click', () => { state.category = btn.dataset.category || ''; render(); }));
   }
 
   function renderTaskList() {
+    if (state.view === 'routine') {
+      const routines = filteredRoutines();
+      els.taskBoardTitle.textContent = `${state.month}월 루틴업무 목록`;
+      els.taskBoardMeta.textContent = `표시 ${routines.length}건 · 날짜가 명확한 매월 반복업무`;
+      if (!routines.length) { els.taskList.innerHTML = '<div class="empty-state">조건에 맞는 루틴업무가 없어요.</div>'; return; }
+      els.taskList.innerHTML = routines.map(routine => {
+        const cat = categoryLabel(routine.category || '기타');
+        const day = routineDay(routine);
+        const dateLabel = routine.day === 'last' ? '월말' : `${day}일`;
+        const sub = [routine.summary, routine.department ? `안내: ${routine.department}` : '', routine.memo ? `메모: ${routine.memo}` : ''].filter(Boolean).join(' · ');
+        return `<article class="task-row routine-row"><span class="routine-list-mark">루틴</span><span class="period-chip">${esc(routine.displaySchedule || routine.schedule || dateLabel)}</span><span class="category-chip cat-${catClass(cat)}">${esc(cat)}</span><div class="task-main"><div class="task-title">${esc(routine.title)}</div><div class="task-sub">${esc(sub || '매월 반복업무입니다.')}</div></div></article>`;
+      }).join('');
+      return;
+    }
     const tasks = filteredTasks();
     const stats = completionStats(filteredTasks());
     els.taskBoardTitle.textContent = `${state.month}월 업무 목록`;
@@ -313,6 +385,12 @@
     $('goTodayBtn').addEventListener('click', () => { state.year = today.getFullYear(); state.month = today.getMonth() + 1; state.selectedDate = isoDate(today); render(); window.scrollTo({top:0, behavior:'smooth'}); });
     els.viewFilterChips.querySelectorAll('[data-view]').forEach(btn => btn.addEventListener('click', () => { state.view = btn.dataset.view; render(); }));
     els.taskSearchInput.addEventListener('input', () => { state.query = els.taskSearchInput.value; render(); });
+    els.filterResetBtn.addEventListener('click', () => { state.view = 'all'; state.category = ''; state.query = ''; render(); toast('필터를 초기화했어요.'); });
+    els.filterToggleBtn.addEventListener('click', () => {
+      const isOpen = els.taskFilterPanel.classList.toggle('is-open');
+      els.filterToggleBtn.setAttribute('aria-expanded', String(isOpen));
+      els.filterToggleBtn.textContent = isOpen ? '필터 접기' : '필터 열기';
+    });
     els.addCustomTaskBtn.addEventListener('click', () => {
       els.manualDate.value = state.selectedDate || isoDate(today);
       els.manualTitle.value = '';
